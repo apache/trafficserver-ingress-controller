@@ -1,0 +1,13 @@
+# go dependency files
+vendor/
+
+# go mod
+go.sum
+!go.mod
+
+# builds
+ingress*ats
+
+# untracking
+trash/
+other/
