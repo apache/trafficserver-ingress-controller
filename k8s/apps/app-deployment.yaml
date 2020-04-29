@@ -1,0 +1,135 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trafficserver-test-2
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trafficserver-test-3
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: app1
+  namespace: trafficserver-test-2
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: node-app-1:latest
+        imagePullPolicy: Never
+        env:
+        - name: AUTHOR
+          value: app1
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: '150Mi'
+            cpu: 50m
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: app2
+  namespace: trafficserver-test-2
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: app2
+        image: node-app-2:latest
+        imagePullPolicy: Never
+        env:
+        - name: AUTHOR
+          value: app2
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: '150Mi'
+            cpu: 50m
+
+---
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: app1
+  namespace: trafficserver-test-3
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: node-app-1:latest
+        imagePullPolicy: Never
+        env:
+        - name: AUTHOR
+          value: app1
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: '150Mi'
+            cpu: 50m
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: app2
+  namespace: trafficserver-test-3
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: app2
+    spec:
+      containers:
+      - name: app2
+        image: node-app-2:latest
+        imagePullPolicy: Never
+        env:
+        - name: AUTHOR
+          value: app2
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            memory: '150Mi'
+            cpu: 50m
