@@ -91,7 +91,7 @@ For other purposes, you can use `git clone` or directly download repository to y
 
 ### Example Walkthrough
 Once you have cloned the project repo and started Docker and Kubernetes, in the terminal:
-1. `$ cd ingress-ats`
+1. `$ cd trafficserver-ingress-controller`
 2. `$ docker build -t ats_alpine .` 
      - wait for Docker finish building the image
 3. `$ docker build -t node-app-1 k8s/backend/node-app-1/`    
