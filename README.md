@@ -107,7 +107,7 @@ Once you have cloned the project repo and started Docker and Kubernetes, in the 
     - Create a namespace for ATS pod
 6. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
     - Create a self-signed certificate
-7. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run -o yaml | kubectl apply -f -`
+7. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
     - Create a secret in the namespace just created
 5. `$ kubectl apply -f k8s/traffic-server/`
     -  will define a new [kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) named `trafficserver-test` and deploy a single ATS pod to said namespace. The ATS pod is also where the ingress controller lives. Additionally, this will expose your local machine's port `30000` to the outside world.
