@@ -51,6 +51,8 @@ spec:
             - mountPath: "/etc/ats/ssl"
               name: ats-ssl
               readOnly: true
+            - name: varlog
+              mountPath: /usr/local/var/log/trafficserver
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME
@@ -74,10 +76,27 @@ spec:
             hostPort: 443
             name: https
             protocol: TCP
+        - name: log-collector
+          image: fluent/fluentd:v1.6-debian-1
+          volumeMounts:
+          - name: varlog
+            mountPath: "/var/log"
+          - name: config-volume
+            mountPath: "/fluentd/etc"
+        - name: trafficserver-exporter
+          image: tsexporter:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 9122
       volumes:
         - name: ats-ssl
           secret:
             secretName: tls-secret
+        - name: varlog
+          emptyDir: {}
+        - name: config-volume
+          configMap:
+            name: fluentd-config
 
 ---
 

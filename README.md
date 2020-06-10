@@ -94,24 +94,28 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 1. `$ eval $(minikube docker-env)`
       - To understand why we do this, please read [Use local images by re-using the docker daemon](https://kubernetes.io/docs/setup/learning-environment/minikube/#use-local-images-by-re-using-the-docker-daemon)
 2. `$ cd trafficserver-ingress-controller`
-3. `$ docker build -t ats_alpine .` 
+3. `$ git submodule update --init`
+4. `$ docker build -t ats_alpine .` 
      - wait for Docker finish building the image
-4. `$ docker build -t node-app-1 k8s/backend/node-app-1/`    
+5. `$ docker build -t tsexporter k8s/backend/trafficserver_exporter/` 
      - wait for Docker finish building the image
-5. `$ docker build -t node-app-2 k8s/backend/node-app-2/`
+6. `$ docker build -t node-app-1 k8s/backend/node-app-1/`    
+     - wait for Docker finish building the image
+7. `$ docker build -t node-app-2 k8s/backend/node-app-2/`
      - wait for Docker finish building the image
 
 - At this point, we have created necessary images for our example. Let's talk about what each step does:
   - Step 2 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
-  - Steps 3 and 4 builds 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
+  - Step 3 builds an image for the trafficserver exporter. This exports the ATS statistics over HTTP for Prometheus to read. 
+  - Steps 4 and 5 build 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
 
-6. `$ kubectl create namespace trafficserver-test`
+8. `$ kubectl create namespace trafficserver-test`
     - Create a namespace for ATS pod
-7. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
+9. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
     - Create a self-signed certificate
-8. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
+10. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
     - Create a secret in the namespace just created
-9. `$ kubectl apply -f k8s/traffic-server/`
+11. `$ kubectl apply -f k8s/traffic-server/`
     -  will define a new [kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) named `trafficserver-test` and deploy a single ATS pod to said namespace. The ATS pod is also where the ingress controller lives. Additionally, this will expose your local machine's port `30000` to the outside world.
 
 #### Proxy
@@ -233,6 +237,41 @@ You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/a
 #### Ingress Class
 
 You can provide an environment variable called `INGRESS_CLASS` in the deployment to specify the ingress class. Only ingress object with annotation `kubernetes.io/ingress.class` with value equal to the environment variable value will be used by ATS for routing
+
+### Logging and Monitoring
+
+#### Fluentd
+
+Fluentd is an open source data collector for a unified logging layer. You can read more about Fluentd [here](https://docs.fluentd.org/). 
+
+This project ships with Fluentd already integrated with the Apache Traffic Server. The configuration file used for the same can be found [here](k8s/configmaps/fluentd-configmap.yaml)
+
+##### What does it do? 
+
+As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/usr/local/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
+
+#### Prometheus and Grafana
+
+Prometheus is an open-source systems monitoring and alerting toolkit originally built at SoundCloud. You can read more about it [here](https://prometheus.io/docs/prometheus/latest/getting_started/). 
+
+Grafana allows you to query, visualize, alert on and understand your metrics no matter where they are stored. You can read more about Grafana [here](https://grafana.com/docs/grafana/latest/)
+
+##### How to use? 
+
+Use the following steps to install Prometheus and Grafana and use them to monitor the Apache Traffic Server statistics:
+
+1. Verify that you have built the docker image for traffic server exporter, if not, run `$ docker build -t tsexporter k8s/backend/trafficserver_exporter/` 
+  - Builds the docker image for traffic server exporter
+2. `$ kubectl apply -f k8s/traffic-server/ats-stats.yaml`
+  - Creates a new service which connects to the ATS pod on port 9122. This service will be used by Prometheus to read the Apache Traffic Server stats.  
+3. `$ kubectl apply -f k8s/configmaps/prometheus-configmap.yaml`
+  - Creates a new configmap which holds the configuration file for Prometheus. You can modify this configuration file to suit your needs. More about that can be read [here](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
+4. `$ kubectl apply -f k8s/traffic-server/prometheus-deployment.yaml`
+  - Creates a new deployment consisting of Prometheus and Grafana. Also creates two new services to access prometheus and grafana. 
+5. Open `192.168.x.x:30090` in your web browser to access Prometheus where `192.168.x.x` is the IP returned by the command: `$ minikube ip` 
+6. Open `192.168.x.x:30030` in your web browser to access the Grafana dashboard where `192.168.x.x` is the IP returned by the command: `$ minikube ip`. 
+6. To use Prometheus as a datasource for Grafana, please read [this](https://prometheus.io/docs/visualization/grafana/#using). The URL on which Grafana can access Prometheus is `localhost:9090`
+
 
 ## Development
 

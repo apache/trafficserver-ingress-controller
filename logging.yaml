@@ -1,0 +1,66 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+# Custom log configuration
+#
+# Documentation on logging:
+#    https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/logging/index.en.html
+#
+# Documentaion on logging.yaml file format:
+#    https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/files/logging.yaml.en.html
+#
+# Example log configurations:
+#    https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/logging/examples.en.html
+
+
+formats:
+    # WebTrends Enhanced Log Format.
+    #
+    # The following is compatible with the WebTrends Enhanced Log Format.
+    # If you want to generate a log that can be parsed by WebTrends
+    # reporting tools, simply create a log that uses this format.
+    - name: welf
+      format: |-
+          id=firewall time="%<cqtd> %<cqtt>" fw=%<phn> pri=6 proto=%<cqus> duration=%<ttmsf> sent=%<psql> rcvd=%<cqhl> src=%<chi> dst=%<shi> dstname=%<shn> user=%<caun> op=%<cqhm> arg="%<cqup>" result=%<pssc> ref="%<{Referer}cqh>" agent="%<{user-agent}cqh>" cache=%<crc>
+    # Squid Log Format with seconds resolution timestamp.
+    # The following is the squid format but with a seconds-only timestamp
+    # (cqts) instead of a seconds and milliseconds timestamp (cqtq).
+    - name: squid_seconds_only_timestamp
+      format: '%<cqts> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<caun> %<phr>/%<shn> %<psct>'
+
+    # Squid Log Format.
+    - name: squid
+      format: '%<cqtq> %<ttms> %<chi> %<crc>/%<pssc> %<psql> %<cqhm> %<cquc> %<caun> %<phr>/%<shn> %<psct>'
+
+    # Common Log Format.
+    - name: common
+      format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl>'
+
+    # Extended Log Format.
+    - name: 'extended'
+      format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts>'
+
+     # Extended2 Log Formats
+    - name: "extended2"
+      format: '%<chi> - %<caun> [%<cqtn>] "%<cqtx>" %<pssc> %<pscl> %<sssc> %<sscl> %<cqcl> %<pqcl> %<cqhl> %<pshl> %<pqhl> %<sshl> %<tts> %<phr> %<cfsc> %<pfsc> %<crc>'
+
+logs:
+    - filename: squid
+      format: squid
+      mode: ascii
+
+
+# vim: set ft=yaml :
