@@ -78,11 +78,11 @@ As defined by [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-n
 
 ### Required Software
 - Docker
-- Kubernetes
+- Kubernetes (Minikube)
 
 To install Docker, visit its [official page](https://docs.docker.com/) and install the correct version for your system.
 
-The easiest way to get Kubernetes on a Mac is through Docker. Launch Docker on your machine and go to `Preferences -> Kubernetes`, Click `Enable Kubernetes` then `Apply`. Kubernetes will be enabled and starting.
+The walkthrough uses Minikube to guide you through the setup process. Visit the [official Minikube page](https://kubernetes.io/docs/tasks/tools/install-minikube/) to install Minikube. 
 
 ### Download project 
 If you are cloning this project for development, visit [Setting up Go-Lang](#setting-up-go-lang) for detailed guide on how to develop projects in Go. 
@@ -90,26 +90,28 @@ If you are cloning this project for development, visit [Setting up Go-Lang](#set
 For other purposes, you can use `git clone` or directly download repository to your computer.
 
 ### Example Walkthrough
-Once you have cloned the project repo and started Docker and Kubernetes, in the terminal:
-1. `$ cd trafficserver-ingress-controller`
-2. `$ docker build -t ats_alpine .` 
+Once you have cloned the project repo and started Docker and Minikube, in the terminal:
+1. `$ eval $(minikube docker-env)`
+      - To understand why we do this, please read [Use local images by re-using the docker daemon](https://kubernetes.io/docs/setup/learning-environment/minikube/#use-local-images-by-re-using-the-docker-daemon)
+2. `$ cd trafficserver-ingress-controller`
+3. `$ docker build -t ats_alpine .` 
      - wait for Docker finish building the image
-3. `$ docker build -t node-app-1 k8s/backend/node-app-1/`    
+4. `$ docker build -t node-app-1 k8s/backend/node-app-1/`    
      - wait for Docker finish building the image
-4. `$ docker build -t node-app-2 k8s/backend/node-app-2/`
+5. `$ docker build -t node-app-2 k8s/backend/node-app-2/`
      - wait for Docker finish building the image
 
 - At this point, we have created necessary images for our example. Let's talk about what each step does:
   - Step 2 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
   - Steps 3 and 4 builds 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
 
-5. `$ kubectl create namespace trafficserver-test`
+6. `$ kubectl create namespace trafficserver-test`
     - Create a namespace for ATS pod
-6. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
+7. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
     - Create a self-signed certificate
-7. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
+8. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
     - Create a secret in the namespace just created
-5. `$ kubectl apply -f k8s/traffic-server/`
+9. `$ kubectl apply -f k8s/traffic-server/`
     -  will define a new [kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) named `trafficserver-test` and deploy a single ATS pod to said namespace. The ATS pod is also where the ingress controller lives. Additionally, this will expose your local machine's port `30000` to the outside world.
 
 #### Proxy
@@ -134,11 +136,11 @@ When both steps _above_ have executed at least once, ATS proxying will have star
 
 In kubernetes, ingress resources are necessary to enable proxying since it is where domain names are defined. However, given _only_ domain names, ATS cannot proxy requests when it doesn't have backend(s) to handle requests. Thus, only when both service pods and ingress are defined can ATS start proxying. To see proxy in action, we can use [curl](https://linux.die.net/man/1/curl) to "fake" external requests:
 
-1. `$ curl -vH "HOST:test.media.com" "localhost:30000/app1"`
-2. `$ curl -vH "HOST:test.media.com" "localhost:30000/app2"`
-3. `$ curl -vH "HOST:test.edge.com" "localhost:30000/app1"`
-4. `$ curl -vH "HOST:test.edge.com" "localhost:30000/app2"`
-5. `$ curl -vH "HOST:test.edge.com" -k "https://localhost:30043/app2"`
+1. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app1"`
+2. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app2"`
+3. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app1"`
+4. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app2"`
+5. `$ curl -vH "HOST:test.edge.com" -k "https://$(minikube ip):30043/app2"`
 
 With above curl commands, outputs from number 1 and 3 should be the same; outputs from number 2 and 4 should be same. The corresponding pairs are the same because all `/app1` use the same backend service _image_, and the same goes for `/app2`. Number 5 illustrates the https version for number 4 and the result is similar. 
 
