@@ -260,16 +260,14 @@ Grafana allows you to query, visualize, alert on and understand your metrics no 
 
 Use the following steps to install Prometheus and Grafana and use them to monitor the Apache Traffic Server statistics:
 
-1. Verify that you have built the docker image for traffic server exporter, if not, run `$ docker build -t tsexporter k8s/backend/trafficserver_exporter/` 
-  - Builds the docker image for traffic server exporter
-2. `$ kubectl apply -f k8s/traffic-server/ats-stats.yaml`
+1. `$ kubectl apply -f k8s/traffic-server/ats-stats.yaml`
   - Creates a new service which connects to the ATS pod on port 9122. This service will be used by Prometheus to read the Apache Traffic Server stats.  
-3. `$ kubectl apply -f k8s/configmaps/prometheus-configmap.yaml`
+2. `$ kubectl apply -f k8s/configmaps/prometheus-configmap.yaml`
   - Creates a new configmap which holds the configuration file for Prometheus. You can modify this configuration file to suit your needs. More about that can be read [here](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
-4. `$ kubectl apply -f k8s/traffic-server/prometheus-deployment.yaml`
+3. `$ kubectl apply -f k8s/traffic-server/prometheus-deployment.yaml`
   - Creates a new deployment consisting of Prometheus and Grafana. Also creates two new services to access prometheus and grafana. 
-5. Open `192.168.x.x:30090` in your web browser to access Prometheus where `192.168.x.x` is the IP returned by the command: `$ minikube ip` 
-6. Open `192.168.x.x:30030` in your web browser to access the Grafana dashboard where `192.168.x.x` is the IP returned by the command: `$ minikube ip`. 
+4. Open `192.168.x.x:30090` in your web browser to access Prometheus where `192.168.x.x` is the IP returned by the command: `$ minikube ip` 
+5. Open `192.168.x.x:30030` in your web browser to access the Grafana dashboard where `192.168.x.x` is the IP returned by the command: `$ minikube ip`. 
 6. To use Prometheus as a datasource for Grafana, please read [this](https://prometheus.io/docs/visualization/grafana/#using). The URL on which Grafana can access Prometheus is `localhost:9090`
 
 
