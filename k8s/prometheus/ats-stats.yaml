@@ -14,5 +14,15 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-tslua.so /usr/local/go/bin/src/ingress-ats/pluginats/connect_redis.lua
-stats_over_http.so
+apiVersion: v1
+kind: Service
+metadata:
+  name: ats-stats-exporter
+  namespace: trafficserver-test
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 9122
+  selector:
+    app: trafficserver-test

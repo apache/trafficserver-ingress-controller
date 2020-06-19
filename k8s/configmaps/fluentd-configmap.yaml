@@ -14,5 +14,28 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-tslua.so /usr/local/go/bin/src/ingress-ats/pluginats/connect_redis.lua
-stats_over_http.so
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: trafficserver-test
+data:
+  fluent.conf: |
+    <source>
+      type tail
+      path /var/log/squid.log
+      pos_file /var/log/squid.log.pos
+      <parse>
+        @type regexp
+        expression ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
+      </parse>
+      tag trafficserver.access
+    </source>
+
+    <match **>
+      @type stdout
+    </match>
+
+    <match fluent.**>
+      @type null
+    </match>

@@ -35,7 +35,8 @@ RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.0.7.tar
 
 COPY ["./plugin.config", "/usr/local/etc/trafficserver/plugin.config"]
 COPY ["./records.config", "/usr/local/etc/trafficserver/records.config"]
-COPY ["./logging.config", "/usr/local/etc/trafficserver/logging.config"]
+COPY ["./logging.yaml", "/usr/local/etc/trafficserver/logging.yaml"]
+
 # enable traffic.out for alpine/gentoo
 RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/usr\/local\/var\/log\/trafficserver\/traffic.out --bind_stderr \/usr\/local\/var\/log\/trafficserver\/traffic.out \"/" /usr/local/bin/trafficserver
 RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/usr\/local\/var\/log\/trafficserver\/traffic.out --bind_stderr \/usr\/local\/var\/log\/trafficserver\/traffic.out \"/" /usr/local/bin/trafficserver

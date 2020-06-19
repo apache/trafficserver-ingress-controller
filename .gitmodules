@@ -1,0 +1,3 @@
+[submodule "k8s/backend/trafficserver_exporter"]
+	path = k8s/backend/trafficserver_exporter
+	url = https://github.com/gdvalle/trafficserver_exporter.git
