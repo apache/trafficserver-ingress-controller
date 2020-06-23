@@ -21,6 +21,7 @@ import (
 
 	//	"sync"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis"
 )
 
@@ -53,6 +54,37 @@ func Init() (*Client, error) {
 		return nil, fmt.Errorf("Failed to FlushAll: %s", err.Error())
 	}
 	return rClient, nil
+}
+
+func InitForTesting() (*Client, error) {
+	mr, err := miniredis.Run()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defaultDB := redis.NewClient(&redis.Options{
+		Addr: mr.Addr(), // connect to domain socket
+		DB:   0,         // use default DB
+	})
+
+	_, err = defaultDB.Ping().Result()
+	if err != nil {
+		return nil, err
+	}
+
+	dbOne := redis.NewClient(&redis.Options{
+		Addr: mr.Addr(), // connect to domain socket
+		DB:   1,         // use DB number 1
+	})
+
+	_, err = dbOne.Ping().Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Client{defaultDB, dbOne}, nil
+
 }
 
 // CreateRedisClient establishes connection to redis DB
@@ -116,6 +148,7 @@ func (c *Client) DefaultDBSUnionStore(dest, src string) {
 // DBOneSAdd does SAdd on DB One and logs results
 func (c *Client) DBOneSAdd(hostport, svcport string) {
 	_, err := c.DBOne.SAdd(hostport, svcport).Result()
+
 	if err != nil {
 		log.Printf("DBOne.SAdd(%s, %s).Result() Error: %s\n", hostport, svcport, err.Error())
 	}
@@ -188,4 +221,78 @@ func (c *Client) PrintAllKeys() {
 	} else {
 		log.Println("DBOne.Do(\"KEYS\", \"*\").Result(): ", res)
 	}
+}
+
+func (c *Client) GetDefaultDBKeyValues() map[string][]string {
+	var (
+		res         interface{}
+		err         error
+		keyValueMap map[string][]string
+	)
+
+	if res, err = c.DefaultDB.Do("KEYS", "*").Result(); err != nil {
+		log.Println("Error Printing DB One (1): ", err)
+	}
+
+	keyValueMap = make(map[string][]string)
+
+	switch keys := res.(type) {
+	case []interface{}:
+		for _, key := range keys {
+			if smembers, err := c.DefaultDB.Do("SMEMBERS", key).Result(); err != nil {
+				log.Println("Error Printing DB One (1): ", err)
+			} else {
+				keyValueMap[key.(string)] = []string{}
+				switch values := smembers.(type) {
+				case []interface{}:
+					for _, value := range values {
+						keyValueMap[key.(string)] = append(keyValueMap[key.(string)], value.(string))
+					}
+				default:
+					fmt.Printf("Cannot iterate over %T\n", smembers)
+				}
+			}
+		}
+	default:
+		fmt.Printf("Cannot iterate over %T\n", res)
+	}
+
+	return keyValueMap
+}
+
+func (c *Client) GetDBOneKeyValues() map[string][]string {
+	var (
+		res         interface{}
+		err         error
+		keyValueMap map[string][]string
+	)
+
+	if res, err = c.DBOne.Do("KEYS", "*").Result(); err != nil {
+		log.Println("Error Printing DB One (1): ", err)
+	}
+
+	keyValueMap = make(map[string][]string)
+
+	switch keys := res.(type) {
+	case []interface{}:
+		for _, key := range keys {
+			if smembers, err := c.DBOne.Do("SMEMBERS", key).Result(); err != nil {
+				log.Println("Error Printing DB One (1): ", err)
+			} else {
+				keyValueMap[key.(string)] = []string{}
+				switch values := smembers.(type) {
+				case []interface{}:
+					for _, value := range values {
+						keyValueMap[key.(string)] = append(keyValueMap[key.(string)], value.(string))
+					}
+				default:
+					fmt.Printf("Cannot iterate over %T\n", smembers)
+				}
+			}
+		}
+	default:
+		fmt.Printf("Cannot iterate over %T\n", res)
+	}
+
+	return keyValueMap
 }
