@@ -23,8 +23,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 
-	k "k8s.io/client-go/kubernetes"
-
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
 	v1beta1 "k8s.io/api/extensions/v1beta1"
@@ -40,7 +39,7 @@ import (
 
 // Watcher stores all essential information to act on HostGroups
 type Watcher struct {
-	Cs           *k.Clientset
+	Cs           kubernetes.Interface
 	ATSNamespace string
 	Ep           *endpoint.Endpoint
 	StopChan     chan struct{}
@@ -56,7 +55,6 @@ type EventHandler interface {
 
 // Watch creates necessary threads to watch over resources
 func (w *Watcher) Watch() error {
-
 	//================= Watch for Ingress ==================
 	igHandler := IgHandler{"ingresses", w.Ep}
 	err := w.allNamespacesWatchFor(&igHandler, w.Cs.ExtensionsV1beta1().RESTClient(),
