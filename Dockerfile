@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM alpine:3.11 as builder 
+FROM alpine:3.12 as builder 
 
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
@@ -103,7 +103,7 @@ RUN chmod 755 tls-config.sh
 RUN chmod 755 tls-reload.sh
 RUN chmod 755 entry.sh
 
-FROM alpine:3.11
+FROM alpine:3.12
 
 COPY --from=builder /usr/local /usr/local
 
