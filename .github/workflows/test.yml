@@ -1,0 +1,48 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+
+  build:
+    name: Test Redis and Lua
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+    
+    - uses: leafo/gh-actions-lua@v6
+      with:
+        luaVersion: "5.1.5"
+    
+    - uses: leafo/gh-actions-luarocks@v2
+
+    - name: Install Busted
+      run: |
+        luarocks install busted
+
+    - name: Get dependencies
+      run: |
+        go get -v -t -d ./...
+        if [ -f Gopkg.toml ]; then
+            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+            dep ensure
+        fi
+
+    - name: Test Watcher
+      run: go test -v ./watcher/
+    
+    - name: Test Redis
+      run: go test -v ./redis/
+    
+    - name: Test RedisPluginATS
+      run: |
+        cd pluginats
+        ../.luarocks/bin/busted connect_redis_test.lua
