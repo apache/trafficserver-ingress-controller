@@ -3,7 +3,19 @@ notifications:
   commits: commits@trafficserver.apache.org
   issues: issues@trafficserver.apache.org
   pullrequests: github@trafficserver.apache.org
-#github:
-#  enabled_merge_buttons:
-#    # enable squash button:
-#    squash:  true
+github:
+  description: Apache Traffic Server Ingress Controller for Kubernetes
+  homepage: https://github.com/apache/trafficserver-ingress-controller
+  labels:
+    - ingress-controller
+    - kubernetes
+    - kubernetes-ingress
+    - ingress
+    - kubernetes-ingress-controlle
+    - k8s
+    - apache
+  features:
+    issues: true
+  enabled_merge_buttons:
+    # enable squash button:
+    squash: true
