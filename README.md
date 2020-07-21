@@ -291,6 +291,18 @@ Use the following steps to install Prometheus and Grafana and use them to monito
 ### Compilation
 To compile, while in `ingress-ats/` directory: `go build -o ingress_ats main/main.go`
 
+### Unit Tests
+The project includes unit tests for the controller written in Golang and the plugin written in Lua.
+
+To run the Golang unit tests: `go test ./watcher/ && go test ./redis/`
+
+The Lua unit tests use `busted` for testing. `busted` can be installed using `luarocks`:`luarocks install busted`. More information on how to install busted is available [here](https://olivinelabs.com/busted/). 
+> :warning: **Note that the project uses Lua 5.1 version**
+
+To run the Lua unit tests: 
+- `cd pluginats`
+- `busted connect_redis_test.lua` 
+
 ### Text-Editor
 The repository comes with basic support for both [vscode](https://code.visualstudio.com/) and `vim`. 
 

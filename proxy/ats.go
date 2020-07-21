@@ -18,11 +18,18 @@ package proxy
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // ATSManager talks to ATS
 // In the future, this is the struct that should manage
 // everything related to ATS
+type ATSManagerInterface interface {
+	ConfigSet(k, v string) (string, error)
+	ConfigGet(k string) (string, error)
+	IncludeIngressClass(c string) bool
+}
+
 type ATSManager struct {
 	Namespace    string
 	IngressClass string
@@ -49,4 +56,15 @@ func (m *ATSManager) ConfigSet(k, v string) (msg string, err error) {
 		return "", fmt.Errorf("failed to execute: traffic_ctl config set %s %s Error: %s", k, v, err.Error())
 	}
 	return fmt.Sprintf("Ran p.Key: %s p.Val: %s --> stdoutStderr: %q", k, v, stdoutStderr), nil
+}
+
+func (m *ATSManager) ConfigGet(k string) (msg string, err error) {
+	cmd := exec.Command("traffic_ctl", "config", "get", k)
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("failed to execute: traffic_ctl config get %s Error: %s", k, err.Error())
+	}
+	stdoutString := fmt.Sprintf("%q", stdoutStderr)
+	configValue := strings.Split(strings.Trim(strings.Trim(stdoutString, "\""), "\\n"), ": ")[1]
+	return configValue, err
 }

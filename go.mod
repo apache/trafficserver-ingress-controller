@@ -17,4 +17,5 @@ require (
 	k8s.io/client-go v0.0.0-20190626045420-1ec4b74c7bda
 	k8s.io/klog v0.3.3 // indirect
 	k8s.io/utils v0.0.0-20190607212802-c55fbcfc754a // indirect
+	github.com/alicebob/miniredis/v2 v2.13.0
 )
