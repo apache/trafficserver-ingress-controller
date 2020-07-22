@@ -13,6 +13,6 @@ jobs:
       uses: actions/checkout@v2
     - name: Build and push
       run: ./build-master.sh
-      # env:
-      #   QUAY_USERNAME: ${{  secrets.QUAY_USERNAME }}
-      #   QUAY_PASSWORD: ${{  secrets.QUAY_PASSWORD }}
+      env:
+        DOCKERHUB_USER: ${{  secrets.DOCKERHUB_USER }}
+        DOCKERHUB_TOKEN: ${{  secrets.DOCKERHUB_TOKEN }}
