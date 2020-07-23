@@ -3,10 +3,8 @@
 # build
 REPONAME="ats-ingress"
 TAG="latest"
-#TARGET="quay.io"/${QUAY_USERNAME}/${REPONAME}:${TAG}
-TARGET="ats-ingress:latest"
-#echo ${TARGET}
+TARGET=atsingress/${REPONAME}:${TAG}
 
-#echo "${QUAY_PASSWORD}" | docker login -u "${QUAY_USERNAME}" quay.io --password-stdin
+echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USER}" --password-stdin
 docker build -t ${TARGET} .
-#docker push ${TARGET}
+docker push ${TARGET}
