@@ -32,5 +32,10 @@ app.get('/app1', (req, res) => {
   res.sendFile('hello.html', {root: __dirname });
 })
 
+app.get('/app2', (req, res) => {
+  res.sendFile('hello-updated.html', {root: __dirname });
+})
+
+
 app.listen(PORT, HOST);
 console.log(`Running on http://${HOST}:${PORT}`);
