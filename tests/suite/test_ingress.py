@@ -22,10 +22,10 @@ def setup_module(module):
     misc_command('openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"')
     kubectl_create('namespace trafficserver-test')
     kubectl_create('secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
-    kubectl_apply('../k8s/configmaps/')
-    kubectl_apply('../k8s/traffic-server/')
-    kubectl_apply('../k8s/apps/')
-    kubectl_apply('../k8s/ingresses/')
+    kubectl_apply('data/configmaps/')
+    kubectl_apply('data/traffic-server/')
+    kubectl_apply('data/apps/')
+    kubectl_apply('data/ingresses/')
     time.sleep(90)
 
 def teardown_module(module):
