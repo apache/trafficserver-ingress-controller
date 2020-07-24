@@ -43,6 +43,6 @@ const (
 // Endpoint stores all essential information to act on HostGroups
 type Endpoint struct {
 	RedisClient *redis.Client
-	ATSManager  *proxy.ATSManager
+	ATSManager  proxy.ATSManagerInterface
 	NsManager   *namespace.NsManager
 }

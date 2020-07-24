@@ -48,5 +48,3 @@ jobs:
         run: |
           cd tests
           pytest -q --minikubeip="$(minikube ip)" suite/test_ingress.py
-
-      

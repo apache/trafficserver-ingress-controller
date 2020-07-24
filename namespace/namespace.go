@@ -51,3 +51,7 @@ func (m *NsManager) Init() {
 		m.allNamespaces = false
 	}
 }
+
+func (m *NsManager) DisableAllNamespaces() {
+	m.allNamespaces = false
+}
