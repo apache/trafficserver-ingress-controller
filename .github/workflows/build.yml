@@ -1,4 +1,4 @@
-name: Build
+name: Build and Integrate
 
 on:
   push:
@@ -6,13 +6,45 @@ on:
       - 'master'
 
 jobs:
-  build:
+  build-and-integrate:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Build and push
-      run: ./build-master.sh
-      env:
-        DOCKERHUB_USER: ${{  secrets.DOCKERHUB_USER }}
-        DOCKERHUB_TOKEN: ${{  secrets.DOCKERHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          submodules: 'true'
+
+      - name: Setup Minikube
+        uses: manusa/actions-setup-minikube@v1.1.0
+        with:
+          minikube version: 'v1.11.0'
+          kubernetes version: 'v1.18.3'
+      
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7' 
+      
+      - name: Build ATS Alpine
+        run: docker build -t ats_alpine .
+      
+      - name: Build Exporter
+        run: docker build -t tsexporter k8s/backend/trafficserver_exporter/
+      
+      - name: Build App 1
+        run: docker build -t node-app-1 k8s/backend/node-app-1/
+      
+      - name: Build App 2
+        run: docker build -t node-app-2 k8s/backend/node-app-2/
+      
+      - name: Install dependencies
+        run: |
+          cd tests
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Test 
+        run: |
+          cd tests
+          pytest -q --minikubeip="$(minikube ip)" suite/test_ingress.py
