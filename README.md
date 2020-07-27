@@ -80,7 +80,7 @@ As defined by [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-n
 
 ### Required Software
 - Docker
-- Kubernetes (Minikube)
+- Kubernetes 1.18 (Minikube 1.11)
 
 To install Docker, visit its [official page](https://docs.docker.com/) and install the correct version for your system.
 
