@@ -19,6 +19,8 @@
 
 ATS Kubernetes Ingress Controller
 =================================
+![Test](https://github.com/apache/trafficserver-ingress-controller/workflows/Test/badge.svg)
+![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/workflows/Build%20and%20Integrate/badge.svg)
 
 ## Prerequisites
 It is assumed that you understand conceptually, [docker containers](https://www.docker.com/resources/what-container), [kubernetes](https://kubernetes.io/), and [proxy servers](https://en.wikipedia.org/wiki/Proxy_server)
