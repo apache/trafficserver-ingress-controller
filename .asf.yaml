@@ -11,7 +11,7 @@ github:
     - kubernetes
     - kubernetes-ingress
     - ingress
-    - kubernetes-ingress-controlle
+    - kubernetes-ingress-controller
     - k8s
     - apache
   features:
