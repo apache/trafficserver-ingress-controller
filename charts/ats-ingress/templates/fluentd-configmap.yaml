@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+data:
+  fluent.conf: |
+    <source>
+      type tail
+      path {{ .Values.collector.path }}/squid.log
+      pos_file {{ .Values.collector.path }}/squid.log.pos
+      <parse>
+        @type regexp
+        expression ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
+      </parse>
+      tag trafficserver.access
+    </source>
+
+    <match **>
+      @type stdout
+    </match>
+
+    <match fluent.**>
+      @type null
+    </match>

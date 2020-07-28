@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: ats
+data:
+  # reloadable data only
+  proxy.config.log.logfile_dir: {{ .Values.ats.log.dir | quote }}
