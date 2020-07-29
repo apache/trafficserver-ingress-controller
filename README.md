@@ -22,53 +22,38 @@ ATS Kubernetes Ingress Controller
 ![Test](https://github.com/apache/trafficserver-ingress-controller/workflows/Test/badge.svg)
 ![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/workflows/Build%20and%20Integrate/badge.svg)
 
-## Prerequisites
-It is assumed that you understand conceptually, [docker containers](https://www.docker.com/resources/what-container), [kubernetes](https://kubernetes.io/), and [proxy servers](https://en.wikipedia.org/wiki/Proxy_server)
-
-*Throughout ALL documentations, this project is referred to as "**ingress controller**" or "**the controller**"
-
 ## Contents
-- [ATS Kubernetes Ingress Controller](#ats-kubernetes-ingress-controller)
-  - [Prerequisites](#prerequisites)
-  - [Contents](#contents)
-  - [Abstract](#abstract)
-  - [What is Ingress Controller?](#what-is-ingress-controller)
-  - [Versions](#versions)
-  - [How to use](#how-to-use)
-    - [Required Software](#required-software)
-    - [Download project](#download-project)
-    - [Example Walkthrough](#example-walkthrough)
-      - [Proxy](#proxy)
-      - [ConfigMap](#configmap)
-      - [Snippet](#snippet)
-      - [Ingress Class](#ingressclass)
-  - [Development](#development)
-    - [Develop with Go-Lang in Linux](#develop-with-go-lang-in-linux)
-    - [Compilation](#compilation)
-    - [Text-Editor](#text-editor)
-  - [Documentation](#documentation)
+- [Introduction](#Introduction)
+- [Versions of Software Used](#versions-of-software-used)
+- [How to use](#how-to-use)
+  - [Requirements](#requirements)
+  - [Download project](#download-project)
+  - [Example Walkthrough](#example-walkthrough)
+    - [Proxy](#proxy)
+    - [ConfigMap](#configmap)
+    - [Snippet](#snippet)
+    - [Ingress Class](#ingressclass)
+  - [Logging and Monitoring](#logging-and-monitoring)
+    - [Fluentd](#fluend)
+    - [Prometheus and Grafana](#prometheus-and-grafana)
+- [Development](#development)
+  - [Develop with Go-Lang in Linux](#develop-with-go-lang-in-linux)
+  - [Compilation](#compilation)
+  - [Text-Editor](#text-editor)
+- [Documentation](#documentation)
 
-## Abstract
-[Apache Traffic Server (ATS)](https://trafficserver.apache.org/) is a high performance, open-source, caching proxy server that is scalable and configurable. This project integrates ATS as the ingress resource to a [Kubernetes(K8s)](https://kubernetes.io/) cluster, then acts as the ingress resource's custom controller. 
-
+## Introduction 
+[Apache Traffic Server (ATS)](https://trafficserver.apache.org/) is a high performance, open-source, caching proxy server that is scalable and configurable. This project uses ATS as a [Kubernetes(K8s)](https://kubernetes.io/) [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 
 ![Abstract](docs/images/abstract.png)
 
-
-From high-level, the ingress controller talks to K8s' API and sets up `watchers` on specific resources that are interesting to ATS. Then, the controller _controls_ ATS by either (1) relay the information from K8s API to ATS, or (2) configure ATS directly.
-
+From high-level, the ingress controller talks to K8s' API and sets up `watchers` on specific resources that are interesting to ATS. Then, the controller _controls_ ATS by either(1) relay the information from K8s API to ATS, or (2) configure ATS directly.
 
 ![How](docs/images/how-it-works.png)
 
-
-
-## What is Ingress Controller?
-As defined by [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-nginx#what-is-an-ingress-controller):
->An Ingress Controller is a daemon, deployed as a Kubernetes Pod, that watches the apiserver's `/ingresses` endpoint for updates to the [Ingress resource](https://kubernetes.io/docs/concepts/services-networking/ingress/). Its job is to satisfy requests for Ingresses.
-
-## Versions 
+## Versions of Software Used
 - Alpine 3.11
-- Apache Traffic Server 8.0.6
+- Apache Traffic Server 8.0.8
 - LuaJIT 2.0.4
 - Lua 5.1.4
 - Go 1.12.8
@@ -78,7 +63,7 @@ As defined by [kubernetes/ingress-nginx](https://github.com/kubernetes/ingress-n
 
 ## How to use
 
-### Required Software
+### Requirements
 - Docker
 - Kubernetes 1.18 (Minikube 1.11)
 
@@ -136,87 +121,13 @@ The following steps can be executed in any order, thus list numbers are not used
   - both ingress resources define domain name `test.edge.com`; however, `test.edge.com/app1` is only defined in `trafficserver-test-2` and `test.edge.com/app2` is only defined in `trafficserver-test-3`
   - Addtionally, an ingress resources defines HTTPS access for `test.edge.com/app2` in namespace `trafficserver-test-3`
 
-When both steps _above_ have executed at least once, ATS proxying will have started to work. 
-
-In kubernetes, ingress resources are necessary to enable proxying since it is where domain names are defined. However, given _only_ domain names, ATS cannot proxy requests when it doesn't have backend(s) to handle requests. Thus, only when both service pods and ingress are defined can ATS start proxying. To see proxy in action, we can use [curl](https://linux.die.net/man/1/curl) to "fake" external requests:
+When both steps _above_ have executed at least once, ATS proxying will have started to work. To see proxy in action, we can use [curl](https://linux.die.net/man/1/curl):
 
 1. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app1"`
 2. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app2"`
 3. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app1"`
 4. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app2"`
 5. `$ curl -vH "HOST:test.edge.com" -k "https://$(minikube ip):30043/app2"`
-
-With above curl commands, outputs from number 1 and 3 should be the same; outputs from number 2 and 4 should be same. The corresponding pairs are the same because all `/app1` use the same backend service _image_, and the same goes for `/app2`. Number 5 illustrates the https version for number 4 and the result is similar. 
-
-Expected received packet from `/app1` resembles:
-```html
-< HTTP/1.1 200 OK
-< X-Powered-By: Express
-< Accept-Ranges: bytes
-< Cache-Control: public, max-age=0
-< Last-Modified: Tue, 06 Aug 2019 16:31:53 GMT
-< ETag: W/"be-16c67c5d0a8"
-< Content-Type: text/html; charset=UTF-8
-< Content-Length: 190
-< Date: Mon, 19 Aug 2019 18:39:14 GMT
-< Age: 1
-< Connection: keep-alive
-< Server: ATS/7.1.6
-< 
-<!DOCTYPE html>
-<HTML>
-
-<HEAD>
-    <TITLE>
-        Hello from app1
-    </TITLE>
-</HEAD>
-
-<BODY>
-    <H1>Hi</H1>
-    <P>This is very minimal "hello world" HTML document.</P>
-</BODY>
-
-</HTML>
-* Connection #0 to host localhost left intact
-```
-
-Expected received packet from `/app2` resembles:
-```html
-< HTTP/1.1 200 OK
-< X-Powered-By: Express
-< Accept-Ranges: bytes
-< Cache-Control: public, max-age=0
-< Last-Modified: Fri, 14 Jun 2019 18:18:51 GMT
-< ETag: W/"bc-16b5736b2f8"
-< Content-Type: text/html; charset=UTF-8
-< Content-Length: 188
-< Date: Mon, 19 Aug 2019 18:39:10 GMT
-< Age: 0
-< Connection: keep-alive
-< Server: ATS/7.1.6
-< 
-<!DOCTYPE html>
-<HTML>
-
-<HEAD>
-    <TITLE>
-        A Small Hello
-    </TITLE>
-</HEAD>
-
-<BODY>
-    <H1>Hi</H1>
-    <P>This is very minimal "hello world" HTML document.</P>
-</BODY>
-
-</HTML>
-* Connection #0 to host localhost left intact
-```
-
-The curl commands demonstrate that, with the help of the ingress controller, ATS can not only resolve domain names while routing requests to various namespaces based on path, but also, is capable of handling the case where domain's paths existing across different namespaces. 
-
-Of course there are checks in place by the ingress controller so that any path corresponding to a domain name can only be defined in one namespace, and domain names are resolved across all namespace. 
 
 #### ConfigMap
 
@@ -228,11 +139,10 @@ Below is an example of configuring Apache Traffic Server [_reloadable_ configura
     1. `proxy.config.output.logfile.rolling_enabled: "1"`
     2. `proxy.config.output.logfile.rolling_interval_sec: "3000"`
     3. `proxy.config.restart.active_client_threshold: "0"`
-  - feel free to add other reloadable configurations, and/or change the above 3 to other valid values. Checks are in place so that mistakes are tolerated.
 
 #### Snippet
 
-You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/plugins/lua.en.html) to an ingress object and ATS will execute it for requests matching the routing rules defined in the ingress object. See an example in k8s/ingresses/ats-ingress-2.yaml 
+You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/plugins/lua.en.html) to an ingress object and ATS will execute it for requests matching the routing rules defined in the ingress object. See an example in annotation section of yaml file [here](k8s/ingresses/ats-ingress-2.yaml) 
 
 #### Ingress Class
 
@@ -242,34 +152,23 @@ You can provide an environment variable called `INGRESS_CLASS` in the deployment
 
 #### Fluentd
 
-Fluentd is an open source data collector for a unified logging layer. You can read more about Fluentd [here](https://docs.fluentd.org/). 
-
-This project ships with Fluentd already integrated with the Apache Traffic Server. The configuration file used for the same can be found [here](k8s/configmaps/fluentd-configmap.yaml)
-
-##### What does it do? 
+This project ships with [Fluentd](https://docs.fluentd.org/) already integrated with the Apache Traffic Server. The configuration file used for the same can be found [here](k8s/configmaps/fluentd-configmap.yaml)
 
 As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/usr/local/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
 
 #### Prometheus and Grafana
 
-Prometheus is an open-source systems monitoring and alerting toolkit originally built at SoundCloud. You can read more about it [here](https://prometheus.io/docs/prometheus/latest/getting_started/). 
+Use the following steps to install [Prometheus](https://prometheus.io/docs/prometheus/latest/getting_started/) and [Grafana](https://grafana.com/docs/grafana/latest/) and use them to monitor the Apache Traffic Server statistics:
 
-Grafana allows you to query, visualize, alert on and understand your metrics no matter where they are stored. You can read more about Grafana [here](https://grafana.com/docs/grafana/latest/)
-
-##### How to use? 
-
-Use the following steps to install Prometheus and Grafana and use them to monitor the Apache Traffic Server statistics:
-
-1. `$ kubectl apply -f k8s/traffic-server/ats-stats.yaml`
+1. `$ kubectl apply -f k8s/prometheus/ats-stats.yaml`
   - Creates a new service which connects to the ATS pod on port 9122. This service will be used by Prometheus to read the Apache Traffic Server stats.  
 2. `$ kubectl apply -f k8s/configmaps/prometheus-configmap.yaml`
   - Creates a new configmap which holds the configuration file for Prometheus. You can modify this configuration file to suit your needs. More about that can be read [here](https://prometheus.io/docs/prometheus/latest/configuration/configuration/)
-3. `$ kubectl apply -f k8s/traffic-server/prometheus-deployment.yaml`
+3. `$ kubectl apply -f k8s/prometheus/prometheus-deployment.yaml`
   - Creates a new deployment consisting of Prometheus and Grafana. Also creates two new services to access prometheus and grafana. 
 4. Open `192.168.x.x:30090` in your web browser to access Prometheus where `192.168.x.x` is the IP returned by the command: `$ minikube ip` 
 5. Open `192.168.x.x:30030` in your web browser to access the Grafana dashboard where `192.168.x.x` is the IP returned by the command: `$ minikube ip`. 
 6. To use Prometheus as a datasource for Grafana, please read [this](https://prometheus.io/docs/visualization/grafana/#using). The URL on which Grafana can access Prometheus is `localhost:9090`
-
 
 ## Development
 
@@ -280,16 +179,14 @@ Use the following steps to install Prometheus and Grafana and use them to monito
 4. Add Go workspace to your PATH: `export PATH=$PATH:$(go env GOPATH)/bin`
 5. Define Go import Paths
    - Go's import path is different from other languages in that all import paths are _absolute paths_. Due to this reason, it is important to set up your project paths correctly
-   - define the base path: `mkdir -p $GOPATH/src/github.com/<your user name>/`
+   - define the base path: `mkdir -p $GOPATH/src/github.com/`
 6. Clone the project:
-   - `cd $GOPATH/src/github.com/<your user name>/`
+   - `cd $GOPATH/src/github.com/`
    - `git clone <project>`
 7. As of Go 1.12 in order to have `go.mod` within Go paths, you must export: `export GO111MODULE=on` to be able to compile locally. 
 
-*Above steps are a very short summary of [Getting Started](https://golang.org/doc/install) and [How to Write Go Code](https://golang.org/doc/code.html) from official Go-lang documentation. For more detailed info and/or assistance, it is recommended to checkout these 2 links first.
-
 ### Compilation
-To compile, while in `ingress-ats/` directory: `go build -o ingress_ats main/main.go`
+To compile, type: `go build -o ingress_ats main/main.go`
 
 ### Unit Tests
 The project includes unit tests for the controller written in Golang and the plugin written in Lua.
