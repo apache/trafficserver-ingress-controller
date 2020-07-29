@@ -98,27 +98,26 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 2. `$ cd trafficserver-ingress-controller`
 3. `$ git submodule update --init`
 4. `$ docker build -t ats_alpine .` 
-     - wait for Docker finish building the image
 5. `$ docker build -t tsexporter k8s/backend/trafficserver_exporter/` 
-     - wait for Docker finish building the image
 6. `$ docker build -t node-app-1 k8s/backend/node-app-1/`    
-     - wait for Docker finish building the image
 7. `$ docker build -t node-app-2 k8s/backend/node-app-2/`
-     - wait for Docker finish building the image
+8. `$ docker pull fluent/fluentd:v1.6-debian-1`
 
 - At this point, we have created necessary images for our example. Let's talk about what each step does:
-  - Step 2 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
-  - Step 3 builds an image for the trafficserver exporter. This exports the ATS statistics over HTTP for Prometheus to read. 
-  - Steps 4 and 5 build 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
+  - Step 4 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
+  - Step 5 builds an image for the trafficserver exporter. This exports the ATS statistics over HTTP for Prometheus to read. 
+  - Steps 6 and 7 build 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
 
-8. `$ kubectl create namespace trafficserver-test`
+9. `$ kubectl create namespace trafficserver-test`
     - Create a namespace for ATS pod
-9. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
+10. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
     - Create a self-signed certificate
-10. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
+11. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
     - Create a secret in the namespace just created
-11. `$ kubectl apply -f k8s/traffic-server/`
-    -  will define a new [kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) named `trafficserver-test` and deploy a single ATS pod to said namespace. The ATS pod is also where the ingress controller lives. Additionally, this will expose your local machine's port `30000` to the outside world.
+12. `$ kubectl apply -f k8s/configmaps/fluentd-confmap.yaml`
+    - Create config map for fluentd
+13. `$ kubectl apply -f k8s/traffic-server/`
+    -  will define a new [kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) named `trafficserver-test` and deploy a single ATS pod to said namespace. The ATS pod is also where the ingress controller lives. 
 
 #### Proxy
 
@@ -129,7 +128,6 @@ The following steps can be executed in any order, thus list numbers are not used
   - creates kubernetes services and [deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) for `appsvc1` and `appsvc2`
   - deploy 2 of each `appsvc1`, and `appsvc2` pods in `trafficserver-test-2`, totally 4 pods in said namespace.
   - similarly, deploy 2 of each `appsvc1`, and `appsvc2` pods in `trafficserver-test-3`, totally 4 pods in this namespace. We now have 8 pods in total for the 2 services we have created and deployed in the 2 namespaces.
-  - in addition to the ATS pod, we have created and deployed 9 pods.
 
 - `$ kubectl apply -f k8s/ingresses/`
   - creates namespaces `trafficserver-test-2` and `trafficserver-test-3` if not already exist
