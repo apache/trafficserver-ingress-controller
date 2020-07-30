@@ -179,7 +179,6 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
   ![Datasource add success](docs/images/datasource-success.png) 
 10. Click on the '+' icon in the left handside column and select 'Dashboard'
 11. Click on '+ Add new panel'
-  ![New Panel](docs/images/new-panel.png) 
 12. Enter a PromQL query. For example if you want to add a graph showing the total number of responses over time enter `trafficserver_responses_total` and press Shift + Enter.
   ![New Graph](docs/images/new-graph.png)
 13. Click on Apply to add the graph to your dashboard. You can similarly make add more graphs to your dashboard to suit your needs. To learn more about Grafana click [here](https://grafana.com/docs/grafana/latest/)
