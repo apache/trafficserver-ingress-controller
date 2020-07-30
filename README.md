@@ -171,7 +171,6 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
   - Creates a new deployment consisting of Prometheus and Grafana. Also creates two new services to access prometheus and grafana. 
 4. Open `x.x.x.x:30090` in your web browser to access Prometheus where `x.x.x.x` is the IP returned by the command: `$ minikube ip` 
 5. Open `x.x.x.x:30030` in your web browser to access the Grafana dashboard where `x.x.x.x` is the IP returned by the command: `$ minikube ip`.
-  ![Grafana Login Page](docs/images/grafana-login.png)
 6. The default credentials for logging into Grafana are `admin:admin`
 7. Click on `Add your first data source' and select Prometheus under the 'Time series databases category'
 8. Set an appropriate name for the data source and enter `localhost:9090` as the URL
