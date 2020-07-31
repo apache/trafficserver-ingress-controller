@@ -1,3 +1,19 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
 # TODO for Helm support
 Helm support for ATS Ingress Controller is still under development and can only be used locally after building the following docker images:
 - ats_alpine
@@ -6,10 +22,7 @@ Helm support for ATS Ingress Controller is still under development and can only 
 After building the above images, do the following to install ATS Ingress using Helm:
 1. `$ kubectl create namespace ats-ingress`
     - Create the namespace where the ingress controller will be installed
-2. `$ helm install charts/ats-ingress --generate-name -n ats-ingress`
-    - Use helm install to install the chart specifying the namespace created in step one
-
-To install the ingress controller with TLS support, create a file named `override.yaml` which contains the following two values:
+2. To install the ingress controller in the namespace created in step 1, create a file named `override.yaml` which contains the following two values:
 ```yaml
 tls:
     crt: <TLS certificate>
@@ -19,8 +32,8 @@ and then:
 `$ helm install -f override.yaml charts/ats-ingress --generate-name -n ats-ingress`
 
 ## TODO for enabling Helm
-- [ ] Upload ats_alpine docker image to a public repository and replace `image.repository` value in values.yaml
-- [ ] Upload trafficserver-exporter docker image to a public repository and make the corresponding changes in `.Values.ats.exporter.image.repository`
+- [ ] Upload ats_alpine docker image to a public repository and make corresponding changes to `image.repository` value in values.yaml
+- [ ] Upload trafficserver-exporter docker image to a public repository and make corresponding changes to `ats.exporter.image.repository` value in values.yaml 
 - [ ] Hosting the helm chart on a public domain.
 
 ### Hosting the helm chart
