@@ -110,6 +110,9 @@ collector:
   name: log-collector
   path: "/var/log"
   fluentdConfigPath: "/fluentd/etc"
+  image:
+    repository: fluent/fluentd
+    tag: v1.6-debian-1
 
 tls:
   crt:

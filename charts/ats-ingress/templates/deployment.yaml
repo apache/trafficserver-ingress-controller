@@ -66,7 +66,7 @@ spec:
             name: https
             protocol: TCP
         - name: {{ .Values.collector.name }}
-          image: fluent/fluentd:v1.6-debian-1
+          image: {{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag }}
           volumeMounts:
           - name: varlog
             mountPath: {{ .Values.collector.path | quote }}
