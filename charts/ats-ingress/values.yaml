@@ -1,0 +1,121 @@
+#  Licensed to the Apache Software Foundation (ASF) under one
+#  or more contributor license agreements.  See the NOTICE file
+#  distributed with this work for additional information
+#  regarding copyright ownership.  The ASF licenses this file
+#  to you under the Apache License, Version 2.0 (the
+#  "License"); you may not use this file except in compliance
+#  with the License.  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+# Default values for ats-ingress.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: ats_alpine
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: latest
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: NodePort
+  http:
+    port: 80
+    targetPort: 80
+    nodePort: 30000
+  https:
+    port: 443
+    targetPort: 443
+    nodePort: 30043
+
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+ats:
+  ssl: 
+    path: "/etc/ats/ssl"
+    name: ats-ssl
+    secret: tls-secret
+  log:
+    dir: /usr/local/var/log/trafficserver
+  exporter:
+    name: trafficserver-exporter
+    image:
+      repository: tsexporter
+      tag: latest
+    service:
+      name: ats-stats-exporter
+      port: 9122
+      type: ClusterIP
+
+collector:
+  name: log-collector
+  path: "/var/log"
+  fluentdConfigPath: "/fluentd/etc"
+  image:
+    repository: fluent/fluentd
+    tag: v1.6-debian-1
+  parse:
+    defaultRegex: ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
+
+tls:
+  crt:
+  key:
