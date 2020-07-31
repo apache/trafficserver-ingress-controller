@@ -98,6 +98,9 @@ ats:
     dir: /usr/local/var/log/trafficserver
   exporter:
     name: trafficserver-exporter
+    image:
+      repository: tsexporter
+      tag: latest
     service:
       name: ats-stats-exporter
       port: 9122

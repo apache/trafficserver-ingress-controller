@@ -73,7 +73,7 @@ spec:
           - name: config-volume
             mountPath: {{ .Values.collector.fluentdConfigPath | quote }}
         - name: {{ .Values.ats.exporter.name }}
-          image: tsexporter:latest
+          image: {{ .Values.ats.exporter.image.repository }}:{{ .Values.ats.exporter.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: {{ .Values.ats.exporter.service.port }}
