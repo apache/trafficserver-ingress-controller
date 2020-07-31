@@ -161,8 +161,6 @@ As can be seen from the default configuration file, Fluentd reads the Apache Tra
 
 ##### Example Walkthrough
 
-Use the following steps to install [Prometheus](https://prometheus.io/docs/prometheus/latest/getting_started/) and [Grafana](https://grafana.com/docs/grafana/latest/) and use them to monitor the Apache Traffic Server statistics.
-
 1. `$ kubectl apply -f k8s/prometheus/ats-stats.yaml`
   - Creates a new service which connects to the ATS pod on port 9122. This service will be used by Prometheus to read the Apache Traffic Server stats.  
 2. `$ kubectl apply -f k8s/configmaps/prometheus-configmap.yaml`
