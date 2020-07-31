@@ -30,7 +30,7 @@ data:
       pos_file {{ .Values.collector.path }}/squid.log.pos
       <parse>
         @type regexp
-        expression ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
+        expression {{ .Values.collector.parse.defaultRegex }}
       </parse>
       tag trafficserver.access
     </source>

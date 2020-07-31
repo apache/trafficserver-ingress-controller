@@ -113,6 +113,8 @@ collector:
   image:
     repository: fluent/fluentd
     tag: v1.6-debian-1
+  parse:
+    defaultRegex: ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
 
 tls:
   crt:
