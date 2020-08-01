@@ -43,7 +43,6 @@ spec:
       labels:
         app: trafficserver-test
     spec:
-
       containers:
         - name: trafficserver-test
           image: ats_alpine:latest # Needs to be updated
@@ -51,8 +50,10 @@ spec:
             - mountPath: "/etc/ats/ssl"
               name: ats-ssl
               readOnly: true
-            - name: varlog
-              mountPath: /usr/local/var/log/trafficserver
+            - name: log-trafficserver
+              mountPath: "/usr/local/var/log/trafficserver"
+            - name: log-ingress
+              mountPath: "/usr/local/var/log/ingress"
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME
@@ -79,8 +80,10 @@ spec:
         - name: log-collector
           image: fluent/fluentd:v1.6-debian-1
           volumeMounts:
-          - name: varlog
-            mountPath: "/var/log"
+          - name: log-trafficserver
+            mountPath: "/var/log/trafficserver"
+          - name: log-ingress
+            mountPath: "/var/log/ingress"
           - name: config-volume
             mountPath: "/fluentd/etc"
         - name: trafficserver-exporter
@@ -92,7 +95,9 @@ spec:
         - name: ats-ssl
           secret:
             secretName: tls-secret
-        - name: varlog
+        - name: log-trafficserver
+          emptyDir: {}
+        - name: log-ingress
           emptyDir: {}
         - name: config-volume
           configMap:
