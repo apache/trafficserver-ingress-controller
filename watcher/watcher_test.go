@@ -37,7 +37,7 @@ func TestAllNamespacesWatchFor_Add(t *testing.T) {
 		t.Error(err)
 	}
 
-	fc.Add(&v1.Endpoints{
+	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Create(&v1.Endpoints{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver-test-2",
@@ -62,6 +62,7 @@ func TestAllNamespacesWatchFor_Add(t *testing.T) {
 			},
 		},
 	})
+
 	time.Sleep(100 * time.Millisecond)
 
 	returnedKeys := w.Ep.RedisClient.GetDefaultDBKeyValues()
@@ -83,7 +84,7 @@ func TestAllNamespacesWatchFor_Update(t *testing.T) {
 		t.Error(err)
 	}
 
-	fc.Add(&v1.Endpoints{
+	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Create(&v1.Endpoints{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver-test-2",
@@ -108,9 +109,10 @@ func TestAllNamespacesWatchFor_Update(t *testing.T) {
 			},
 		},
 	})
+
 	time.Sleep(100 * time.Millisecond)
 
-	fc.Modify(&v1.Endpoints{
+	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Update(&v1.Endpoints{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver-test-2",
@@ -135,6 +137,7 @@ func TestAllNamespacesWatchFor_Update(t *testing.T) {
 			},
 		},
 	})
+
 	time.Sleep(100 * time.Millisecond)
 
 	returnedKeys := w.Ep.RedisClient.GetDefaultDBKeyValues()
@@ -226,8 +229,8 @@ func TestInNamespacesWatchFor_Add(t *testing.T) {
 	targetNs := make([]string, 1, 1)
 	targetNs[0] = "trafficserver"
 
-	err := w.inNamespacesWatchForConfigMaps(&cmHandler, w.Cs.CoreV1().RESTClient(),
-		targetNs, fields.Everything(), &v1.ConfigMap{}, 0, w.Cs)
+	err := w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
+		targetNs, fields.Everything(), &v1.ConfigMap{}, 0)
 
 	if err != nil {
 		t.Error(err)
@@ -278,8 +281,8 @@ func TestInNamespacesWatchFor_Update(t *testing.T) {
 	targetNs := make([]string, 1, 1)
 	targetNs[0] = "trafficserver"
 
-	err := w.inNamespacesWatchForConfigMaps(&cmHandler, w.Cs.CoreV1().RESTClient(),
-		targetNs, fields.Everything(), &v1.ConfigMap{}, 0, w.Cs)
+	err := w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
+		targetNs, fields.Everything(), &v1.ConfigMap{}, 0)
 
 	if err != nil {
 		t.Error(err)
@@ -343,8 +346,8 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 	targetNs := make([]string, 1, 1)
 	targetNs[0] = "trafficserver"
 
-	err := w.inNamespacesWatchForConfigMaps(&cmHandler, w.Cs.CoreV1().RESTClient(),
-		targetNs, fields.Everything(), &v1.ConfigMap{}, 0, w.Cs)
+	err := w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
+		targetNs, fields.Everything(), &v1.ConfigMap{}, 0)
 
 	if err != nil {
 		t.Error(err)
