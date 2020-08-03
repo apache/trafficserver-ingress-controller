@@ -26,13 +26,24 @@ data:
   fluent.conf: |
     <source>
       type tail
-      path {{ .Values.collector.path }}/squid.log
-      pos_file {{ .Values.collector.path }}/squid.log.pos
+      path {{ .Values.collector.path.trafficserver }}/squid.log
+      pos_file {{ .Values.collector.path.trafficserver }}/squid.log.pos
       <parse>
         @type regexp
-        expression {{ .Values.collector.parse.defaultRegex }}
+        expression {{ .Values.collector.parse.ats.defaultRegex }}
       </parse>
       tag trafficserver.access
+    </source>
+
+    <source>
+      type tail
+      path {{ .Values.collector.path.ingress }}/ingress_ats.err
+      pos_file {{ .Values.collector.path.ingress }}/ingress_ats.err.pos
+      <parse>
+        @type regexp
+        expression {{ .Values.collector.parse.ingress.defaultRegex }}
+      </parse>
+      tag ingress.log
     </source>
 
     <match **>
