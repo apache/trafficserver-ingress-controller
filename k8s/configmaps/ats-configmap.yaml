@@ -26,6 +26,8 @@ kind: ConfigMap
 metadata:
   namespace: trafficserver-test
   name: ats
+  annotations:
+    "ats-configmap" : "true"
 data:
   # reloadable data only
   proxy.config.output.logfile.rolling_enabled: "1"
