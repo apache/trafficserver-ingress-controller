@@ -23,7 +23,7 @@ syslogd
 crond
 
 # TLS auto reload script
-/usr/local/bin/tls-reload.sh >> /usr/local/var/log/ingress_ats.err &
+/usr/local/bin/tls-reload.sh >> /usr/local/var/log/ingress/ingress_ats.err &
 
 # generate TLS cert config file for ats 
 /usr/local/bin/tls-config.sh 
@@ -36,5 +36,5 @@ chown -R nobody:nobody /usr/local/etc/trafficserver
 DISTRIB_ID=gentoo /usr/local/bin/trafficserver start
 
 sleep 20 
-/usr/local/go/bin/src/ingress-ats/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -useInClusterConfig=T 2>>/usr/local/var/log/ingress_ats.err
+/usr/local/go/bin/src/ingress-ats/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -useInClusterConfig=T 2>>/usr/local/var/log/ingress/ingress_ats.err
 

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-/usr/local/var/log/ingress_ats.err {
+/usr/local/var/log/ingress/ingress_ats.err {
   daily
   rotate 2
   copytruncate

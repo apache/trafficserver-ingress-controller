@@ -43,8 +43,10 @@ spec:
             - mountPath: {{ .Values.ats.ssl.path | quote }} 
               name: {{ .Values.ats.ssl.name }}
               readOnly: true
-            - name: varlog
-              mountPath: {{ .Values.ats.log.dir }}
+            - name: log-trafficserver
+              mountPath: {{ .Values.ats.log.trafficserver.dir }}
+            - name: log-ingress
+              mountPath: {{ .Values.ats.log.ingress.dir }}
           env:
             - name: POD_NAME
               valueFrom:
@@ -68,8 +70,10 @@ spec:
         - name: {{ .Values.collector.name }}
           image: {{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag }}
           volumeMounts:
-          - name: varlog
-            mountPath: {{ .Values.collector.path | quote }}
+          - name: log-ingress
+            mountPath: {{ .Values.collector.path.ingress | quote }}
+          - name: log-trafficserver
+            mountPath: {{ .Values.collector.path.trafficserver | quote }}
           - name: config-volume
             mountPath: {{ .Values.collector.fluentdConfigPath | quote }}
         - name: {{ .Values.ats.exporter.name }}
@@ -81,7 +85,9 @@ spec:
         - name: {{ .Values.ats.ssl.name }}
           secret:
             secretName: {{ .Values.ats.ssl.secret }}
-        - name: varlog
+        - name: log-trafficserver
+          emptyDir: {}
+        - name: log-ingress
           emptyDir: {}
         - name: config-volume
           configMap:

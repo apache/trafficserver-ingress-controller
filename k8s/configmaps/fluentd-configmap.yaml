@@ -23,13 +23,24 @@ data:
   fluent.conf: |
     <source>
       type tail
-      path /var/log/squid.log
-      pos_file /var/log/squid.log.pos
+      path /var/log/trafficserver/squid.log
+      pos_file /var/log/trafficserver/squid.log.pos
       <parse>
         @type regexp
         expression ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
       </parse>
       tag trafficserver.access
+    </source>
+
+    <source>
+      type tail
+      path /var/log/ingress/ingress_ats.err
+      pos_file /var/log/ingress/ingress_ats.err.pos
+      <parse>
+        @type regexp
+        expression ^(?<date>[^ ]*)\s(?<timestamp>[^ ]*)\s(?<log>.*)$
+      </parse>
+      tag ingress.log
     </source>
 
     <match **>
