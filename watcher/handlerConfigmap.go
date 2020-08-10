@@ -41,6 +41,16 @@ func (c *CMHandler) update(newObj interface{}) {
 		log.Println("In ConfigMapHandler Update; cannot cast to *v1.ConfigMap")
 		return
 	}
+
+	annotations := cm.GetAnnotations()
+	if val, ok := annotations["ats-configmap"]; ok {
+		if val != "true" {
+			return
+		}
+	} else {
+		return
+	}
+
 	for currKey, currVal := range cm.Data {
 		msg, err := c.Ep.ATSManager.ConfigSet(currKey, currVal) // update ATS
 		if err != nil {

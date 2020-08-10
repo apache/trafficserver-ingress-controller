@@ -134,8 +134,8 @@ When both steps _above_ have executed at least once, ATS proxying will have star
 
 Below is an example of configuring Apache Traffic Server [_reloadable_ configurations](https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/files/records.config.en.html#reloadable) using [kubernetes configmap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) resource:
 
-- `$ kubectl apply -f k8s/configmaps/`
-  - create a ConfigMap resource in `trafficserver-test` if not already exist
+- `$ kubectl apply -f k8s/configmaps/ats-configmap.yaml`
+  - create a ConfigMap resource in `trafficserver-test` with the annotation `"ats-configmap":"true"` if not already exist
   - configure 3 _reloadable_ ATS configurations:
     1. `proxy.config.output.logfile.rolling_enabled: "1"`
     2. `proxy.config.output.logfile.rolling_interval_sec: "3000"`

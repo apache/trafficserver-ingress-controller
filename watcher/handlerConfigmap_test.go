@@ -59,6 +59,23 @@ func TestAdd_BasicConfigMap(t *testing.T) {
 
 }
 
+func TestShouldNotAdd_BasicConfigMap(t *testing.T) {
+	cmHandler := createExampleCMHandler()
+	exampleConfigMap := createExampleConfigMap()
+
+	exampleConfigMap.Annotations = map[string]string{
+		"ats-configmap": "false",
+	}
+
+	cmHandler.Add(&exampleConfigMap)
+
+	rEnabled, err := cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_enabled")
+
+	if err == nil {
+		t.Errorf("Should not have executed. Instead gives %s", rEnabled)
+	}
+}
+
 func TestUpdate_BasicConfigMap(t *testing.T) {
 	cmHandler := createExampleCMHandler()
 	exampleConfigMap := createExampleConfigMap()
@@ -97,6 +114,9 @@ func createExampleConfigMap() v1.ConfigMap {
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver-test-2",
+			Annotations: map[string]string{
+				"ats-configmap": "true",
+			},
 		},
 		Data: map[string]string{
 			"proxy.config.output.logfile.rolling_enabled":      "1",

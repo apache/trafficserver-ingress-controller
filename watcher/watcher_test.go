@@ -240,6 +240,9 @@ func TestInNamespacesWatchFor_Add(t *testing.T) {
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
+			Annotations: map[string]string{
+				"ats-configmap": "true",
+			},
 		},
 		Data: map[string]string{
 			"proxy.config.output.logfile.rolling_enabled":      "1",
@@ -292,6 +295,9 @@ func TestInNamespacesWatchFor_Update(t *testing.T) {
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
+			Annotations: map[string]string{
+				"ats-configmap": "true",
+			},
 		},
 		Data: map[string]string{
 			"proxy.config.output.logfile.rolling_enabled":      "1",
@@ -305,6 +311,9 @@ func TestInNamespacesWatchFor_Update(t *testing.T) {
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
+			Annotations: map[string]string{
+				"ats-configmap": "true",
+			},
 		},
 		Data: map[string]string{
 			"proxy.config.output.logfile.rolling_enabled":      "1",
@@ -357,6 +366,9 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
+			Annotations: map[string]string{
+				"ats-configmap": "true",
+			},
 		},
 		Data: map[string]string{
 			"proxy.config.output.logfile.rolling_enabled":      "1",
@@ -396,6 +408,43 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 	}
 
 	threshold, err := cmHandler.Ep.ATSManager.ConfigGet("proxy.config.restart.active_client_threshold")
+
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(threshold, "2") {
+		t.Errorf("returned \n%s,  but expected \n%s", threshold, "2")
+	}
+
+	w.Cs.CoreV1().ConfigMaps("trafficserver-2").Create(&v1.ConfigMap{
+		ObjectMeta: meta_v1.ObjectMeta{
+			Name:      "testsvc",
+			Namespace: "trafficserver",
+		},
+		Data: map[string]string{
+			"proxy.config.output.logfile.rolling_enabled":      "1",
+			"proxy.config.output.logfile.rolling_interval_sec": "3000",
+			"proxy.config.restart.active_client_threshold":     "4",
+		},
+	})
+	time.Sleep(100 * time.Millisecond)
+
+	rEnabled, err = cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_enabled")
+
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rEnabled, "1") {
+		t.Errorf("returned \n%s,  but expected \n%s", rEnabled, "1")
+	}
+
+	rInterval, err = cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_interval_sec")
+
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rInterval, "4000") {
+		t.Errorf("returned \n%s,  but expected \n%s", rInterval, "4000")
+	}
+
+	threshold, err = cmHandler.Ep.ATSManager.ConfigGet("proxy.config.restart.active_client_threshold")
 
 	if err != nil {
 		t.Error(err)
