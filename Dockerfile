@@ -26,8 +26,8 @@ RUN apk add --no-cache --virtual .ats-build-deps \
   libexecinfo-dev linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev 
 
-RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.0.8.tar.bz2 | bzip2 -dc | tar xf - \
-  && cd trafficserver-8.0.8/ \
+RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.1.0.tar.bz2 | bzip2 -dc | tar xf - \
+  && cd trafficserver-8.1.0/ \
   && autoreconf -if \
   && ./configure --enable-debug=yes \
   && make \
