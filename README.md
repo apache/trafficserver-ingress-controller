@@ -53,7 +53,7 @@ From high-level, the ingress controller talks to K8s' API and sets up `watchers`
 ![How](docs/images/how-it-works.png)
 
 ## Versions of Software Used
-- Alpine 3.12
+- Alpine 3.12.1
 - Apache Traffic Server 8.1.0
 - LuaJIT 2.0.4
 - Lua 5.1.4
