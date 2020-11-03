@@ -181,6 +181,24 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
   ![New Graph](docs/images/new-graph.png)
 13. Click on Apply to add the graph to your dashboard. You can similarly make add more graphs to your dashboard to suit your needs. To learn more about Grafana click [here](https://grafana.com/docs/grafana/latest/)
 
+#### Jaeger/Tracing
+
+To install Jaeger to add support for tracing, run:
+
+```
+$ kubectl create namespace observability 
+$ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/crds/jaegertracing.io_jaegers_crd.yaml 
+$ kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/service_account.yaml
+$ kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role.yaml
+$ kubectl create -n observability -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/role_binding.yaml
+$ kubectl create -n observability -f k8s/jaeger/operator.yaml
+$ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/cluster_role.yaml
+$ kubectl create -f https://raw.githubusercontent.com/jaegertracing/jaeger-operator/master/deploy/cluster_role_binding.yaml
+$ kubectl apply -f k8s/jaeger/simplest.yaml
+$ kubectl patch svc simplest-query -n observability -p '{"spec": {"ports": [{"port": 16686,"targetPort": 16686,"nodePort":30086,"name": "http"}],"type": "NodePort"}}'
+```
+Open `x.x.x.x:30086` in a web browser to access the Jaegar UI where `x.x.x.x` is the IP returned by running `$ minikube ip`
+
 ## Development
 
 ### Develop with Go-Lang in Linux
