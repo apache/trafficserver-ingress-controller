@@ -4,7 +4,6 @@
 
 	// List of extensions which should be recommended for users of this workspace.
 	"recommendations": [
-		"ms-vscode.go", // Go-lang language support
 		"redhat.vscode-yaml", // docker + k8s code hints and code snippets
 		"keyring.lua", // lua language support
 		"ms-kubernetes-tools.vscode-kubernetes-tools", // managing k8s
