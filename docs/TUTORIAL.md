@@ -46,10 +46,10 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
       - To understand why we do this, please read [Use local images by re-using the docker daemon](https://kubernetes.io/docs/setup/learning-environment/minikube/#use-local-images-by-re-using-the-docker-daemon)
 2. `$ cd trafficserver-ingress-controller`
 3. `$ git submodule update --init`
-4. `$ docker build -t ats_alpine .` 
-5. `$ docker build -t tsexporter k8s/backend/trafficserver_exporter/` 
-6. `$ docker build -t node-app-1 k8s/backend/node-app-1/`    
-7. `$ docker build -t node-app-2 k8s/backend/node-app-2/`
+4. `$ docker build -t ats-ingress .` 
+5. `$ docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/` 
+6. `$ docker build -t node-app-1 k8s/images/node-app-1/`    
+7. `$ docker build -t node-app-2 k8s/images/node-app-2/`
 8. `$ docker pull fluent/fluentd:v1.6-debian-1`
 
 - At this point, we have created necessary images for our example. Let's talk about what each step does:
