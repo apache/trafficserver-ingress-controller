@@ -27,7 +27,7 @@ ATS Kubernetes Ingress Controller
 
 - [Architecture](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/ARCHITECTURE.md)
 - [Tutorial](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/TUTORIAL.md)
-- [Development](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/DEVELOPMENT.md
+- [Development](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/DEVELOPMENT.md)
 
 ## Versions of Software Used
 - Alpine 3.12.1
