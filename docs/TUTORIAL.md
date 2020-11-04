@@ -135,12 +135,12 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
 6. The default credentials for logging into Grafana are `admin:admin`
 7. Click on `Add your first data source' and select Prometheus under the 'Time series databases category'
 8. Set an appropriate name for the data source and enter `localhost:9090` as the URL
-  ![New Datasource](docs/images/new-datasource.png)
+  ![New Datasource](images/new-datasource.png)
 9. Click on 'Save & Test'. If everything has been installed correctly you should get a notification saying 'Data source is working'
-  ![Datasource add success](docs/images/datasource-success.png) 
+  ![Datasource add success](images/datasource-success.png) 
 10. Click on the '+' icon in the left handside column and select 'Dashboard'
 11. Click on '+ Add new panel'
 12. Enter a PromQL query. For example if you want to add a graph showing the total number of responses over time enter `trafficserver_responses_total` and press Shift + Enter.
-  ![New Graph](docs/images/new-graph.png)
+  ![New Graph](images/new-graph.png)
 13. Click on Apply to add the graph to your dashboard. You can similarly make add more graphs to your dashboard to suit your needs. To learn more about Grafana click [here](https://grafana.com/docs/grafana/latest/)
 
