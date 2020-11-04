@@ -17,65 +17,28 @@
     under the License.
 -->
 
-ATS Kubernetes Ingress Controller
-=================================
-![Test](https://github.com/apache/trafficserver-ingress-controller/workflows/Test/badge.svg)
-![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/workflows/Build%20and%20Integrate/badge.svg)
-
-## Contents
-- [Introduction](#Introduction)
-- [Versions of Software Used](#versions-of-software-used)
-- [How to use](#how-to-use)
-  - [Requirements](#requirements)
-  - [Download project](#download-project)
-  - [Example Walkthrough](#example-walkthrough)
-    - [Proxy](#proxy)
-    - [ConfigMap](#configmap)
-    - [Snippet](#snippet)
-    - [Ingress Class](#ingressclass)
-  - [Logging and Monitoring](#logging-and-monitoring)
-    - [Fluentd](#fluend)
-    - [Prometheus and Grafana](#prometheus-and-grafana)
-- [Development](#development)
-  - [Develop with Go-Lang in Linux](#develop-with-go-lang-in-linux)
-  - [Compilation](#compilation)
-  - [Unit Tests](#unit-tests)
-  - [Text-Editor](#text-editor)
-- [Documentation](#documentation)
-
-## Introduction 
-[Apache Traffic Server (ATS)](https://trafficserver.apache.org/) is a high performance, open-source, caching proxy server that is scalable and configurable. This project uses ATS as a [Kubernetes(K8s)](https://kubernetes.io/) [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
-
-![Abstract](docs/images/abstract.png)
-
-From high-level, the ingress controller talks to K8s' API and sets up `watchers` on specific resources that are interesting to ATS. Then, the controller _controls_ ATS by either(1) relay the information from K8s API to ATS, or (2) configure ATS directly.
-
-![How](docs/images/how-it-works.png)
-
-## Versions of Software Used
-- Alpine 3.12.1
-- Apache Traffic Server 8.1.0
-- LuaJIT 2.0.4
-- Lua 5.1.4
-- Go 1.12.8
-- Other Packages
-  - luasocket 3.0rc1
-  - redis-lua 2.0.4
-
-## How to use
+## Tutorial
+- [Requirements](#requirements)
+- [Download project](#download-project)
+- [Example Walkthrough](#example-walkthrough)
+  - [Proxy](#proxy)
+  - [ConfigMap](#configmap)
+  - [Snippet](#snippet)
+  - [Ingress Class](#ingressclass)
+- [Logging and Monitoring](#logging-and-monitoring)
+  - [Fluentd](#fluend)
+  - [Prometheus and Grafana](#prometheus-and-grafana)
 
 ### Requirements
-- Docker
-- Kubernetes 1.18.10 (Minikube 1.14.2)
+- Docker 
+- Kubernetes 1.18.10 (through Minikube 1.14.2)
 
 To install Docker, visit its [official page](https://docs.docker.com/) and install the correct version for your system.
 
 The walkthrough uses Minikube to guide you through the setup process. Visit the [official Minikube page](https://kubernetes.io/docs/tasks/tools/install-minikube/) to install Minikube. 
 
 ### Download project 
-If you are cloning this project for development, visit [Setting up Go-Lang](#setting-up-go-lang) for detailed guide on how to develop projects in Go. 
-
-For other purposes, you can use `git clone` or directly download repository to your computer.
+You can use `git clone` or directly download repository to your computer.
 
 ### Example Walkthrough
 Once you have cloned the project repo and started Docker and Minikube, in the terminal:
@@ -180,43 +143,4 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
 12. Enter a PromQL query. For example if you want to add a graph showing the total number of responses over time enter `trafficserver_responses_total` and press Shift + Enter.
   ![New Graph](docs/images/new-graph.png)
 13. Click on Apply to add the graph to your dashboard. You can similarly make add more graphs to your dashboard to suit your needs. To learn more about Grafana click [here](https://grafana.com/docs/grafana/latest/)
-
-## Development
-
-### Develop with Go-Lang in Linux
-1. Get Go-lang 1.12 from [official site](https://golang.org/dl/)
-2. Add `go` command to your PATH: `export PATH=$PATH:/usr/local/go/bin`
-3. Define GOPATH: `export GOPATH=$(go env GOPATH)`
-4. Add Go workspace to your PATH: `export PATH=$PATH:$(go env GOPATH)/bin`
-5. Define Go import Paths
-   - Go's import path is different from other languages in that all import paths are _absolute paths_. Due to this reason, it is important to set up your project paths correctly
-   - define the base path: `mkdir -p $GOPATH/src/github.com/`
-6. Clone the project:
-   - `cd $GOPATH/src/github.com/`
-   - `git clone <project>`
-7. As of Go 1.12 in order to have `go.mod` within Go paths, you must export: `export GO111MODULE=on` to be able to compile locally. 
-
-### Compilation
-To compile, type: `go build -o ingress-ats main/main.go`
-
-### Unit Tests
-The project includes unit tests for the controller written in Golang and the plugin written in Lua.
-
-To run the Golang unit tests: `go test ./watcher/ && go test ./redis/`
-
-The Lua unit tests use `busted` for testing. `busted` can be installed using `luarocks`:`luarocks install busted`. More information on how to install busted is available [here](https://olivinelabs.com/busted/). 
-> :warning: **Note that the project uses Lua 5.1 version**
-
-To run the Lua unit tests: 
-- `cd pluginats`
-- `busted connect_redis_test.lua` 
-
-### Text-Editor
-The repository comes with basic support for both [vscode](https://code.visualstudio.com/) and `vim`. 
-
-If you're using `vscode`:
-- `.vscode/settings.json` contains some basic settings for whitespaces and tabs
-- `.vscode/extensions.json` contains a few recommended extensions for this project. It is highly recommended to install the [Go extension](https://github.com/Microsoft/vscode-go) since it contains the code lint this project used during development.
-
-If you're using `vim`, a `vimrc` file with basic whitespace and tab configurations is also provided
 
