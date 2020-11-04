@@ -28,16 +28,16 @@ jobs:
           python-version: '3.7' 
       
       - name: Build ATS Alpine
-        run: docker build -t ats_alpine .
+        run: docker build -t ats-ingress .
       
       - name: Build Exporter
-        run: docker build -t tsexporter k8s/backend/trafficserver_exporter/
+        run: docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/
       
       - name: Build App 1
-        run: docker build -t node-app-1 k8s/backend/node-app-1/
+        run: docker build -t node-app-1 k8s/images/node-app-1/
       
       - name: Build App 2
-        run: docker build -t node-app-2 k8s/backend/node-app-2/
+        run: docker build -t node-app-2 k8s/images/node-app-2/
       
       - name: Install dependencies
         run: |

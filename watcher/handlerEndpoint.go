@@ -16,16 +16,13 @@
 package watcher
 
 import (
-	//"encoding/json"
 	"fmt"
 	"log"
 
 	"ingress-ats/endpoint"
-	//	t "ingress-ats/types"
 	"ingress-ats/util"
 
 	v1 "k8s.io/api/core/v1"
-	//	set "github.com/deckarep/golang-set"
 )
 
 // EpHandler implements EventHandler

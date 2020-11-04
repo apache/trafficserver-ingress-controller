@@ -46,7 +46,7 @@ spec:
 
       containers:
         - name: trafficserver-test
-          image: ats_alpine:latest # Needs to be updated
+          image: ats-ingress:latest # Needs to be updated
           volumeMounts:
             - mountPath: "/etc/ats/ssl"
               name: ats-ssl
@@ -84,7 +84,7 @@ spec:
           - name: config-volume
             mountPath: "/fluentd/etc"
         - name: trafficserver-exporter
-          image: tsexporter:latest
+          image: ats-ingress-exporter:latest
           imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 9122

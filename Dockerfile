@@ -33,9 +33,9 @@ RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.1.0.tar
   && make \
   && make install
 
-COPY ["./plugin.config", "/usr/local/etc/trafficserver/plugin.config"]
-COPY ["./records.config", "/usr/local/etc/trafficserver/records.config"]
-COPY ["./logging.yaml", "/usr/local/etc/trafficserver/logging.yaml"]
+COPY ["./config/plugin.config", "/usr/local/etc/trafficserver/plugin.config"]
+COPY ["./config/records.config", "/usr/local/etc/trafficserver/records.config"]
+COPY ["./config/logging.yaml", "/usr/local/etc/trafficserver/logging.yaml"]
 
 # enable traffic.out for alpine/gentoo
 RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/usr\/local\/var\/log\/trafficserver\/traffic.out --bind_stderr \/usr\/local\/var\/log\/trafficserver\/traffic.out \"/" /usr/local/bin/trafficserver
@@ -67,8 +67,8 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
   bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
-RUN wget https://dl.google.com/go/go1.12.8.src.tar.gz \
-    && tar -C /usr/local -xzf go1.12.8.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
+RUN wget https://dl.google.com/go/go1.15.3.src.tar.gz \
+    && tar -C /usr/local -xzf go1.15.3.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
 ENV PATH=${PATH}:/usr/local/go/bin
 ENV GOPATH="/usr/local/go/bin"
 
@@ -79,7 +79,6 @@ COPY ["./main/", "$GOPATH/src/ingress-ats/main"]
 COPY ["./proxy/", "$GOPATH/src/ingress-ats/proxy"]
 COPY ["./namespace/", "$GOPATH/src/ingress-ats/namespace"]
 COPY ["./endpoint/", "$GOPATH/src/ingress-ats/endpoint"]
-COPY ["./types/", "$GOPATH/src/ingress-ats/types"]
 COPY ["./util/", "$GOPATH/src/ingress-ats/util"]
 COPY ["./watcher/", "$GOPATH/src/ingress-ats/watcher"]
 COPY ["./pluginats/", "$GOPATH/src/ingress-ats/pluginats"]
@@ -92,12 +91,12 @@ ENV GO111MODULE=on
 RUN go build -o ingress_ats main/main.go 
 
 # redis conf 
-COPY ["./redis.conf", "/usr/local/etc/redis.conf"]
+COPY ["./config/redis.conf", "/usr/local/etc/redis.conf"]
 
 # entry.sh + other scripts
-COPY ["./tls-config.sh", "/usr/local/bin/tls-config.sh"]
-COPY ["./tls-reload.sh", "/usr/local/bin/tls-reload.sh"]
-COPY ["./entry.sh", "/usr/local/bin/entry.sh"]
+COPY ["./bin/tls-config.sh", "/usr/local/bin/tls-config.sh"]
+COPY ["./bin/tls-reload.sh", "/usr/local/bin/tls-reload.sh"]
+COPY ["./bin/entry.sh", "/usr/local/bin/entry.sh"]
 WORKDIR /usr/local/bin/
 RUN chmod 755 tls-config.sh
 RUN chmod 755 tls-reload.sh
@@ -139,6 +138,6 @@ RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
 
 # set up ingress log location
 RUN mkdir -p /usr/local/var/log/ingress/
-COPY ["./logrotate.ingress", "/etc/logrotate.d/ingress"]
+COPY ["./config/logrotate.ingress", "/etc/logrotate.d/ingress"]
 
 ENTRYPOINT ["/usr/local/bin/entry.sh"]

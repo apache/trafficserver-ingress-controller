@@ -16,11 +16,9 @@
 package watcher
 
 import (
-	//	"encoding/json"
 	"log"
 
 	"ingress-ats/endpoint"
-	//	t "ingress-ats/types"
 	"ingress-ats/util"
 
 	v1beta1 "k8s.io/api/extensions/v1beta1"

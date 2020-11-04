@@ -17,24 +17,12 @@
     under the License.
 -->
 
-ATS Kubernetes Ingress Controller
-=================================
-![Test](https://github.com/apache/trafficserver-ingress-controller/workflows/Test/badge.svg)
-![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/workflows/Build%20and%20Integrate/badge.svg)
-
-## Introduction
+## Architecture
 [Apache Traffic Server (ATS)](https://trafficserver.apache.org/) is a high performance, open-source, caching proxy server that is scalable and configurable. This project uses ATS as a [Kubernetes(K8s)](https://kubernetes.io/) [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)
 
-- [Architecture](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/ARCHITECTURE.md)
-- [Tutorial](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/TUTORIAL.md)
-- [Development](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/DEVELOPMENT.md)
+![Abstract](images/abstract.png)
 
-## Versions of Software Used
-- Alpine 3.12.1
-- Apache Traffic Server 8.1.0
-- LuaJIT 2.0.4 / Lua 5.1.4
-- Go 1.15.3
-- Other Packages
-  - luasocket 3.0rc1
-  - redis-lua 2.0.4
+From high-level, the ingress controller talks to K8s' API and sets up `watchers` on specific resources that are interesting to ATS. Then, the controller _controls_ ATS by either(1) relay the information from K8s API to ATS, or (2) configure ATS directly.
+
+![How](images/how-it-works.png)
 

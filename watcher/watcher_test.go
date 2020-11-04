@@ -15,6 +15,7 @@
 package watcher
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -37,7 +38,7 @@ func TestAllNamespacesWatchFor_Add(t *testing.T) {
 		t.Error(err)
 	}
 
-	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Create(&v1.Endpoints{
+	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Create(context.TODO(), &v1.Endpoints{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver-test-2",
@@ -61,7 +62,7 @@ func TestAllNamespacesWatchFor_Add(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, meta_v1.CreateOptions{})
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -84,7 +85,7 @@ func TestAllNamespacesWatchFor_Update(t *testing.T) {
 		t.Error(err)
 	}
 
-	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Create(&v1.Endpoints{
+	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Create(context.TODO(), &v1.Endpoints{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver-test-2",
@@ -108,11 +109,11 @@ func TestAllNamespacesWatchFor_Update(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, meta_v1.CreateOptions{})
 
 	time.Sleep(100 * time.Millisecond)
 
-	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Update(&v1.Endpoints{
+	w.Cs.CoreV1().Endpoints("trafficserver-test-2").Update(context.TODO(), &v1.Endpoints{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver-test-2",
@@ -136,7 +137,7 @@ func TestAllNamespacesWatchFor_Update(t *testing.T) {
 				},
 			},
 		},
-	})
+	}, meta_v1.UpdateOptions{})
 
 	time.Sleep(100 * time.Millisecond)
 
@@ -236,7 +237,7 @@ func TestInNamespacesWatchFor_Add(t *testing.T) {
 		t.Error(err)
 	}
 
-	w.Cs.CoreV1().ConfigMaps("trafficserver").Create(&v1.ConfigMap{
+	w.Cs.CoreV1().ConfigMaps("trafficserver").Create(context.TODO(), &v1.ConfigMap{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
@@ -249,7 +250,7 @@ func TestInNamespacesWatchFor_Add(t *testing.T) {
 			"proxy.config.output.logfile.rolling_interval_sec": "4000",
 			"proxy.config.restart.active_client_threshold":     "2",
 		},
-	})
+	}, meta_v1.CreateOptions{})
 	time.Sleep(100 * time.Millisecond)
 
 	rEnabled, err := cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_enabled")
@@ -291,7 +292,7 @@ func TestInNamespacesWatchFor_Update(t *testing.T) {
 		t.Error(err)
 	}
 
-	w.Cs.CoreV1().ConfigMaps("trafficserver").Create(&v1.ConfigMap{
+	w.Cs.CoreV1().ConfigMaps("trafficserver").Create(context.TODO(), &v1.ConfigMap{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
@@ -304,10 +305,10 @@ func TestInNamespacesWatchFor_Update(t *testing.T) {
 			"proxy.config.output.logfile.rolling_interval_sec": "4000",
 			"proxy.config.restart.active_client_threshold":     "2",
 		},
-	})
+	}, meta_v1.CreateOptions{})
 	time.Sleep(100 * time.Millisecond)
 
-	w.Cs.CoreV1().ConfigMaps("trafficserver").Update(&v1.ConfigMap{
+	w.Cs.CoreV1().ConfigMaps("trafficserver").Update(context.TODO(), &v1.ConfigMap{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
@@ -320,7 +321,7 @@ func TestInNamespacesWatchFor_Update(t *testing.T) {
 			"proxy.config.output.logfile.rolling_interval_sec": "3000",
 			"proxy.config.restart.active_client_threshold":     "0",
 		},
-	})
+	}, meta_v1.UpdateOptions{})
 	time.Sleep(100 * time.Millisecond)
 
 	rEnabled, err := cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_enabled")
@@ -362,7 +363,7 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 		t.Error(err)
 	}
 
-	w.Cs.CoreV1().ConfigMaps("trafficserver").Create(&v1.ConfigMap{
+	w.Cs.CoreV1().ConfigMaps("trafficserver").Create(context.TODO(), &v1.ConfigMap{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
@@ -375,10 +376,10 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 			"proxy.config.output.logfile.rolling_interval_sec": "4000",
 			"proxy.config.restart.active_client_threshold":     "2",
 		},
-	})
+	}, meta_v1.CreateOptions{})
 	time.Sleep(100 * time.Millisecond)
 
-	w.Cs.CoreV1().ConfigMaps("trafficserver-2").Create(&v1.ConfigMap{
+	w.Cs.CoreV1().ConfigMaps("trafficserver-2").Create(context.TODO(), &v1.ConfigMap{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc-2",
 			Namespace: "trafficserver-2",
@@ -388,7 +389,7 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 			"proxy.config.output.logfile.rolling_interval_sec": "3000",
 			"proxy.config.restart.active_client_threshold":     "4",
 		},
-	})
+	}, meta_v1.CreateOptions{})
 	time.Sleep(100 * time.Millisecond)
 
 	rEnabled, err := cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_enabled")
@@ -415,7 +416,7 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 		t.Errorf("returned \n%s,  but expected \n%s", threshold, "2")
 	}
 
-	w.Cs.CoreV1().ConfigMaps("trafficserver-2").Create(&v1.ConfigMap{
+	w.Cs.CoreV1().ConfigMaps("trafficserver-2").Create(context.TODO(), &v1.ConfigMap{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "testsvc",
 			Namespace: "trafficserver",
@@ -425,7 +426,7 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 			"proxy.config.output.logfile.rolling_interval_sec": "3000",
 			"proxy.config.restart.active_client_threshold":     "4",
 		},
-	})
+	}, meta_v1.CreateOptions{})
 	time.Sleep(100 * time.Millisecond)
 
 	rEnabled, err = cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_enabled")

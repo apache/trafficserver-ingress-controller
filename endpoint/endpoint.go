@@ -16,21 +16,9 @@
 package endpoint
 
 import (
-	//	"fmt"
-	//	"log"
-
-	//	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-
-	//	v1beta1 "k8s.io/api/extensions/v1beta1"
-	//	extensionsV1beta1 "k8s.io/client-go/kubernetes/typed/extensions/v1beta1"
-
-	//	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"ingress-ats/namespace"
 	"ingress-ats/proxy"
 	"ingress-ats/redis"
-	//	t "ingress-ats/types"
-	//	"ingress-ats/util"
 )
 
 const (
