@@ -21,7 +21,9 @@
 - [Requirements](#requirements)
 - [Download project](#download-project)
 - [Example Walkthrough](#example-walkthrough)
-  - [Proxy](#proxy)
+  - [Setting Up Proxy](#setting-up-proxy)
+  - [Setting Up Backend Applications](#setting-up-backend-applications)
+  - [Checking Results](#checking-results)
   - [ConfigMap](#configmap)
   - [Snippet](#snippet)
   - [Ingress Class](#ingressclass)
@@ -38,9 +40,12 @@ To install Docker, visit its [official page](https://docs.docker.com/) and insta
 The walkthrough uses Minikube to guide you through the setup process. Visit the [official Minikube page](https://kubernetes.io/docs/tasks/tools/install-minikube/) to install Minikube. 
 
 ### Download project 
-You can use `git clone` or directly download repository to your computer.
+You can use `git clone` to download repository to your computer.
 
 ### Example Walkthrough
+
+#### Setting Up Proxy
+
 Once you have cloned the project repo and started Docker and Minikube, in the terminal:
 1. `$ eval $(minikube docker-env)`
       - To understand why we do this, please read [Use local images by re-using the docker daemon](https://kubernetes.io/docs/setup/learning-environment/minikube/#use-local-images-by-re-using-the-docker-daemon)
@@ -52,10 +57,11 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 7. `$ docker build -t node-app-2 k8s/images/node-app-2/`
 8. `$ docker pull fluent/fluentd:v1.6-debian-1`
 
-- At this point, we have created necessary images for our example. Let's talk about what each step does:
+- At this point, we have created necessary images for our example:
   - Step 4 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
   - Step 5 builds an image for the trafficserver exporter. This exports the ATS statistics over HTTP for Prometheus to read. 
   - Steps 6 and 7 build 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
+  - Step 8 builds an image for fluentd. This is for log collection.
 
 9. `$ kubectl create namespace trafficserver-test`
     - Create a namespace for ATS pod
@@ -66,9 +72,14 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 12. `$ kubectl apply -f k8s/configmaps/fluentd-configmap.yaml`
     - Create config map for fluentd
 13. `$ kubectl apply -f k8s/traffic-server/`
-    -  will define a new [kubernetes namespace](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) named `trafficserver-test` and deploy a single ATS pod to said namespace. The ATS pod is also where the ingress controller lives. 
 
-#### Proxy
+- Now we have an ATS running inside the cluster. 
+  - Step 9 creates a namespace for ATS pod.
+  - Steps 10 and 11 create a self-signed SSL certificate and keep it in a secret inside the namespace above.
+  - Step 12 provides the ConfigMap for configuration options for fluentd
+  - Step 13 deploys a single ATS pod to said namespace. The ATS pod is also where the ingress controller lives. 
+
+#### Setting Up Backend Applications
 
 The following steps can be executed in any order, thus list numbers are not used.
 
@@ -85,13 +96,20 @@ The following steps can be executed in any order, thus list numbers are not used
   - both ingress resources define domain name `test.edge.com`; however, `test.edge.com/app1` is only defined in `trafficserver-test-2` and `test.edge.com/app2` is only defined in `trafficserver-test-3`
   - Addtionally, an ingress resources defines HTTPS access for `test.edge.com/app2` in namespace `trafficserver-test-3`
 
-When both steps _above_ have executed at least once, ATS proxying will have started to work. To see proxy in action, we can use [curl](https://linux.die.net/man/1/curl):
+#### Checking Results
+
+ATS proxying should have started to work. To see proxy in action, we can use [curl](https://linux.die.net/man/1/curl):
 
 1. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app1"`
 2. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app2"`
 3. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app1"`
 4. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app2"`
 5. `$ curl -vH "HOST:test.edge.com" -k "https://$(minikube ip):30043/app2"`
+
+You may have problem with minikube using docker driver as localhost (i.e. 127.0.0.1) will be used as the cluster ip. So you will need to forward the traffic designated for the port to the ports of the ATS pods inside the cluster before the above curl commands will work. Each command below needs to be run in separate terminal. 
+
+- `$ kubectl port-forward <pod name> 30043:443 -n trafficserver-test`
+- `$ kubectl port-forward <pod name> 30000:80 -n trafficserver-test`
 
 #### ConfigMap
 
@@ -106,7 +124,7 @@ Below is an example of configuring Apache Traffic Server [_reloadable_ configura
 
 #### Snippet
 
-You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/plugins/lua.en.html) to an ingress object and ATS will execute it for requests matching the routing rules defined in the ingress object. See an example in annotation section of yaml file [here](k8s/ingresses/ats-ingress-2.yaml) 
+You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/plugins/lua.en.html) to an ingress object and ATS will execute it for requests matching the routing rules defined in the ingress object. See an example in annotation section of yaml file [here](../k8s/ingresses/ats-ingress-2.yaml) 
 
 #### Ingress Class
 
@@ -116,7 +134,7 @@ You can provide an environment variable called `INGRESS_CLASS` in the deployment
 
 #### Fluentd
 
-This project ships with [Fluentd](https://docs.fluentd.org/) already integrated with the Apache Traffic Server. The configuration file used for the same can be found [here](k8s/configmaps/fluentd-configmap.yaml)
+This project ships with [Fluentd](https://docs.fluentd.org/) already integrated with the Apache Traffic Server. The configuration file used for the same can be found [here](../k8s/configmaps/fluentd-configmap.yaml)
 
 As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/usr/local/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
 
