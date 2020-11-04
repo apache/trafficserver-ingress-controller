@@ -19,7 +19,6 @@ import (
 	"log"
 
 	"ingress-ats/endpoint"
-	//	t "ingress-ats/types"
 
 	v1 "k8s.io/api/core/v1"
 )

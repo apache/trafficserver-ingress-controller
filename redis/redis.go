@@ -19,8 +19,6 @@ import (
 	"fmt"
 	"log"
 
-	//	"sync"
-
 	"github.com/alicebob/miniredis/v2"
 	"github.com/go-redis/redis"
 )

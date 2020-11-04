@@ -15,8 +15,6 @@
 
 package namespace
 
-// import v1 "k8s.io/api/core/v1"
-
 // ALL Namespaces constant for unified text
 const ALL string = "all"
 

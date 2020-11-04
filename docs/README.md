@@ -66,7 +66,7 @@ From high-level, the ingress controller talks to K8s' API and sets up `watchers`
 
 ### Requirements
 - Docker
-- Kubernetes 1.18 (Minikube 1.11)
+- Kubernetes 1.18.10 (Minikube 1.14.2)
 
 To install Docker, visit its [official page](https://docs.docker.com/) and install the correct version for your system.
 
@@ -197,7 +197,7 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
 7. As of Go 1.12 in order to have `go.mod` within Go paths, you must export: `export GO111MODULE=on` to be able to compile locally. 
 
 ### Compilation
-To compile, type: `go build -o ingress_ats main/main.go`
+To compile, type: `go build -o ingress-ats main/main.go`
 
 ### Unit Tests
 The project includes unit tests for the controller written in Golang and the plugin written in Lua.
