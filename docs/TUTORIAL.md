@@ -64,13 +64,9 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
   - Step 8 builds an image for fluentd. This is for log collection.
 
 9. `$ kubectl create namespace trafficserver-test`
-    - Create a namespace for ATS pod
 10. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
-    - Create a self-signed certificate
 11. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
-    - Create a secret in the namespace just created
 12. `$ kubectl apply -f k8s/configmaps/fluentd-configmap.yaml`
-    - Create config map for fluentd
 13. `$ kubectl apply -f k8s/traffic-server/`
 
 - Now we have an ATS running inside the cluster. 
@@ -81,7 +77,7 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 
 #### Setting Up Backend Applications
 
-The following steps can be executed in any order, thus list numbers are not used.
+The following steps can be executed in any order
 
 - `$ kubectl apply -f k8s/apps/`
   - creates namespaces `trafficserver-test-2` and `trafficserver-test-3` if not already exist
