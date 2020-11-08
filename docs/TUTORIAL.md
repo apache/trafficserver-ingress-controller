@@ -26,9 +26,9 @@
   - [Checking Results](#checking-results)
   - [ConfigMap](#configmap)
   - [Snippet](#snippet)
-  - [Ingress Class](#ingressclass)
+  - [Ingress Class](#ingress-class)
 - [Logging and Monitoring](#logging-and-monitoring)
-  - [Fluentd](#fluend)
+  - [Fluentd](#fluentd)
   - [Prometheus and Grafana](#prometheus-and-grafana)
 
 ### Requirements
@@ -48,7 +48,6 @@ You can use `git clone` to download repository to your computer.
 
 Once you have cloned the project repo and started Docker and Minikube, in the terminal:
 1. `$ eval $(minikube docker-env)`
-      - To understand why we do this, please read [Use local images by re-using the docker daemon](https://kubernetes.io/docs/setup/learning-environment/minikube/#use-local-images-by-re-using-the-docker-daemon)
 2. `$ cd trafficserver-ingress-controller`
 3. `$ git submodule update --init`
 4. `$ docker build -t ats-ingress .` 
