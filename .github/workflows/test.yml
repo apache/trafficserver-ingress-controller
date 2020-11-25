@@ -1,6 +1,20 @@
 name: Test
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+    paths-ignore:
+    - '.vscode/**'
+    - 'charts/**'
+    - 'docs/**'
+  pull_request:
+    branches:
+    - master
+    paths-ignore:
+    - '.vscode/**'
+    - 'charts/**'
+    - 'docs/**'
 
 jobs:
 

@@ -3,7 +3,11 @@ name: Build and Integrate
 on:
   push:
     branches:
-      - 'master'
+    - 'master'
+    paths-ignore:
+    - '.vscode/**'
+    - 'charts/**'
+    - 'docs/**'
 
 jobs:
   build-and-integrate:
