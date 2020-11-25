@@ -22,7 +22,6 @@ metadata:
     "helm.sh/hook": post-install
     "helm.sh/hook-weight": "0"
     "helm.sh/hook-delete-policy": before-hook-creation
-    "ats-configmap": "true"
 data:
   # reloadable data only
-  proxy.config.log.logfile_dir: {{ .Values.ats.log.dir | quote }}
+  proxy.config.log.logfile_dir: {{ .Values.ats.log.trafficserver.dir | quote }}
