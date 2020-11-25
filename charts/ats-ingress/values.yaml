@@ -21,9 +21,8 @@
 replicaCount: 1
 
 image:
-  repository: ats_alpine
+  repository: kichan/ats-ingress
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: latest
 
 imagePullSecrets: []
@@ -42,15 +41,8 @@ serviceAccount:
 podAnnotations: {}
 
 podSecurityContext: {}
-  # fsGroup: 2000
 
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 service:
   type: NodePort
@@ -63,25 +55,14 @@ service:
     targetPort: 443
     nodePort: 30043
 
-
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
 
 autoscaling:
   enabled: false
-  minReplicas: 1
-  maxReplicas: 100
+  minReplicas: 2
+  maxReplicas: 5
+  # only used if the cluster doesn't support autoscaling/v2beta
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
 
 nodeSelector: {}
 
@@ -99,15 +80,17 @@ ats:
       dir: /usr/local/var/log/trafficserver
     ingress:
       dir: /usr/local/var/log/ingress
-  exporter:
-    name: trafficserver-exporter
-    image:
-      repository: tsexporter
-      tag: latest
-    service:
-      name: ats-stats-exporter
-      port: 9122
-      type: ClusterIP
+
+exporter:
+  name: trafficserver-exporter
+  image:
+    repository: kichan/ats-ingress-exporter
+    pullPolicy: IfNotPresent
+    tag: latest
+  service:
+    name: ats-stats-exporter
+    port: 9122
+    type: ClusterIP
 
 collector:
   name: log-collector
@@ -119,10 +102,7 @@ collector:
     repository: fluent/fluentd
     tag: v1.6-debian-1
   parse:
-    ats:
+    trafficserver:
       defaultRegex: ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
     ingress:
       defaultRegex: ^(?<date>[^ ]*)\s(?<timestamp>[^ ]*)\s(?<log>.*)$
-tls:
-  crt:
-  key:

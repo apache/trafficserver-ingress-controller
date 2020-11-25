@@ -39,12 +39,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.ats.exporter.service.name }}
+  name: {{ .Values.exporter.service.name }}
   namespace: {{ .Release.Namespace }}
 spec:
-  type: {{ .Values.ats.exporter.service.type }}
+  type: {{ .Values.exporter.service.type }}
   ports:
   - port: 80
-    targetPort: {{ .Values.ats.exporter.service.port }}
+    targetPort: {{ .Values.exporter.service.port }}
   selector:
     {{- include "ats-ingress.selectorLabels" . | nindent 4 }}

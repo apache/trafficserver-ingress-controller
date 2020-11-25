@@ -30,7 +30,7 @@ data:
       pos_file {{ .Values.collector.path.trafficserver }}/squid.log.pos
       <parse>
         @type regexp
-        expression {{ .Values.collector.parse.ats.defaultRegex }}
+        expression {{ .Values.collector.parse.trafficserver.defaultRegex }}
       </parse>
       tag trafficserver.access
     </source>

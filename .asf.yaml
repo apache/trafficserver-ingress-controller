@@ -19,3 +19,5 @@ github:
   enabled_merge_buttons:
     # enable squash button:
     squash: true
+  ghp_branch:  master
+  ghp_path:    /charts

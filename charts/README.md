@@ -18,23 +18,32 @@
 -->
 
 # Helm support
-Helm support for ATS Ingress Controller is still under development and can only be used locally after building the following docker images:
-- ats_alpine
-- tsexporter
+This is the ats-ingress chart repository for Helm V3. 
+It contains chart for ats-ingress, which contains pods for 
+- Apache Traffic Server + Ingress Controller
+- fluentd v1.6 
+- trafficserver_exporter v0.3.3
 
-After building the above images, do the following to install ATS Ingress using Helm:
-1. `$ kubectl create namespace ats-ingress`
-2. Prepare a self-signed certificate:
-`$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
-3. Create a file named `override.yaml` which contains the following two values:
-```yaml
-tls:
-    crt: <TLS certificate>
-    key: <TLS key>
-```
-4. `$ helm install -f override.yaml charts/ats-ingress --generate-name -n ats-ingress`
+## To build new version of the helm chart
+1. git clone the project
+2. `$ cd trafficserver-ingress-controller/charts`
+3. Update version in ats-ingress/Chart.yaml
+4. `$ helm package ats-ingress`
+5. `$ helm repo index . --url https://apache.github.com/trafficserver-ingress-controller`
+6. Commit and push the changes
 
-## TODO for enabling Helm
-- [ ] Upload ats_alpine docker image to a public repository and make corresponding changes to `image.repository` value in values.yaml
-- [ ] Upload trafficserver-exporter docker image to a public repository and make corresponding changes to `ats.exporter.image.repository` value in values.yaml 
-- [ ] Hosting the helm chart on github page. Follow the [chart repository guide](https://helm.sh/docs/topics/chart_repository/). 
+## To install from git source
+1. git clone the project
+2. `$ kubectl create namespace ats-helm`
+3. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
+4. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n ats-helm --dry-run=client -o yaml | kubectl apply -f -`
+5. `$ helm install charts/ats-ingress --generate-name -n ats-helm`
+
+## To install from helm repo
+1. `$ kubectl create namespace ats-helm`
+2. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
+3. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n ats-helm --dry-run=client -o yaml | kubectl apply -f -`
+4. `$ helm repo add ats-ingress https://apache.github.io/trafficserver-ingress-controller`
+5. `$ helm repo update`
+6. `$ helm install ats-ingress/ats-ingress --generate-name -n ats-helm` 
+

@@ -23,9 +23,7 @@ metadata:
 spec:
   minReadySeconds: 30
 
-  # DO NOT EXCEED ONE COPY
   replicas: 1
-  # DO NOT EXCEED ONE COPY
 
   selector:
     matchLabels:
@@ -76,11 +74,11 @@ spec:
             mountPath: {{ .Values.collector.path.trafficserver | quote }}
           - name: config-volume
             mountPath: {{ .Values.collector.fluentdConfigPath | quote }}
-        - name: {{ .Values.ats.exporter.name }}
-          image: {{ .Values.ats.exporter.image.repository }}:{{ .Values.ats.exporter.image.tag }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+        - name: {{ .Values.exporter.name }}
+          image: {{ .Values.exporter.image.repository }}:{{ .Values.exporter.image.tag }}
+          imagePullPolicy: {{ .Values.exporter.image.pullPolicy }}
           ports:
-          - containerPort: {{ .Values.ats.exporter.service.port }}
+          - containerPort: {{ .Values.exporter.service.port }}
       volumes:
         - name: {{ .Values.ats.ssl.name }}
           secret:
