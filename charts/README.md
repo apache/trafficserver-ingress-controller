@@ -25,20 +25,25 @@ It contains chart for ats-ingress, which contains pods for
 - trafficserver_exporter v0.3.3
 
 ## To build new version of the helm chart
-1. Update version in ats-ingress/Chart.yaml
-2. `$ helm package ats-ingress`
-3. `$ helm repo index . --url https://apache.github.com/trafficserver-ingress-controller`
-4. Commit and push the changes
+1. git clone the project
+2. `$ cd trafficserver-ingress-controller/charts`
+3. Update version in ats-ingress/Chart.yaml
+4. `$ helm package ats-ingress`
+5. `$ helm repo index . --url https://apache.github.com/trafficserver-ingress-controller`
+6. Commit and push the changes
 
 ## To install from git source
-1. `$ kubectl create namespace ats-helm`
-2. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n ats-helm --dry-run=client -o yaml | kubectl apply -f -`
-3. `$ helm install charts/ats-ingress --generate-name -n ats-helm`
+1. git clone the project
+2. `$ kubectl create namespace ats-helm`
+3. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
+4. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n ats-helm --dry-run=client -o yaml | kubectl apply -f -`
+5. `$ helm install charts/ats-ingress --generate-name -n ats-helm`
 
-## To install from repo
+## To install from helm repo
 1. `$ kubectl create namespace ats-helm`
-2. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n ats-helm --dry-run=client -o yaml | kubectl apply -f -`
-3. `$ helm repo add ats-ingress https://apache.github.io/trafficserver-ingress-controller`
-4. `$ helm repo update`
-5. `$ helm install ats-ingress/ats-ingress --generate-name -n ats-helm` 
+2. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
+3. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n ats-helm --dry-run=client -o yaml | kubectl apply -f -`
+4. `$ helm repo add ats-ingress https://apache.github.io/trafficserver-ingress-controller`
+5. `$ helm repo update`
+6. `$ helm install ats-ingress/ats-ingress --generate-name -n ats-helm` 
 
