@@ -30,6 +30,7 @@
 - [Logging and Monitoring](#logging-and-monitoring)
   - [Fluentd](#fluentd)
   - [Prometheus and Grafana](#prometheus-and-grafana)
+- [Helm Chart](#helm-chart)
 
 ### Requirements
 - Docker 
@@ -156,4 +157,8 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
 12. Enter a PromQL query. For example if you want to add a graph showing the total number of responses over time enter `trafficserver_responses_total` and press Shift + Enter.
   ![New Graph](images/new-graph.png)
 13. Click on Apply to add the graph to your dashboard. You can similarly make add more graphs to your dashboard to suit your needs. To learn more about Grafana click [here](https://grafana.com/docs/grafana/latest/)
+
+### Helm Chart
+
+Helm Chart is provided. You can delete the namespace of `trafficserver-test` and `monitoring-layer` created above and continue the tutorial by following instructions [here](../charts/README.md). The curl commands [here](#checking-results) will continue to work. 
 

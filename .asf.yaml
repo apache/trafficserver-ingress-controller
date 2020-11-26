@@ -6,6 +6,8 @@ notifications:
 github:
   description: Apache Traffic Server Ingress Controller for Kubernetes
   homepage: https://github.com/apache/trafficserver-ingress-controller
+  ghp_branch: master
+  ghp_path: /docs
   labels:
     - ingress-controller
     - kubernetes
@@ -19,5 +21,3 @@ github:
   enabled_merge_buttons:
     # enable squash button:
     squash: true
-  ghp_branch:  master
-  ghp_path:    /charts
