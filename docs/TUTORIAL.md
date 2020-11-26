@@ -160,5 +160,5 @@ Use the following steps to install [Prometheus](https://prometheus.io/docs/prome
 
 ### Helm Chart
 
-Helm Chart is provided. You can delete the namespace of `trafficserver-test` and `monitoring-layer` created above and continue the tutorial by following instructions [here](charts/README.md). The curl commands [here](#checking-results) will continue to work. 
+Helm Chart is provided. You can delete the namespace of `trafficserver-test` and `monitoring-layer` created above and continue the tutorial by following instructions [here](../charts/README.md). The curl commands [here](#checking-results) will continue to work. 
 
