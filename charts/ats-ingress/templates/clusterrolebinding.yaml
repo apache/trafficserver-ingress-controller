@@ -16,19 +16,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */}}
 
-{{- if .Values.controller.imageCredentials.registry -}}
-apiVersion: v1
-kind: Secret
+{{- if .Values.rbac.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
 metadata:
   name: {{ include "ats-ingress.fullname" . }}
-  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "ats-ingress.name" . }}
     helm.sh/chart: {{ include "ats-ingress.chart" . }}
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
-type: kubernetes.io/dockerconfigjson
-data:
-  .dockerconfigjson: {{ include "ats-ingress.imagePullSecret" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "ats-ingress.fullname" . }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "ats-ingress.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
 {{- end -}}
+
