@@ -13,38 +13,61 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "ats-ingress.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "ats-ingress.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ include "ats-ingress.name" . }}
+    helm.sh/chart: {{ include "ats-ingress.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion }}
+{{- if .Values.controller.service.labels }}
+{{ toYaml .Values.controller.service.labels | indent 4 }}
+{{- end }}
+  annotations:
+{{- range $key, $value := .Values.controller.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+{{- end }}
 spec:
-  type: {{ .Values.service.type }}
+  {{ with .Values.controller.service.clusterIP }}clusterIP: {{ . }}{{ end }}
+  type: {{ .Values.controller.service.type }}
+  {{- if .Values.controller.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.controller.service.externalTrafficPolicy }}
+  {{- end }}
+  {{- if .Values.controller.service.healthCheckNodePort }}
+  healthCheckNodePort: {{ .Values.controller.service.healthCheckNodePort }}
+  {{- end }}
   ports:
     - name: http
-      port: {{ .Values.service.http.port }}
+      port: {{ .Values.controller.service.http.port }}
       protocol: TCP
-      targetPort: {{ .Values.service.http.targetPort }}
-      nodePort: {{ .Values.service.http.nodePort }}
+      targetPort: {{ .Values.controller.service.http.targetPort }}
+      nodePort: {{ .Values.controller.service.http.nodePort }}
     - name: https
-      port: {{ .Values.service.https.port }}
+      port: {{ .Values.controller.service.https.port }}
       protocol: TCP
-      targetPort: {{ .Values.service.https.targetPort }}
-      nodePort: {{ .Values.service.https.nodePort }}
+      targetPort: {{ .Values.controller.service.https.targetPort }}
+      nodePort: {{ .Values.controller.service.https.nodePort }}
   selector:
-    {{- include "ats-ingress.selectorLabels" . | nindent 4 }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Values.exporter.service.name }}
-  namespace: {{ .Release.Namespace }}
-spec:
-  type: {{ .Values.exporter.service.type }}
-  ports:
-  - port: 80
-    targetPort: {{ .Values.exporter.service.port }}
-  selector:
-    {{- include "ats-ingress.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ template "kubernetes-ingress.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  {{- if .Values.controller.service.sessionAffinity }}
+  sessionAffinity: {{ .Values.controller.service.sessionAffinity }}
+  {{- end }}
+  externalIPs:
+{{- if .Values.controller.service.externalIPs }}
+{{ toYaml .Values.controller.service.externalIPs | indent 4 }}
+{{- end -}}
+{{- if (eq .Values.controller.service.type "LoadBalancer") }}
+{{- if .Values.controller.service.loadBalancerIP }}
+  loadBalancerIP: "{{ .Values.controller.service.loadBalancerIP }}"
+{{- end }}
+{{- if .Values.controller.service.loadBalancerSourceRanges }}
+  loadBalancerSourceRanges:
+{{ toYaml .Values.controller.service.loadBalancerSourceRanges | indent 4 }}
+{{- end }}
+{{- end }}

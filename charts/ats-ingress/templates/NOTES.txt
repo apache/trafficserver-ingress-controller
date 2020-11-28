@@ -1,0 +1,7 @@
+ATS Ingress Controller has been successfully installed.
+
+Controller image deployed is: "{{ .Values.controller.image.repository }}:{{ tpl .Values.controller.image.tag . }}".
+
+For more examples and up to date documentation, please visit:
+https://github.com/apache/trafficserver-ingress-controller/
+

@@ -18,91 +18,154 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+## Enable RBAC Authorization
+## ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+rbac:
+  create: true
 
-image:
-  repository: kichan/ats-ingress
-  pullPolicy: IfNotPresent
-  tag: latest
+## Configure Service Account
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+serviceAccount:
+  create: true
+  name:
 
-imagePullSecrets: []
+## Override name / fullname for the controller
 nameOverride: ""
 fullnameOverride: ""
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
+## Controller default values
+controller:
+  name: controller
 
-podAnnotations: {}
+  ## Image Information
+  image:
+    repository: kichan/ats-ingress
+    pullPolicy: IfNotPresent
+    tag: latest
 
-podSecurityContext: {}
+  ## Private Registry configuration
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  imageCredentials:
+    registry: null
+    username: null
+    password: null
 
-securityContext: {}
+  ## Controller Service configuration
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
+  service:
+    type: NodePort
 
-service:
-  type: NodePort
-  http:
-    port: 80
-    targetPort: 80
-    nodePort: 30000
-  https:
-    port: 443
-    targetPort: 443
-    nodePort: 30043
+    ## Service annotations
+    ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+    annotations: {}
 
-resources: {}
+    ## Service labels
+    ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+    labels: {}
+    
+    http:
+      port: 80
+      targetPort: 80
+      nodePort: 30000
+    https:
+      port: 443
+      targetPort: 443
+      nodePort: 30043
 
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 5
-  # only used if the cluster doesn't support autoscaling/v2beta
-  targetCPUUtilizationPercentage: 80
+    # clusterIP: ""
 
-nodeSelector: {}
+    # sessionAffinity: ""
 
-tolerations: []
+    # externalTrafficPolicy: "Local"
+    
+    healthCheckNodePort: 0
 
-affinity: {}
+    externalIPs: []
 
-ats:
-  ssl: 
+    loadBalancerIP: ""
+
+    loadBalancerSourceRanges: []
+
+  replicaCount: 1
+
+  ## SSL certificate information
+  ssl:
     path: "/etc/ats/ssl"
     name: ats-ssl
     secret: tls-secret
+
+  ## log location for ATS and controller program
   log:
     trafficserver:
       dir: /usr/local/var/log/trafficserver
     ingress:
       dir: /usr/local/var/log/ingress
 
-exporter:
-  name: trafficserver-exporter
-  image:
-    repository: kichan/ats-ingress-exporter
-    pullPolicy: IfNotPresent
-    tag: latest
-  service:
-    name: ats-stats-exporter
-    port: 9122
-    type: ClusterIP
+  ## Additional labels to add to the deployment or daemonset metadata
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  extraLabels: {}
 
-collector:
-  name: log-collector
-  path: 
-    trafficserver: "/var/log/trafficserver"
-    ingress: "/var/log/ingress"
-  fluentdConfigPath: "/fluentd/etc"
-  image:
-    repository: fluent/fluentd
-    tag: v1.6-debian-1
-  parse:
-    trafficserver:
-      defaultRegex: ^(?<timestamp>[^ ]*)\s(?<processing_time>[^ ]*)\s(?<client_ip>[^ ]*)\s(?<cache_result>[^ ]*)\s(?<response_length>[^ ]*)\s(?<request_method>[^ ]*)\s(?<url>[^ ]*)\s(?<username_authenticated_client>[^ ]*)\s(?<heirarchy_route>[^ ]*)\s(?<content_type>[^ ]*)$
-    ingress:
-      defaultRegex: ^(?<date>[^ ]*)\s(?<timestamp>[^ ]*)\s(?<log>.*)$
+  ## Additional labels to add to the pod container metadata
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  podLabels: {}
+
+  ## Additional annotations to add to the pod container metadata
+  ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  podAnnotations: {}
+
+  ## Set additional environment variables
+  extraEnvs: []
+
+  ## Add additional containers
+  extraContainers: []
+
+  ## Volumes required by additional containers
+  extraVolumes: []
+
+  ## Init Containers
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+
+  ## Pod Node assignment
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  nodeSelector: {}
+
+  ## Node Taints and Tolerations for pod-node scheduling through attraction/repelling
+  ## ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
+  ## Node Affinity for pod-node scheduling constraints
+  ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
+
+  ## Pod DNS Config
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+  dnsConfig: {}
+
+  ## Pod DNS Policy
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+  dnsPolicy: Default
+
+  ## Controller Pod PriorityClass
+  ## ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
+  priorityClassName: ""
+
+  ## Compute Resources for controller container
+  ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+  resources: {}
+
+  ## Controller deployment strategy definition
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy: {}
+
+  ## Controller container lifecycle handlers
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/
+  lifecycle: {}
+
+  ## Pod termination grace period
+  ## ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  terminationGracePeriodSeconds: 60
+
+  ## minimum number of seconds for which a newly created Pod should be ready
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#min-ready-seconds
+  minReadySeconds: 30

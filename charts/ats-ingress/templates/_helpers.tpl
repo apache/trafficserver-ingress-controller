@@ -47,21 +47,19 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels
+Encode an imagePullSecret string.
 */}}
-{{- define "ats-ingress.labels" -}}
-helm.sh/chart: {{ include "ats-ingress.chart" . }}
-{{ include "ats-ingress.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- define "ats-ingress.imagePullSecret" }}
+{{- printf "{\"auths\": {\"%s\": {\"auth\": \"%s\"}}}" .Values.controller.imageCredentials.registry (printf "%s:%s" .Values.controller.imageCredentials.username .Values.controller.imageCredentials.password | b64enc) | b64enc }}
 {{- end }}
 
 {{/*
-Selector labels
+Create the name of the controller service account to use.
 */}}
-{{- define "ats-ingress.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "ats-ingress.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
+{{- define "ats-ingress.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "ats-ingress.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
