@@ -19,17 +19,13 @@
 
 # Helm support
 This is the ats-ingress chart repository for Helm V3. 
-It contains Helm chart for ats-ingress, which contains the following - 
-- Apache Traffic Server + Ingress Controller
-- fluentd v1.6 
-- trafficserver_exporter v0.3.3
 
-## To build new version of the helm chart
+## To build and push new version of the helm chart
 1. git clone the project
 2. `$ cd trafficserver-ingress-controller/charts`
 3. Update version in ats-ingress/Chart.yaml
 4. `$ helm package ats-ingress`
-5. `$ helm repo index . --url https://apache.github.com/trafficserver-ingress-controller`
+5. `$ helm repo index . --url https://apache.github.io/trafficserver-ingress-controller`
 6. `$ cp index.yaml ../docs/`
 7. `$ cp ats-ingress-*.tgz ../docs/`
 6. Commit and push the changes
