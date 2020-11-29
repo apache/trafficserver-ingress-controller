@@ -27,6 +27,7 @@
   - [ConfigMap](#configmap)
   - [Snippet](#snippet)
   - [Ingress Class](#ingress-class)
+  - [Customizing Logging and TLS](#customizing-logging-and-tls)
 - [Logging and Monitoring](#logging-and-monitoring)
   - [Fluentd](#fluentd)
   - [Prometheus and Grafana](#prometheus-and-grafana)
@@ -59,7 +60,7 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 
 - At this point, we have created necessary images for our example:
   - Step 4 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
-  - Step 5 builds an image for the trafficserver exporter. This exports the ATS statistics over HTTP for Prometheus to read. 
+  - Step 5 builds an image for the trafficserver exporter. This exports the ATS statistics for Prometheus to read. It uses the [Stats Over HTTP Plugin](https://docs/trafficserver.apache.org/en/8.1.x/admin-guide/plugins/stats_over_http.en.html)
   - Steps 6 and 7 build 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
   - Step 8 builds an image for fluentd. This is for log collection.
 
@@ -124,7 +125,11 @@ You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/a
 
 #### Ingress Class
 
-You can provide an environment variable called `INGRESS_CLASS` in the deployment to specify the ingress class. Only ingress object with annotation `kubernetes.io/ingress.class` with value equal to the environment variable value will be used by ATS for routing
+You can provide an environment variable called `INGRESS_CLASS` in the deployment to specify the ingress class. See an example commented out [here](../k8s/trafficserver/ats-deployment.yaml). Only ingress object with annotation `kubernetes.io/ingress.class` with value equal to the environment variable value will be used by ATS for routing
+
+#### Customizing Logging and TLS
+
+You can specify a different [logging.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/logging.yaml.en.html) and [ssl_server_name.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/ssl_server_name.yaml.en.html) by providing environment variable `LOG_CONFIG_FNAME` and `SSL_SERVER_FNAME` respsectively. See an example commented out [here](../k8s/trafficserver/ats-deployment.yaml). The new contents of them can be provided through a ConfigMap and loaded to a volume mounted for the ATS container (Example [here](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) ). Similarly certificates needed for the connection between ATS and origin can be provided through a Secret that loaded to a volume mounted for the ATS container as well (Example [here](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod) ). To refresh these certificates we may need to override the entrypoint with our own command and add extra script to watch for changes in those secret in order to reload ATS (Example [here](../bin/tls-reload.sh) ).
 
 ### Logging and Monitoring
 
