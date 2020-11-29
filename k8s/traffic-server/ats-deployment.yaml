@@ -66,6 +66,10 @@ spec:
                   fieldPath: metadata.namespace
 #            - name: INGRESS_CLASS
 #              value: "ats"
+#            - name: LOG_CONFIG_FNAME
+#              value: "/usr/local/etc/trafficserver/logging.yaml"
+#            - name: SSL_SERVERNAME_FNAME
+#              value: "/usr/local/etc/trafficserver/ssl_server_name.yaml"
             - name: POD_TLS_PATH
               value: "/etc/ats/ssl"
           ports:
