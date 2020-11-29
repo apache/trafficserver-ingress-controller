@@ -55,6 +55,10 @@ spec:
     spec:
       serviceAccountName: {{ include "ats-ingress.serviceAccountName" . }}
       terminationGracePeriodSeconds: {{ .Values.controller.terminationGracePeriodSeconds }}
+{{- if .Values.controller.podSecurityContext }}
+      securityContext:
+{{ toYaml .Values.controller.podSecurityContext | indent 8 }}
+{{- end }}
 {{- if .Values.controller.dnsConfig }}
       dnsConfig:
 {{ toYaml .Values.controller.dnsConfig | indent 8 }}
@@ -71,6 +75,13 @@ spec:
         - name: {{ .Chart.Name }}
           image: {{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+{{- if .Values.controller.command }}
+          command: {{ .Values.controller.command }}
+{{- end }}
+          args:
+{{- range .Values.controller.extraArgs }}
+          - {{ . }}
+{{- end }}
           volumeMounts:
             - mountPath: {{ .Values.controller.ssl.path | quote }} 
               name: {{ .Values.controller.ssl.name }}
@@ -103,6 +114,10 @@ spec:
             protocol: TCP
           resources:
             {{- toYaml .Values.controller.resources | nindent 12 }}
+          {{- if .Values.controller.securityContext }}
+          securityContext:
+{{ toYaml .Values.controller.securityContext | indent 12 }}
+          {{- end }}
           {{- if .Values.controller.lifecycle }}
           lifecycle:
             {{- if eq "string" (printf "%T" .Values.controller.lifecycle) }}

@@ -50,6 +50,20 @@ controller:
     username: null
     password: null
 
+  ## optionally override entrypoint
+  command: ""
+
+  ## Additional command line arguments to pass to Controller
+  extraArgs: []
+
+  ## Security Context for pod
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  podSecurityContext: {}
+
+  ## Security Context for container
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+  securityContext: {}
+
   ## Controller Service configuration
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
   service:
