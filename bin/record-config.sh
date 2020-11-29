@@ -18,26 +18,10 @@
 
 set +x
 
-# start basic service
-syslogd
-crond
+if [ ! -z "${LOG_CONFIG_FNAME}" ]; then
+	echo "CONFIG proxy.config.log.config.filename STRING ${LOG_CONFIG_FNAME}" >> /usr/local/etc/trafficserver/records.config
+fi
 
-# TLS auto reload script
-/usr/local/bin/tls-reload.sh >> /usr/local/var/log/ingress/ingress_ats.err &
-
-# generate TLS cert config file for ats 
-/usr/local/bin/tls-config.sh 
-
-# append specific environment variables to records.config 
-/usr/local/bin/records-config.sh
-
-# start redis
-redis-server /usr/local/etc/redis.conf 
-
-# start ats
-chown -R nobody:nobody /usr/local/etc/trafficserver
-DISTRIB_ID=gentoo /usr/local/bin/trafficserver start
-
-sleep 20 
-/usr/local/go/bin/src/ingress-ats/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -useInClusterConfig=T 2>>/usr/local/var/log/ingress/ingress_ats.err
-
+if [ ! -z "${SSL_SERVERNAME_FNAME}" ]; then
+	echo "CONFIG proxy.config.ssl.servername.filename STRING ${SSL_SERVERNAME_FNAME}" >> /usr/local/etc/trafficserver/records.config
+fi

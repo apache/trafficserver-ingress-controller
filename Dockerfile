@@ -96,10 +96,12 @@ COPY ["./config/redis.conf", "/usr/local/etc/redis.conf"]
 # entry.sh + other scripts
 COPY ["./bin/tls-config.sh", "/usr/local/bin/tls-config.sh"]
 COPY ["./bin/tls-reload.sh", "/usr/local/bin/tls-reload.sh"]
+COPY ["./bin/records-config.sh", "/usr/local/bin/records-config.sh"]
 COPY ["./bin/entry.sh", "/usr/local/bin/entry.sh"]
 WORKDIR /usr/local/bin/
 RUN chmod 755 tls-config.sh
 RUN chmod 755 tls-reload.sh
+RUN chmod 755 records-config.sh
 RUN chmod 755 entry.sh
 
 FROM alpine:3.12.1
