@@ -17,5 +17,5 @@
 extraction:
   javascript:
     index:
-      filters:
-        - exclude: "k8s/**"
+      exclude
+        - k8s
