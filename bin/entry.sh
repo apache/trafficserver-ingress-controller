@@ -34,7 +34,8 @@ crond
 # start redis
 redis-server /usr/local/etc/redis.conf 
 
-# start ats
+# create health check file and start ats
+touch /var/run/ts-alive
 chown -R nobody:nobody /usr/local/etc/trafficserver
 DISTRIB_ID=gentoo /usr/local/bin/trafficserver start
 
