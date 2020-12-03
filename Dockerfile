@@ -26,6 +26,8 @@ RUN apk add --no-cache --virtual .ats-build-deps \
   libexecinfo-dev linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev 
 
+RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev
+
 RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.1.1.tar.bz2 | bzip2 -dc | tar xf - \
   && cd trafficserver-8.1.1/ \
   && autoreconf -if \
@@ -130,6 +132,8 @@ RUN apk add -U \
     inotify-tools \
     cpulimit \
     logrotate
+
+RUN apk add -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc
 
 # redis
 RUN mkdir -p /var/run/redis/ \
