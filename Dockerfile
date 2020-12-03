@@ -26,14 +26,15 @@ RUN apk add --no-cache --virtual .ats-build-deps \
   libexecinfo-dev linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev 
 
-RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.1.0.tar.bz2 | bzip2 -dc | tar xf - \
-  && cd trafficserver-8.1.0/ \
+RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.1.1.tar.bz2 | bzip2 -dc | tar xf - \
+  && cd trafficserver-8.1.1/ \
   && autoreconf -if \
   && ./configure --enable-debug=yes \
   && make \
   && make install
 
 COPY ["./config/plugin.config", "/usr/local/etc/trafficserver/plugin.config"]
+COPY ["./config/healthchecks.config", "/usr/local/etc/trafficserver/healthchecks.config"]
 COPY ["./config/records.config", "/usr/local/etc/trafficserver/records.config"]
 COPY ["./config/logging.yaml", "/usr/local/etc/trafficserver/logging.yaml"]
 
