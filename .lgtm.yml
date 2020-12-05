@@ -18,4 +18,4 @@ extraction:
   javascript:
     index:
       exclude:
-        - k8s
+        - docs

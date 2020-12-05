@@ -25,11 +25,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/test', (req, res) => {
-  res.sendFile('hello.html', {root: __dirname });
+  res.sendFile('hello.html', {root: __dirname }); // lgtm[js/missing-rate-limiting]
 })
 
 app.get('/app2', (req, res) => {
-  res.sendFile('hello.html', {root: __dirname });
+  res.sendFile('hello.html', {root: __dirname }); // lgtm[js/missing-rate-limiting]
 })
 
 app.listen(PORT, HOST);

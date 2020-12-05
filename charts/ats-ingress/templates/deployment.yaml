@@ -114,6 +114,18 @@ spec:
             protocol: TCP
           resources:
             {{- toYaml .Values.controller.resources | nindent 12 }}
+          {{- if .Values.controller.livenessProbe }}
+          livenessProbe:
+{{ toYaml .Values.controller.livenessProbe | indent 12 }}
+          {{- end }}
+          {{- if .Values.controller.readinessProbe }}
+          readinessProbe:
+{{ toYaml .Values.controller.readinessProbe | indent 12 }}
+          {{- end }}
+          {{- if .Values.controller.startupProbe }}
+          startupProbe:
+{{ toYaml .Values.controller.startupProbe | indent 12 }}
+          {{- end }}
           {{- if .Values.controller.securityContext }}
           securityContext:
 {{ toYaml .Values.controller.securityContext | indent 12 }}
