@@ -64,6 +64,12 @@ controller:
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   securityContext: {}
 
+  ## Controller Container liveness/readiness probe configuration
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  livenessProbe: {}
+  readinessProbe: {}
+  startupProbe: {}  
+
   ## Controller Service configuration
   ## ref: https://kubernetes.io/docs/concepts/services-networking/service/
   service:
