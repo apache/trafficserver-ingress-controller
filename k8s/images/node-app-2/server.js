@@ -24,12 +24,12 @@ app.get('/', (req, res) => {
   res.send('Hello world\n');
 });
 
-app.get('/test', (req, res) => {
-  res.sendFile('hello.html', {root: __dirname }); // lgtm[js/missing-rate-limiting]
+app.get('/test', (req, res) => { // lgtm[js/missing-rate-limiting]
+  res.sendFile('hello.html', {root: __dirname });
 })
 
-app.get('/app2', (req, res) => {
-  res.sendFile('hello.html', {root: __dirname }); // lgtm[js/missing-rate-limiting]
+app.get('/app2', (req, res) => { // lgtm[js/missing-rate-limiting]
+  res.sendFile('hello.html', {root: __dirname });
 })
 
 app.listen(PORT, HOST);
