@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM alpine:3.12.1 as builder 
+FROM alpine:3.12.3 as builder 
 
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
@@ -70,8 +70,8 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
   bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
-RUN wget https://dl.google.com/go/go1.15.3.src.tar.gz \
-    && tar -C /usr/local -xzf go1.15.3.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
+RUN wget https://dl.google.com/go/go1.15.6.src.tar.gz \
+    && tar -C /usr/local -xzf go1.15.6.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
 ENV PATH=${PATH}:/usr/local/go/bin
 ENV GOPATH="/usr/local/go/bin"
 
@@ -107,7 +107,7 @@ RUN chmod 755 tls-reload.sh
 RUN chmod 755 records-config.sh
 RUN chmod 755 entry.sh
 
-FROM alpine:3.12.1
+FROM alpine:3.12.3
 
 COPY --from=builder /usr/local /usr/local
 
