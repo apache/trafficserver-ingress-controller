@@ -30,10 +30,10 @@ ATS Kubernetes Ingress Controller
 - [Development](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/DEVELOPMENT.md)
 
 ## Versions of Software Used
-- Alpine 3.12.1
+- Alpine 3.12.3
 - Apache Traffic Server 8.1.1
 - LuaJIT 2.0.4 / Lua 5.1.4
-- Go 1.15.3
+- Go 1.15.6
 - Other Packages
   - luasocket 3.0rc1
   - redis-lua 2.0.4
