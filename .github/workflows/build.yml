@@ -20,36 +20,36 @@ jobs:
           submodules: 'true'
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@v2.0.1
+        uses: manusa/actions-setup-minikube@v2.3.0
         with:
           minikube version: 'v1.11.0'
           kubernetes version: 'v1.18.3'
           github token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Set up Python 3.7
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7' 
-      
+          python-version: '3.7'
+
       - name: Build ATS Alpine
         run: docker build -t ats-ingress .
-      
+
       - name: Build Exporter
         run: docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/
-      
+
       - name: Build App 1
         run: docker build -t node-app-1 k8s/images/node-app-1/
-      
+
       - name: Build App 2
         run: docker build -t node-app-2 k8s/images/node-app-2/
-      
+
       - name: Install dependencies
         run: |
           cd tests
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
-      - name: Test 
+
+      - name: Test
         run: |
           cd tests
           pytest -q --minikubeip="$(minikube ip)" suite/test_ingress.py
