@@ -25,9 +25,11 @@
   - [Setting Up Backend Applications](#setting-up-backend-applications)
   - [Checking Results](#checking-results)
   - [ConfigMap](#configmap)
+  - [Namespaces for Ingresses](#namespaces-for-ingresses)
   - [Snippet](#snippet)
   - [Ingress Class](#ingress-class)
   - [Customizing Logging and TLS](#customizing-logging-and-tls)
+  - [Customizing plugins](#customizing-plugins)
 - [Logging and Monitoring](#logging-and-monitoring)
   - [Fluentd](#fluentd)
   - [Prometheus and Grafana](#prometheus-and-grafana)
@@ -119,6 +121,10 @@ Below is an example of configuring Apache Traffic Server [_reloadable_ configura
     2. `proxy.config.output.logfile.rolling_interval_sec: "3000"`
     3. `proxy.config.restart.active_client_threshold: "0"`
 
+#### Namespaces for Ingresses
+
+You can specifiy the list of namespaces to look for ingress object by providing `INGRESS_NS`. The default is `all`, which tells the controller to look for ingress objects in all namespaces. Alternatively you can provide a comma-separated list of namespaces for the controller to look for ingresses. Similarly you can specifiy a comma-separated list of namespaces to ignore while the controller is looking for ingresses by providing `INGRESS_IGNORE_NS`. 
+
 #### Snippet
 
 You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/plugins/lua.en.html) to an ingress object and ATS will execute it for requests matching the routing rules defined in the ingress object. See an example in annotation section of yaml file [here](../k8s/ingresses/ats-ingress-2.yaml) 
@@ -129,7 +135,11 @@ You can provide an environment variable called `INGRESS_CLASS` in the deployment
 
 #### Customizing Logging and TLS
 
-You can specify a different [logging.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/logging.yaml.en.html) and [ssl_server_name.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/ssl_server_name.yaml.en.html) by providing environment variable `LOG_CONFIG_FNAME` and `SSL_SERVER_FNAME` respsectively. See an example commented out [here](../k8s/trafficserver/ats-deployment.yaml). The new contents of them can be provided through a ConfigMap and loaded to a volume mounted for the ATS container (Example [here](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) ). Similarly certificates needed for the connection between ATS and origin can be provided through a Secret that loaded to a volume mounted for the ATS container as well (Example [here](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod) ). To refresh these certificates we may need to override the entrypoint with our own command and add extra script to watch for changes in those secret in order to reload ATS (Example [here](../bin/tls-reload.sh) ).
+You can specify a different [logging.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/logging.yaml.en.html) and [ssl_server_name.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/ssl_server_name.yaml.en.html) by providing environment variable `LOG_CONFIG_FNAME` and `SSL_SERVER_FNAME` respsectively. See an example commented out [here](../k8s/traffici-server/ats-deployment.yaml). The new contents of them can be provided through a ConfigMap and loaded to a volume mounted for the ATS container (Example [here](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) ). Similarly certificates needed for the connection between ATS and origin can be provided through a Secret that loaded to a volume mounted for the ATS container as well (Example [here](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod) ). To refresh these certificates we may need to override the entrypoint with our own command and add extra script to watch for changes in those secret in order to reload ATS (Example [here](../bin/tls-reload.sh) ).
+
+#### Customizing Plugins
+
+You can specify extra plugins for [plugin.config](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/plugin.config.en.html) by providing environment variable `EXTRA_PLUGIN_FNAME`. Its contents can be provided through a ConfigMap and loaded to a volume mounted for the ATS container (Example [here](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) ).
 
 ### Logging and Monitoring
 
