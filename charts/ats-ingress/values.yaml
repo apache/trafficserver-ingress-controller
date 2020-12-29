@@ -107,6 +107,9 @@ controller:
     loadBalancerSourceRanges: []
 
   replicaCount: 1
+  
+  autoscaling:
+    enabled: false
 
   ## SSL certificate information
   ssl:
@@ -141,6 +144,9 @@ controller:
 
   ## Volumes required by additional containers
   extraVolumes: []
+
+  ## Volume Mounts 
+  extraVolumeMounts: []
 
   ## Init Containers
   ## ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
