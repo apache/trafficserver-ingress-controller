@@ -31,6 +31,11 @@ crond
 # append specific environment variables to records.config 
 /usr/local/bin/records-config.sh
 
+# append extra plugins to plugin.config
+if [ ! -f "${EXTRA_PLUGIN_FNAME}" ]; then
+	cat $EXTRA_PLUGIN_FNAME >> /usr/local/etc/trafficserver/plugin.config
+fi
+
 # start redis
 redis-server /usr/local/etc/redis.conf 
 
@@ -39,6 +44,10 @@ touch /var/run/ts-alive
 chown -R nobody:nobody /usr/local/etc/trafficserver
 DISTRIB_ID=gentoo /usr/local/bin/trafficserver start
 
+if [ -z "${INGRESS_NS}" ]; then
+	INGRESS_NS="all"
+fi
+
 sleep 20 
-/usr/local/go/bin/src/ingress-ats/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -useInClusterConfig=T 2>>/usr/local/var/log/ingress/ingress_ats.err
+/usr/local/go/bin/src/ingress-ats/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T 2>>/usr/local/var/log/ingress/ingress_ats.err
 
