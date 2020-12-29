@@ -30,7 +30,9 @@ metadata:
 spec:
   minReadySeconds: {{ .Values.controller.minReadySeconds }}
 
+  {{- if not .Values.controller.autoscaling.enabled }}
   replicas: {{ .Values.controller.replicaCount }}
+  {{- end }}
 
   selector:
     matchLabels:
@@ -83,24 +85,28 @@ spec:
           - {{ . }}
 {{- end }}
           volumeMounts:
-            - mountPath: {{ .Values.controller.ssl.path | quote }} 
-              name: {{ .Values.controller.ssl.name }}
-              readOnly: true
-            - name: log-trafficserver
-              mountPath: {{ .Values.controller.log.trafficserver.dir }}
-            - name: log-ingress
-              mountPath: {{ .Values.controller.log.ingress.dir }}
+          - mountPath: {{ .Values.controller.ssl.path | quote }} 
+            name: {{ .Values.controller.ssl.name }}
+            readOnly: true
+          - name: log-trafficserver
+            mountPath: {{ .Values.controller.log.trafficserver.dir }}
+          - name: log-ingress
+            mountPath: {{ .Values.controller.log.ingress.dir }}
+          {{- range .Values.controller.extraVolumeMounts }}
+          - name: {{ .key }}
+            value: {{ .value }}
+          {{- end }}
           env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: POD_TLS_PATH
-              value: {{ .Values.controller.ssl.path | quote }} 
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: POD_TLS_PATH
+            value: {{ .Values.controller.ssl.path | quote }} 
           {{- range .Values.controller.extraEnvs }}
           - name: {{ .name }}
             value: {{ .value }}
