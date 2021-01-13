@@ -47,10 +47,17 @@ rules:
   resources:
   - ingresses
   - ingresses/status
+  - ingressclasses
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - "extensions"
+  - "networking.k8s.io"
+  resources:
+  - ingresses/status
+  verbs:
   - update
 {{- end -}}
 
