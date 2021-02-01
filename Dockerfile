@@ -28,8 +28,8 @@ RUN apk add --no-cache --virtual .ats-build-deps \
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing hwloc-dev
 
-RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-8.1.1.tar.bz2 | bzip2 -dc | tar xf - \
-  && cd trafficserver-8.1.1/ \
+RUN curl -L https://www-us.apache.org/dist/trafficserver/trafficserver-9.0.0.tar.bz2 | bzip2 -dc | tar xf - \
+  && cd trafficserver-9.0.0/ \
   && autoreconf -if \
   && ./configure --enable-debug=yes \
   && make \
