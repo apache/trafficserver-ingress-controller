@@ -49,6 +49,7 @@ controller:
     registry: null
     username: null
     password: null
+  existingImagePullSecret: null
 
   ## optionally override entrypoint
   command: ""
