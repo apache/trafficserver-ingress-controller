@@ -142,4 +142,7 @@ RUN mkdir -p /var/run/redis/ \
 # symlink for luajit
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
 
+# set up ingress log location
+RUN mkdir -p /usr/local/var/log/ingress/
+
 ENTRYPOINT ["/usr/local/bin/entry.sh"]
