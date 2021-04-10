@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM alpine:3.12.3 as builder 
+FROM alpine:3.12.6 as builder 
 
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
@@ -107,12 +107,12 @@ RUN chmod 755 tls-reload.sh
 RUN chmod 755 records-config.sh
 RUN chmod 755 entry.sh
 
-FROM alpine:3.12.3
+FROM alpine:3.12.6
 
 COPY --from=builder /usr/local /usr/local
 
 # essential library  
-RUN apk add -U \
+RUN apk add --no-cache -U \
     bash \
     build-base \
     curl ca-certificates \
@@ -130,10 +130,9 @@ RUN apk add -U \
     tcl \
     openrc \
     inotify-tools \
-    cpulimit \
-    logrotate
+    cpulimit
 
-RUN apk add -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
+RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
 
 # redis
 RUN mkdir -p /var/run/redis/ \
@@ -142,9 +141,5 @@ RUN mkdir -p /var/run/redis/ \
 
 # symlink for luajit
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
-
-# set up ingress log location
-RUN mkdir -p /usr/local/var/log/ingress/
-COPY ["./config/logrotate.ingress", "/etc/logrotate.d/ingress"]
 
 ENTRYPOINT ["/usr/local/bin/entry.sh"]

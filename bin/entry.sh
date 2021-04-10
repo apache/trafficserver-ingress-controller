@@ -18,10 +18,6 @@
 
 set +x
 
-# start basic service
-syslogd
-crond
-
 # TLS auto reload script
 /usr/local/bin/tls-reload.sh >> /usr/local/var/log/ingress/ingress_ats.err &
 
