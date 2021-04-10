@@ -70,8 +70,8 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
   bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
-RUN wget https://dl.google.com/go/go1.15.6.src.tar.gz \
-    && tar -C /usr/local -xzf go1.15.6.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
+RUN wget https://dl.google.com/go/go1.15.11.src.tar.gz \
+    && tar -C /usr/local -xzf go1.15.11.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
 ENV PATH=${PATH}:/usr/local/go/bin
 ENV GOPATH="/usr/local/go/bin"
 
