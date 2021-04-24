@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM alpine:3.12.3 as builder 
+FROM alpine:3.12.7 as builder 
 
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
@@ -70,8 +70,8 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
   bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
-RUN wget https://dl.google.com/go/go1.15.6.src.tar.gz \
-    && tar -C /usr/local -xzf go1.15.6.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
+RUN wget https://dl.google.com/go/go1.15.11.src.tar.gz \
+    && tar -C /usr/local -xzf go1.15.11.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
 ENV PATH=${PATH}:/usr/local/go/bin
 ENV GOPATH="/usr/local/go/bin"
 
@@ -107,12 +107,12 @@ RUN chmod 755 tls-reload.sh
 RUN chmod 755 records-config.sh
 RUN chmod 755 entry.sh
 
-FROM alpine:3.12.3
+FROM alpine:3.12.7
 
 COPY --from=builder /usr/local /usr/local
 
 # essential library  
-RUN apk add -U \
+RUN apk add --no-cache -U \
     bash \
     build-base \
     curl ca-certificates \
@@ -130,10 +130,9 @@ RUN apk add -U \
     tcl \
     openrc \
     inotify-tools \
-    cpulimit \
-    logrotate
+    cpulimit
 
-RUN apk add -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
+RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
 
 # redis
 RUN mkdir -p /var/run/redis/ \
@@ -145,6 +144,5 @@ RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
 
 # set up ingress log location
 RUN mkdir -p /usr/local/var/log/ingress/
-COPY ["./config/logrotate.ingress", "/etc/logrotate.d/ingress"]
 
 ENTRYPOINT ["/usr/local/bin/entry.sh"]
