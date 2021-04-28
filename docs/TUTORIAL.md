@@ -147,7 +147,7 @@ You can specify extra plugins for [plugin.config](https://docs.trafficserver.apa
 
 This project ships with [Fluentd](https://docs.fluentd.org/) already integrated with the Apache Traffic Server. The configuration file used for the same can be found [here](../k8s/configmaps/fluentd-configmap.yaml)
 
-As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/usr/local/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
+As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/opt/ats/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
 
 #### Prometheus and Grafana
 

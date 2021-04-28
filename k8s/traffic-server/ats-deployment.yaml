@@ -53,9 +53,9 @@ spec:
               name: ats-ssl
               readOnly: true
             - name: log-trafficserver
-              mountPath: "/usr/local/var/log/trafficserver"
+              mountPath: "/opt/ats/var/log/trafficserver"
             - name: log-ingress
-              mountPath: "/usr/local/var/log/ingress"
+              mountPath: "/opt/ats/var/log/ingress"
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME
@@ -70,9 +70,9 @@ spec:
 #            - name: INGRESS_CLASS
 #              value: "ats"
 #            - name: LOG_CONFIG_FNAME
-#              value: "/usr/local/etc/trafficserver/logging.yaml"
+#              value: "/opt/ats/etc/trafficserver/logging.yaml"
 #            - name: SSL_SERVERNAME_FNAME
-#              value: "/usr/local/etc/trafficserver/ssl_server_name.yaml"
+#              value: "/opt/ats/etc/trafficserver/ssl_server_name.yaml"
             - name: POD_TLS_PATH
               value: "/etc/ats/ssl"
           ports:

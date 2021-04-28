@@ -121,9 +121,9 @@ controller:
   ## log location for ATS and controller program
   log:
     trafficserver:
-      dir: /usr/local/var/log/trafficserver
+      dir: /opt/ats/var/log/trafficserver
     ingress:
-      dir: /usr/local/var/log/ingress
+      dir: /opt/ats/var/log/ingress
 
   ## Additional labels to add to the deployment or daemonset metadata
   ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/

@@ -20,7 +20,7 @@ FROM alpine:3.12.7 as builder
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
 
-# ATS
+# ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
   build-base openssl-dev tcl-dev pcre-dev zlib-dev \
   libexecinfo-dev linux-headers libunwind-dev \
@@ -28,28 +28,26 @@ RUN apk add --no-cache --virtual .ats-build-deps \
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc-dev
 
+RUN addgroup -Sg 101 ats
+
+RUN adduser -S -D -H -u 101 -h /tmp -s /sbin/nologin -G ats -g ats ats
+
+# download and build ATS
 RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.0.0.tar.bz2 | bzip2 -dc | tar xf - \
   && cd trafficserver-9.0.0/ \
   && autoreconf -if \
-  && ./configure --enable-debug=yes \
+  && ./configure --enable-debug=yes --prefix=/opt/ats --with-user=ats \
   && make \
   && make install
 
-COPY ["./config/plugin.config", "/usr/local/etc/trafficserver/plugin.config"]
-COPY ["./config/healthchecks.config", "/usr/local/etc/trafficserver/healthchecks.config"]
-COPY ["./config/records.config", "/usr/local/etc/trafficserver/records.config"]
-COPY ["./config/logging.yaml", "/usr/local/etc/trafficserver/logging.yaml"]
+COPY ["./config/plugin.config", "/opt/ats/etc/trafficserver/plugin.config"]
+COPY ["./config/healthchecks.config", "/opt/ats/etc/trafficserver/healthchecks.config"]
+COPY ["./config/records.config", "/opt/ats/etc/trafficserver/records.config"]
+COPY ["./config/logging.yaml", "/opt/ats/etc/trafficserver/logging.yaml"]
 
 # enable traffic.out for alpine/gentoo
-RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/usr\/local\/var\/log\/trafficserver\/traffic.out --bind_stderr \/usr\/local\/var\/log\/trafficserver\/traffic.out \"/" /usr/local/bin/trafficserver
-RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/usr\/local\/var\/log\/trafficserver\/traffic.out --bind_stderr \/usr\/local\/var\/log\/trafficserver\/traffic.out \"/" /usr/local/bin/trafficserver
-
-# Installing lua 5.1.4 
-RUN curl -R -O http://www.lua.org/ftp/lua-5.1.4.tar.gz \
-    && tar zxf lua-5.1.4.tar.gz \
-    && cd lua-5.1.4 \
-    && make linux test \
-    && make linux install
+RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
+RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
 
 # luasocket
 RUN wget https://github.com/diegonehab/luasocket/archive/v3.0-rc1.tar.gz \
@@ -58,12 +56,12 @@ RUN wget https://github.com/diegonehab/luasocket/archive/v3.0-rc1.tar.gz \
   && sed -i "s/LDFLAGS_linux=-O -shared -fpic -o/LDFLAGS_linux=-O -shared -fpic -L\/usr\/lib -lluajit-5.1 -o/" src/makefile \
   && ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so \
   && make \
-  && make install-unix
+  && make install-unix prefix=/opt/ats
 
 # redis.lua
 RUN wget https://github.com/nrk/redis-lua/archive/v2.0.4.tar.gz \
   && tar zxf v2.0.4.tar.gz \
-  && cp redis-lua-2.0.4/src/redis.lua /usr/local/share/lua/5.1/redis.lua
+  && cp redis-lua-2.0.4/src/redis.lua /opt/ats/share/lua/5.1/redis.lua
 
 # ingress-ats
 RUN apk add --no-cache --virtual .ingress-build-deps \
@@ -71,12 +69,12 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
 RUN wget https://dl.google.com/go/go1.15.11.src.tar.gz \
-    && tar -C /usr/local -xzf go1.15.11.src.tar.gz && cd /usr/local/go/src/ && ./make.bash
-ENV PATH=${PATH}:/usr/local/go/bin
-ENV GOPATH="/usr/local/go/bin"
+    && tar -C /opt/ats -xzf go1.15.11.src.tar.gz && cd /opt/ats/go/src/ && ./make.bash
+ENV PATH=${PATH}:/opt/ats/go/bin
+ENV GOPATH="/opt/ats/go/bin"
 
 # ----------------------- Copy over Project Code to Go path ------------------------
-RUN mkdir -p /usr/local/go/bin/src/ingress-ats 
+RUN mkdir -p /opt/ats/go/bin/src/ingress-ats 
 
 COPY ["./main/", "$GOPATH/src/ingress-ats/main"]
 COPY ["./proxy/", "$GOPATH/src/ingress-ats/proxy"]
@@ -89,27 +87,25 @@ COPY ["./redis/", "$GOPATH/src/ingress-ats/redis"]
 COPY ["./go.mod", "$GOPATH/src/ingress-ats/go.mod"]
 
 # Building Project Main
-WORKDIR /usr/local/go/bin/src/ingress-ats
+WORKDIR /opt/ats/go/bin/src/ingress-ats
 ENV GO111MODULE=on
 RUN go build -o ingress_ats main/main.go 
 
 # redis conf 
-COPY ["./config/redis.conf", "/usr/local/etc/redis.conf"]
+COPY ["./config/redis.conf", "/opt/ats/etc/redis.conf"]
 
 # entry.sh + other scripts
-COPY ["./bin/tls-config.sh", "/usr/local/bin/tls-config.sh"]
-COPY ["./bin/tls-reload.sh", "/usr/local/bin/tls-reload.sh"]
-COPY ["./bin/records-config.sh", "/usr/local/bin/records-config.sh"]
-COPY ["./bin/entry.sh", "/usr/local/bin/entry.sh"]
-WORKDIR /usr/local/bin/
+COPY ["./bin/tls-config.sh", "/opt/ats/bin/tls-config.sh"]
+COPY ["./bin/tls-reload.sh", "/opt/ats/bin/tls-reload.sh"]
+COPY ["./bin/records-config.sh", "/opt/ats/bin/records-config.sh"]
+COPY ["./bin/entry.sh", "/opt/ats/bin/entry.sh"]
+WORKDIR /opt/ats/bin/
 RUN chmod 755 tls-config.sh
 RUN chmod 755 tls-reload.sh
 RUN chmod 755 records-config.sh
 RUN chmod 755 entry.sh
 
 FROM alpine:3.12.7
-
-COPY --from=builder /usr/local /usr/local
 
 # essential library  
 RUN apk add --no-cache -U \
@@ -143,6 +139,15 @@ RUN mkdir -p /var/run/redis/ \
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
 
 # set up ingress log location
-RUN mkdir -p /usr/local/var/log/ingress/
+RUN mkdir -p /opt/ats/var/log/ingress/
 
-ENTRYPOINT ["/usr/local/bin/entry.sh"]
+# create ats user/group
+RUN addgroup -Sg 101 ats
+
+RUN adduser -S -D -H -u 101 -h /tmp -s /sbin/nologin -G ats -g ats ats
+
+COPY --from=builder --chown=ats:ats /opt/ats /opt/ats
+
+USER ats
+
+ENTRYPOINT ["/opt/ats/bin/entry.sh"]

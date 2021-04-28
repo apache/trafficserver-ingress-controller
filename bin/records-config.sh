@@ -19,9 +19,9 @@
 set +x
 
 if [ ! -z "${LOG_CONFIG_FNAME}" ]; then
-	echo "CONFIG proxy.config.log.config.filename STRING ${LOG_CONFIG_FNAME}" >> /usr/local/etc/trafficserver/records.config
+	echo "CONFIG proxy.config.log.config.filename STRING ${LOG_CONFIG_FNAME}" >> /opt/ats/etc/trafficserver/records.config
 fi
 
 if [ ! -z "${SSL_SERVERNAME_FNAME}" ]; then
-	echo "CONFIG proxy.config.ssl.servername.filename STRING ${SSL_SERVERNAME_FNAME}" >> /usr/local/etc/trafficserver/records.config
+	echo "CONFIG proxy.config.ssl.servername.filename STRING ${SSL_SERVERNAME_FNAME}" >> /opt/ats/etc/trafficserver/records.config
 fi
