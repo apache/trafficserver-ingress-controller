@@ -19,7 +19,7 @@
 set +x
 
 # TLS auto reload script
-/opt/ats/bin/tls-reload.sh >> /opt/ats/var/log/ingress/ingress_ats.err &
+#/opt/ats/bin/tls-reload.sh >> /opt/ats/var/log/ingress/ingress_ats.err &
 
 # generate TLS cert config file for ats 
 /opt/ats/bin/tls-config.sh 
@@ -36,14 +36,13 @@ fi
 redis-server /opt/ats/etc/redis.conf 
 
 # create health check file and start ats
-touch /var/run/ts-alive
-chown -R nobody:nobody /opt/ats/etc/trafficserver
-DISTRIB_ID=gentoo /opt/ats/bin/trafficserver start
+touch /opt/ats/var/run/ts-alive
+# chown -R nobody:nobody /opt/ats/etc/trafficserver
+# DISTRIB_ID=gentoo /opt/ats/bin/trafficserver start
 
 if [ -z "${INGRESS_NS}" ]; then
 	INGRESS_NS="all"
 fi
 
-sleep 20 
 /opt/ats/go/bin/src/ingress-ats/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T 2>>/opt/ats/var/log/ingress/ingress_ats.err
 

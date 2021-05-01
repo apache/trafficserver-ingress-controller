@@ -28,9 +28,9 @@ RUN apk add --no-cache --virtual .ats-build-deps \
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc-dev
 
-RUN addgroup -Sg 103 ats
+RUN addgroup -Sg 101 ats
 
-RUN adduser -S -D -H -u 103 -h /tmp -s /sbin/nologin -G ats -g ats ats
+RUN adduser -S -D -H -u 101 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 # download and build ATS
 RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.0.0.tar.bz2 | bzip2 -dc | tar xf - \
@@ -112,6 +112,14 @@ RUN chmod 755 tls-reload.sh
 RUN chmod 755 records-config.sh
 RUN chmod 755 entry.sh
 
+# redis
+RUN mkdir -p /opt/ats/var/run/redis/ \
+  && touch /opt/ats/var/run/redis/redis.sock \
+  && mkdir -p /opt/ats/var/log/redis
+
+# set up ingress log location
+RUN mkdir -p /opt/ats/var/log/ingress/
+
 FROM alpine:3.12.7
 
 # essential library  
@@ -137,21 +145,13 @@ RUN apk add --no-cache -U \
 
 RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
 
-# redis
-RUN mkdir -p /var/run/redis/ \
-  && touch /var/run/redis/redis.sock \
-  && mkdir -p /var/log/redis
-
 # symlink for luajit
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
 
-# set up ingress log location
-RUN mkdir -p /opt/ats/var/log/ingress/
-
 # create ats user/group
-RUN addgroup -Sg 103 ats
+RUN addgroup -Sg 101 ats
 
-RUN adduser -S -D -H -u 103 -h /tmp -s /sbin/nologin -G ats -g ats ats
+RUN adduser -S -D -H -u 101 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 COPY --from=builder --chown=ats:ats /opt/ats /opt/ats
 

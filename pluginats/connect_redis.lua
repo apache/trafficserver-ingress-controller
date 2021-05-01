@@ -20,7 +20,7 @@ ts.add_package_path('/opt/ats/share/lua/5.1/?.lua;/opt/ats/share/lua/5.1/socket/
 local redis = require 'redis'
 
 -- connecting to unix domain socket
-local client = redis.connect('unix:///var/run/redis/redis.sock')
+local client = redis.connect('unix:///opt/ats/var/run/redis/redis.sock')
 
 -- helper function to split a string
 function ipport_split(s, delimiter)
