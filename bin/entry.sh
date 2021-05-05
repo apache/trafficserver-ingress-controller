@@ -38,7 +38,7 @@ redis-server /opt/ats/etc/redis.conf
 # create health check file and start ats
 touch /opt/ats/var/run/ts-alive
 # chown -R nobody:nobody /opt/ats/etc/trafficserver
-# DISTRIB_ID=gentoo /opt/ats/bin/trafficserver start
+DISTRIB_ID=gentoo /opt/ats/bin/trafficserver start
 
 if [ -z "${INGRESS_NS}" ]; then
 	INGRESS_NS="all"

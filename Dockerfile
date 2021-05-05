@@ -28,9 +28,9 @@ RUN apk add --no-cache --virtual .ats-build-deps \
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc-dev
 
-RUN addgroup -Sg 101 ats
+RUN addgroup -Sg 1000 ats
 
-RUN adduser -S -D -H -u 101 -h /tmp -s /sbin/nologin -G ats -g ats ats
+RUN adduser -S -D -H -u 1000 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 # download and build ATS
 RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.0.0.tar.bz2 | bzip2 -dc | tar xf - \
@@ -149,9 +149,9 @@ RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edg
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
 
 # create ats user/group
-RUN addgroup -Sg 101 ats
+RUN addgroup -Sg 1000 ats
 
-RUN adduser -S -D -H -u 101 -h /tmp -s /sbin/nologin -G ats -g ats ats
+RUN adduser -S -D -H -u 1000 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 COPY --from=builder --chown=ats:ats /opt/ats /opt/ats
 
