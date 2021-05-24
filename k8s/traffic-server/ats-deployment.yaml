@@ -76,12 +76,10 @@ spec:
             - name: POD_TLS_PATH
               value: "/etc/ats/ssl"
           ports:
-          - containerPort: 80
-            hostPort: 80
+          - containerPort: 8080
             name: http
             protocol: TCP
-          - containerPort: 443
-            hostPort: 443
+          - containerPort: 8443
             name: https
             protocol: TCP
         - name: log-collector
@@ -96,6 +94,7 @@ spec:
         - name: trafficserver-exporter
           image: ats-ingress-exporter:latest
           imagePullPolicy: IfNotPresent
+          args: ["--endpoint=http://127.0.0.1:8080/_stats"]
           ports:
           - containerPort: 9122
       volumes:
@@ -121,14 +120,14 @@ spec:
   type: NodePort
   ports:
   - name: http
-    port: 80
+    port: 8080
     protocol: TCP
-    targetPort: 80
-    nodePort: 30000
+    targetPort: 8080
+    nodePort: 30080
   - name: https
-    port: 443
+    port: 8443
     protocol: TCP
-    targetPort: 443
-    nodePort: 30043
+    targetPort: 8443
+    nodePort: 30443
   selector:
     app: trafficserver-test
