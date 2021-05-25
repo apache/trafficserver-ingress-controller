@@ -30,7 +30,7 @@ type Client struct {
 }
 
 const (
-	redisSocketAddr string = "/var/run/redis/redis.sock"
+	redisSocketAddr string = "/opt/ats/var/run/redis/redis.sock"
 	// RSUCCESS is the success code returned by a Redis op
 	RSUCCESS int64 = 1
 	// RFAIL is the failure code returned by a Redis op

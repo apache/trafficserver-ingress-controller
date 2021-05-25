@@ -37,4 +37,4 @@ if [ ! -f "${tlskey}" ]; then
 	exit 1
 fi
 
-echo "dest_ip=* ssl_cert_name=${tlscrt} ssl_key_name=${tlskey}" > /usr/local/etc/trafficserver/ssl_multicert.config
+echo "dest_ip=* ssl_cert_name=${tlscrt} ssl_key_name=${tlskey}" > /opt/ats/etc/trafficserver/ssl_multicert.config

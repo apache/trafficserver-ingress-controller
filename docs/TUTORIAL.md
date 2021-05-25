@@ -99,16 +99,16 @@ The following steps can be executed in any order
 
 ATS proxying should have started to work. To see proxy in action, we can use [curl](https://linux.die.net/man/1/curl):
 
-1. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app1"`
-2. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30000/app2"`
-3. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app1"`
-4. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30000/app2"`
-5. `$ curl -vH "HOST:test.edge.com" -k "https://$(minikube ip):30043/app2"`
+1. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30080/app1"`
+2. `$ curl -vH "HOST:test.media.com" "$(minikube ip):30080/app2"`
+3. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30080/app1"`
+4. `$ curl -vH "HOST:test.edge.com" "$(minikube ip):30080/app2"`
+5. `$ curl -vH "HOST:test.edge.com" -k "https://$(minikube ip):30443/app2"`
 
 You may have problem with minikube using docker driver as localhost (i.e. 127.0.0.1) will be used as the cluster ip. So you will need to forward the traffic designated for the port to the ports of the ATS pods inside the cluster before the above curl commands will work. Each command below needs to be run in separate terminal. 
 
-- `$ kubectl port-forward <pod name> 30043:443 -n trafficserver-test`
-- `$ kubectl port-forward <pod name> 30000:80 -n trafficserver-test`
+- `$ kubectl port-forward <pod name> 30443:443 -n trafficserver-test`
+- `$ kubectl port-forward <pod name> 30080:80 -n trafficserver-test`
 
 #### ConfigMap
 
@@ -145,9 +145,9 @@ You can specify extra plugins for [plugin.config](https://docs.trafficserver.apa
 
 #### Fluentd
 
-This project ships with [Fluentd](https://docs.fluentd.org/) already integrated with the Apache Traffic Server. The configuration file used for the same can be found [here](../k8s/configmaps/fluentd-configmap.yaml)
+The above tutorial is already integrated with [Fluentd](https://docs.fluentd.org/). The configuration file used for the same can be found [here](../k8s/configmaps/fluentd-configmap.yaml)
 
-As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/usr/local/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
+As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/opt/ats/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
 
 #### Prometheus and Grafana
 

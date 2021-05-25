@@ -41,7 +41,7 @@ inotifywait -e modify,move,create,delete -mr --timefmt '%d/%m/%y %H:%M' --format
 		if [ "$newcksum" != "$oldcksum" ]; then                                   
 			echo "At ${time} on ${date}, tls cert/key files update detected." 
 			oldcksum=$newcksum                                      
-			touch /usr/local/etc/trafficserver/ssl_multicert.config 
+			touch /opt/ats/etc/trafficserver/ssl_multicert.config 
 			traffic_ctl config reload 
                 fi 
         done 

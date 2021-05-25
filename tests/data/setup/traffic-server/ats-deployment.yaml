@@ -52,7 +52,7 @@ spec:
               name: ats-ssl
               readOnly: true
             - name: varlog
-              mountPath: /usr/local/var/log/trafficserver
+              mountPath: /opt/ats/var/log/trafficserver
           imagePullPolicy: IfNotPresent
           env:
             - name: POD_NAME

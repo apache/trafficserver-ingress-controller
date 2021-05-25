@@ -14,13 +14,13 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 
-ts.add_package_cpath('/usr/local/lib/lua/5.1/socket/?.so;/usr/local/lib/lua/5.1/mime/?.so')
-ts.add_package_path('/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/socket/?.lua')
+ts.add_package_cpath('/opt/ats/lib/lua/5.1/?.so;/opt/ats/lib/lua/5.1/socket/?.so;/opt/ats/lib/lua/5.1/mime/?.so')
+ts.add_package_path('/opt/ats/share/lua/5.1/?.lua;/opt/ats/share/lua/5.1/socket/?.lua')
 
 local redis = require 'redis'
 
 -- connecting to unix domain socket
-local client = redis.connect('unix:///var/run/redis/redis.sock')
+local client = redis.connect('unix:///opt/ats/var/run/redis/redis.sock')
 
 -- helper function to split a string
 function ipport_split(s, delimiter)
