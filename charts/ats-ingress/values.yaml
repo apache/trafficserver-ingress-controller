@@ -85,13 +85,13 @@ controller:
     labels: {}
     
     http:
-      port: 80
-      targetPort: 80
-      nodePort: 30000
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
     https:
-      port: 443
-      targetPort: 443
-      nodePort: 30043
+      port: 8443
+      targetPort: 8443
+      nodePort: 30443
 
     # clusterIP: ""
 
