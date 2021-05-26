@@ -107,8 +107,8 @@ ATS proxying should have started to work. To see proxy in action, we can use [cu
 
 You may have problem with minikube using docker driver as localhost (i.e. 127.0.0.1) will be used as the cluster ip. So you will need to forward the traffic designated for the port to the ports of the ATS pods inside the cluster before the above curl commands will work. Each command below needs to be run in separate terminal. 
 
-- `$ kubectl port-forward <pod name> 30443:443 -n trafficserver-test`
-- `$ kubectl port-forward <pod name> 30080:80 -n trafficserver-test`
+- `$ kubectl port-forward <pod name> 30443:8443 -n trafficserver-test`
+- `$ kubectl port-forward <pod name> 30080:8080 -n trafficserver-test`
 
 #### ConfigMap
 
