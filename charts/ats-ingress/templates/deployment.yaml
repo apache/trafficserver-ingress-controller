@@ -57,6 +57,10 @@ spec:
     spec:
       serviceAccountName: {{ include "ats-ingress.serviceAccountName" . }}
       terminationGracePeriodSeconds: {{ .Values.controller.terminationGracePeriodSeconds }}
+{{- with .Values.controller.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+{{- end }}
 {{- if .Values.controller.podSecurityContext }}
       securityContext:
 {{ toYaml .Values.controller.podSecurityContext | indent 8 }}
@@ -95,9 +99,8 @@ spec:
             mountPath: {{ .Values.controller.log.trafficserver.dir }}
           - name: log-ingress
             mountPath: {{ .Values.controller.log.ingress.dir }}
-          {{- range .Values.controller.extraVolumeMounts }}
-          - name: {{ .key }}
-            value: {{ .value }}
+          {{- if .Values.controller.extraVolumeMounts -}}
+          {{- toYaml .Values.controller.extraVolumeMounts | nindent 10 }}
           {{- end }}
           env:
           - name: POD_NAME
@@ -110,9 +113,8 @@ spec:
                 fieldPath: metadata.namespace
           - name: POD_TLS_PATH
             value: {{ .Values.controller.ssl.path | quote }} 
-          {{- range .Values.controller.extraEnvs }}
-          - name: {{ .name }}
-            value: {{ .value }}
+          {{- if .Values.controller.extraEnvs -}}
+          {{- toYaml .Values.controller.extraEnvs | nindent 10 }}
           {{- end }}
           ports:
           - containerPort: 8080
