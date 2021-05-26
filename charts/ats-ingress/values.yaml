@@ -165,6 +165,10 @@ controller:
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
+  ## Topology spread constraints
+  ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  topologySpreadConstraints: []
+
   ## Pod DNS Config
   ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
   dnsConfig: {}

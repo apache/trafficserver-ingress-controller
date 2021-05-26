@@ -105,7 +105,7 @@ def get_expected_response_app2():
 
 class TestIngress:
     def test_basic_routing_edge_app1(self, minikubeip):
-        req_url = "http://" + minikubeip + ":30000/app1"
+        req_url = "http://" + minikubeip + ":30080/app1"
         resp = requests.get(req_url, headers={"host": "test.edge.com"})
 
         assert resp.status_code == 200,\
@@ -113,7 +113,7 @@ class TestIngress:
         assert ' '.join(resp.text.split()) == get_expected_response_app1()
         
     def test_basic_routing_media_app1(self, minikubeip):
-        req_url = "http://" + minikubeip + ":30000/app1"
+        req_url = "http://" + minikubeip + ":30080/app1"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
 
         assert resp.status_code == 200,\
@@ -121,7 +121,7 @@ class TestIngress:
         assert ' '.join(resp.text.split()) == get_expected_response_app1()
     
     def test_basic_routing_edge_app2(self, minikubeip):
-        req_url = "http://" + minikubeip + ":30000/app2"
+        req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.edge.com"})
 
         assert resp.status_code == 200,\
@@ -129,7 +129,7 @@ class TestIngress:
         assert ' '.join(resp.text.split()) == get_expected_response_app2()
     
     def test_basic_routing_media_app2(self, minikubeip):
-        req_url = "http://" + minikubeip + ":30000/app2"
+        req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
 
         assert resp.status_code == 200,\
@@ -137,7 +137,7 @@ class TestIngress:
         assert ' '.join(resp.text.split()) == get_expected_response_app2()
     
     def test_basic_routing_edge_app2_https(self, minikubeip):
-        req_url = "https://" + minikubeip + ":30043/app2"
+        req_url = "https://" + minikubeip + ":30443/app2"
         resp = requests.get(req_url, headers={"host": "test.edge.com"}, verify=False)
 
         assert resp.status_code == 200,\
@@ -146,7 +146,7 @@ class TestIngress:
     
     def test_updating_ingress_media_app2(self, minikubeip):
         kubectl_apply('data/ats-ingress-update.yaml')
-        req_url = "http://" + minikubeip + ":30000/app2"
+        req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
 
         assert resp.status_code == 200,\
@@ -155,7 +155,7 @@ class TestIngress:
     
     def test_deleting_ingress_media_app2(self, minikubeip):
         kubectl_apply('data/ats-ingress-delete.yaml')
-        req_url = "http://" + minikubeip + ":30000/app2"
+        req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
 
         assert resp.status_code == 404,\
@@ -163,7 +163,7 @@ class TestIngress:
 
     def test_add_ingress_media(self, minikubeip):
         kubectl_apply('data/ats-ingress-add.yaml')
-        req_url = "http://" + minikubeip + ":30000/test"
+        req_url = "http://" + minikubeip + ":30080/test"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
 
         assert resp.status_code == 200,\
@@ -172,7 +172,7 @@ class TestIngress:
 
     def test_snippet_edge_app2(self, minikubeip):
         kubectl_apply('data/ats-ingress-snippet.yaml')
-        req_url = "http://" + minikubeip + ":30000/app2"
+        req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.edge.com"},allow_redirects=False)
 
         assert resp.status_code == 301,\
