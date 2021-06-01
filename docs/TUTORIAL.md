@@ -62,7 +62,7 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 
 - At this point, we have created necessary images for our example:
   - Step 4 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
-  - Step 5 builds an image for the trafficserver exporter. This exports the ATS statistics for Prometheus to read. It uses the [Stats Over HTTP Plugin](https://docs/trafficserver.apache.org/en/8.1.x/admin-guide/plugins/stats_over_http.en.html)
+  - Step 5 builds an image for the trafficserver exporter. This exports the ATS statistics for Prometheus to read. It uses the [Stats Over HTTP Plugin](https://docs.trafficserver.apache.org/en/9.0.x/admin-guide/plugins/stats_over_http.en.html)
   - Steps 6 and 7 build 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
   - Step 8 builds an image for fluentd. This is for log collection.
 
