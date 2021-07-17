@@ -119,6 +119,7 @@ RUN mkdir -p /opt/ats/var/run/redis/ \
 
 # set up ingress log location
 RUN mkdir -p /opt/ats/var/log/ingress/
+RUN mkdir -p /usr/local/etc/
 
 FROM alpine:3.12.7
 
@@ -141,12 +142,55 @@ RUN apk add --no-cache -U \
     tcl \
     openrc \
     inotify-tools \
-    cpulimit
+    cpulimit \
+    protobuf-dev \
+    cmake \
+    git curl curl-dev libcurl openssl-dev libressl-dev 
 
 RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
 
 # symlink for luajit
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
+
+# setup_thrift.sh
+RUN mkdir -p /tmp
+COPY ["./opentelemetry-tools/setup_thrift.sh", "/tmp/setup_thrift.sh"]
+RUN chmod 775 /tmp/setup_thrift.sh && ./tmp/setup_thrift.sh && rm -rf /tmp/setup_thrift.sh
+
+# nlohmann-json: JSON for modern C++
+COPY ["./opentelemetry-tools/json-3.9.1.tar.gz", "/tmp/json-3.9.1.tar.gz"]
+RUN cd /tmp && tar zxf json-3.9.1.tar.gz \
+ && cd json-3.9.1 \
+ && mkdir build && cd build\
+ && cmake .. \
+ && make \
+ && make install
+
+# jinja2cpp: Jinja2С++
+RUN cd /tmp && git clone https://github.com/flexferrum/Jinja2Cpp.git \
+ && cd Jinja2Cpp \
+ && mkdir build \
+ && cd build \
+ && cmake .. -DCMAKE_INSTALL_PREFIX=../install \
+ && cmake --build . --target all \
+ && cmake --build . --target install
+
+# opentelementry-cpp
+# https://github.com/open-telemetry/opentelemetry-cpp/blob/main/INSTALL.md
+# RUN wget https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.0.0-rc2.tar.gz \
+#  && tar zxf v1.0.0-rc2.tar.gz \
+# -- Change some setting in opentelemetry-cpp-1.0.0-rc2 (Jaeger)
+COPY ["./opentelemetry-cpp-1.0.0-rc2", "/opentelemetry-cpp-1.0.0-rc2"]
+RUN cd opentelemetry-cpp-1.0.0-rc2 \
+ && mkdir build \
+ && cd build \
+ && cmake .. -DBUILD_TESTING=OFF -DWITH_JAEGER=ON -DWITH_OTLP=OFF \
+ && cmake --build . --target all \
+ && cmake --install . --config Debug --prefix /usr/local/ \
+ && chmod 777 -R /opentelemetry-cpp-1.0.0-rc2
+
+# remove pkg to save memorty
+RUN apk del git
 
 # create ats user/group
 RUN addgroup -Sg 1000 ats
@@ -158,3 +202,4 @@ COPY --from=builder --chown=ats:ats /opt/ats /opt/ats
 USER ats
 
 ENTRYPOINT ["/opt/ats/bin/entry.sh"]
+
