@@ -180,14 +180,14 @@ RUN cd /tmp && git clone https://github.com/flexferrum/Jinja2Cpp.git \
 # RUN wget https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.0.0-rc2.tar.gz \
 #  && tar zxf v1.0.0-rc2.tar.gz \
 # -- Change some setting in opentelemetry-cpp-1.0.0-rc2 (Jaeger)
-COPY ["./opentelemetry-cpp-1.0.0-rc2", "/opentelemetry-cpp-1.0.0-rc2"]
-RUN cd opentelemetry-cpp-1.0.0-rc2 \
+COPY ["./opentelemetry-tools/opentelemetry-cpp-1.0.0-rc3.tar.gz", "/opentelemetry-cpp-1.0.0-rc3.tar.gz"]
+RUN tar zxf opentelemetry-cpp-1.0.0-rc3.tar.gz && cd opentelemetry-cpp-1.0.0-rc3 \
  && mkdir build \
  && cd build \
  && cmake .. -DBUILD_TESTING=OFF -DWITH_JAEGER=ON -DWITH_OTLP=OFF \
  && cmake --build . --target all \
  && cmake --install . --config Debug --prefix /usr/local/ \
- && chmod 777 -R /opentelemetry-cpp-1.0.0-rc2
+ && chmod 777 -R /opentelemetry-cpp-1.0.0-rc3
 
 # remove pkg to save memorty
 RUN apk del git
