@@ -34,7 +34,7 @@ cmake -G Ninja .. \
 
 ninja -j $(nproc)
 ninja install
-
+apk del boost boost-dev libevent libevent-dev ninja
 
 popd
 popd
