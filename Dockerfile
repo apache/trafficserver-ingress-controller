@@ -145,7 +145,7 @@ RUN apk add --no-cache -U \
     cpulimit \
     protobuf-dev \
     cmake \
-    git curl curl-dev libcurl openssl-dev libressl-dev 
+    git openssl-dev curl curl-dev libcurl libressl-dev 
 
 RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
 
@@ -177,8 +177,6 @@ RUN cd /tmp && git clone https://github.com/flexferrum/Jinja2Cpp.git \
 
 # opentelementry-cpp
 # https://github.com/open-telemetry/opentelemetry-cpp/blob/main/INSTALL.md
-# RUN wget https://github.com/open-telemetry/opentelemetry-cpp/archive/refs/tags/v1.0.0-rc2.tar.gz \
-#  && tar zxf v1.0.0-rc2.tar.gz \
 # -- Change some setting in opentelemetry-cpp-1.0.0-rc2 (Jaeger)
 COPY ["./opentelemetry-tools/opentelemetry-cpp-1.0.0-rc3.tar.gz", "/opentelemetry-cpp-1.0.0-rc3.tar.gz"]
 RUN tar zxf opentelemetry-cpp-1.0.0-rc3.tar.gz && cd opentelemetry-cpp-1.0.0-rc3 \
@@ -187,10 +185,11 @@ RUN tar zxf opentelemetry-cpp-1.0.0-rc3.tar.gz && cd opentelemetry-cpp-1.0.0-rc3
  && cmake .. -DBUILD_TESTING=OFF -DWITH_JAEGER=ON -DWITH_OTLP=OFF \
  && cmake --build . --target all \
  && cmake --install . --config Debug --prefix /usr/local/ \
- && chmod 777 -R /opentelemetry-cpp-1.0.0-rc3
+ && chmod 777 -R /opentelemetry-cpp-1.0.0-rc3 \
+ && rm -rf opentelemetry-cpp-1.0.0-rc3.tar.gz
 
 # remove pkg to save memorty
-RUN apk del git
+RUN apk del git boost boost-dev libevent libevent-dev ninja openssl-dev curl curl-dev libcurl libressl-dev 
 
 # create ats user/group
 RUN addgroup -Sg 1000 ats
