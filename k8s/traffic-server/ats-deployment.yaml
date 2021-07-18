@@ -18,7 +18,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: trafficserver-test
-
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
 ---
 
 apiVersion: apps/v1
@@ -28,6 +29,8 @@ metadata:
     app: trafficserver-test
   name: trafficserver-test
   namespace: trafficserver-test
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
 spec:
   minReadySeconds: 30
 
@@ -41,13 +44,18 @@ spec:
     metadata:
       labels:
         app: trafficserver-test
+      annotations:
+        "sidecar.jaegertracing.io/inject": "true"
     spec:
       containers:
         - name: trafficserver-test
           image: ats-ingress:latest # Needs to be updated
 # Optional privileged securityContext that can be handy when you need to do debugging 
-#          securityContext:
-#            privileged: true
+        #  securityContext:
+        #    privileged: true
+        #    # Test as root access
+        #    allowPrivilegeEscalation: false
+        #    runAsUser: 0
           volumeMounts:
             - mountPath: "/etc/ats/ssl"
               name: ats-ssl
@@ -97,6 +105,19 @@ spec:
           args: ["--endpoint=http://127.0.0.1:8080/_stats"]
           ports:
           - containerPort: 9122
+        ########
+        # - name: opentelemetry
+        #   image: ats-ingress-exporter:latest
+        #   imagePullPolicy: IfNotPresent
+        #   args: ["--endpoint=http://127.0.0.1:8080/_stats"]
+        #   ports:
+        #   - containerPort: 9122
+        # - name: jaeger
+        #   image: ats-ingress-exporter:latest
+        #   imagePullPolicy: IfNotPresent
+        #   args: ["--endpoint=http://127.0.0.1:8080/_stats"]
+        #   ports:
+        #   - containerPort: 9122
       volumes:
         - name: ats-ssl
           secret:
@@ -116,6 +137,8 @@ kind: Service
 metadata:
   name: trafficserver-test
   namespace: trafficserver-test
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
 spec:
   type: NodePort
   ports:
