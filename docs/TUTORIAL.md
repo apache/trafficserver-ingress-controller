@@ -110,6 +110,11 @@ You may have problem with minikube using docker driver as localhost (i.e. 127.0.
 - `$ kubectl port-forward <pod name> 30443:8443 -n trafficserver-test`
 - `$ kubectl port-forward <pod name> 30080:8080 -n trafficserver-test`
 
+You may also use the following to fetch the Pod name automatically.
+
+- `$ kubectl port-forward $(kubectl -n trafficserver-test get pods -l=app="trafficserver-test" -o name) 30443:8443 -n trafficserver-test`
+- `$ kubectl port-forward $(kubectl -n trafficserver-test get pods -l=app="trafficserver-test" -o name) 30080:8080 -n trafficserver-test`
+
 #### ConfigMap
 
 Below is an example of configuring Apache Traffic Server [_reloadable_ configurations](https://docs.trafficserver.apache.org/en/8.0.x/admin-guide/files/records.config.en.html#reloadable) using [kubernetes configmap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) resource:
