@@ -31,7 +31,7 @@ ATS Kubernetes Ingress Controller
 
 ## Versions of Software Used
 - Alpine 3.12.7
-- Apache Traffic Server 9.0.0
+- Apache Traffic Server 9.0.2
 - LuaJIT 2.0.4 / Lua 5.1.4
 - Go 1.15.11
 - Other Packages
