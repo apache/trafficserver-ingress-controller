@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM alpine:3.12.7 as builder 
+FROM alpine:3.12.8 as builder 
 
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
@@ -75,8 +75,8 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
   bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
-RUN wget https://dl.google.com/go/go1.16.7.src.tar.gz \
-    && tar -C /opt/ats -xzf go1.16.7.src.tar.gz && cd /opt/ats/go/src/ && ./make.bash
+RUN wget https://dl.google.com/go/go1.16.9.src.tar.gz \
+    && tar -C /opt/ats -xzf go1.16.9.src.tar.gz && cd /opt/ats/go/src/ && ./make.bash
 ENV PATH=${PATH}:/opt/ats/go/bin
 ENV GOPATH="/opt/ats/go/bin"
 
@@ -120,7 +120,7 @@ RUN mkdir -p /opt/ats/var/run/redis/ \
 # set up ingress log location
 RUN mkdir -p /opt/ats/var/log/ingress/
 
-FROM alpine:3.12.7
+FROM alpine:3.12.8
 
 # essential library  
 RUN apk add --no-cache -U \

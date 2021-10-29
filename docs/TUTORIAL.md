@@ -37,7 +37,7 @@
 
 ### Requirements
 - Docker 
-- Kubernetes 1.18.10 (through Minikube 1.14.2)
+- (Tested on) Kubernetes 1.21.4 (through Minikube 1.23.0)
 
 To install Docker, visit its [official page](https://docs.docker.com/) and install the correct version for your system.
 
