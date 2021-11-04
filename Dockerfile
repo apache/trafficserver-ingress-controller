@@ -33,8 +33,8 @@ RUN addgroup -Sg 1000 ats
 RUN adduser -S -D -H -u 1000 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 # download and build ATS
-RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.1.0.tar.bz2 | bzip2 -dc | tar xf - \
-  && cd trafficserver-9.1.0/ \
+RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.1.1.tar.bz2 | bzip2 -dc | tar xf - \
+  && cd trafficserver-9.1.1/ \
   && autoreconf -if \
   && ./configure --enable-debug=yes --prefix=/opt/ats --with-user=ats \
   && make \
