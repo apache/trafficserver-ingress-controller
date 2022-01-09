@@ -92,6 +92,7 @@ COPY ["./watcher/", "$GOPATH/src/ingress-ats/watcher"]
 COPY ["./pluginats/", "$GOPATH/src/ingress-ats/pluginats"]
 COPY ["./redis/", "$GOPATH/src/ingress-ats/redis"]
 COPY ["./go.mod", "$GOPATH/src/ingress-ats/go.mod"]
+COPY ["./go.sum", "$GOPATH/src/ingress-ats/go.sum"]
 
 # Building Project Main
 WORKDIR /opt/ats/go/bin/src/ingress-ats
