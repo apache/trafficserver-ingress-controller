@@ -49,19 +49,13 @@ COPY ["./config/logging.yaml", "/opt/ats/etc/trafficserver/logging.yaml"]
 RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
 RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
 
-# Installing lua 5.1.4 and provide header files to compile luasocket 
-RUN curl -R -O http://www.lua.org/ftp/lua-5.1.4.tar.gz \
-    && tar zxf lua-5.1.4.tar.gz \
-    && cd lua-5.1.4 \
-    && make linux test \
-    && make linux install
-
 # luasocket
 RUN wget https://github.com/diegonehab/luasocket/archive/v3.0-rc1.tar.gz \
   && tar zxf v3.0-rc1.tar.gz \
   && cd luasocket-3.0-rc1 \
   && sed -i "s/LDFLAGS_linux=-O -shared -fpic -o/LDFLAGS_linux=-O -shared -fpic -L\/usr\/lib -lluajit-5.1 -o/" src/makefile \
   && ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so \
+  && ln -sf /usr/include/luajit-2.1 /usr/include/lua/5.1 \
   && make \
   && make install-unix prefix=/opt/ats
 
