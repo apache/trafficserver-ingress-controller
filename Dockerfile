@@ -55,6 +55,7 @@ RUN wget https://github.com/diegonehab/luasocket/archive/v3.0-rc1.tar.gz \
   && cd luasocket-3.0-rc1 \
   && sed -i "s/LDFLAGS_linux=-O -shared -fpic -o/LDFLAGS_linux=-O -shared -fpic -L\/usr\/lib -lluajit-5.1 -o/" src/makefile \
   && ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so \
+  && mkdir -p /usr/include/lua \
   && ln -sf /usr/include/luajit-2.1 /usr/include/lua/5.1 \
   && make \
   && make install-unix prefix=/opt/ats
