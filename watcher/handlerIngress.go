@@ -17,11 +17,12 @@ package watcher
 
 import (
 	"log"
+	"strconv"
 
 	"ingress-ats/endpoint"
 	"ingress-ats/util"
 
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	nv1 "k8s.io/api/networking/v1"
 )
 
 // IgHandler implements EventHandler
@@ -37,9 +38,9 @@ func (g *IgHandler) Add(obj interface{}) {
 }
 
 func (g *IgHandler) add(obj interface{}) {
-	ingressObj, ok := obj.(*v1beta1.Ingress)
+	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Add; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Add; cannot cast to *nv1.Ingress")
 		return
 	}
 
@@ -78,8 +79,8 @@ func (g *IgHandler) add(obj interface{}) {
 
 			path := httpPath.Path
 			hostPath := util.ConstructHostPathString(scheme, host, path)
-			service := httpPath.Backend.ServiceName
-			port := httpPath.Backend.ServicePort.String()
+			service := httpPath.Backend.Service.Name
+			port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 			svcport := util.ConstructSvcPortString(namespace, service, port)
 
 			g.Ep.RedisClient.DBOneSAdd(hostPath, svcport)
@@ -103,15 +104,15 @@ func (g *IgHandler) Update(obj, newObj interface{}) {
 }
 
 func (g *IgHandler) update(obj, newObj interface{}) {
-	ingressObj, ok := obj.(*v1beta1.Ingress)
+	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Update; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Update; cannot cast to *nv1.Ingress")
 		return
 	}
 
-	newIngressObj, ok := newObj.(*v1beta1.Ingress)
+	newIngressObj, ok := newObj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Update; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Update; cannot cast to *nv1.Ingress")
 		return
 	}
 
@@ -147,8 +148,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 				g.Ep.RedisClient.DBOneSUnionStore("temp_"+hostPath, hostPath)
 				m["temp_"+hostPath] = hostPath
 
-				service := httpPath.Backend.ServiceName
-				port := httpPath.Backend.ServicePort.String()
+				service := httpPath.Backend.Service.Name
+				port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 				svcport := util.ConstructSvcPortString(namespace, service, port)
 
 				g.Ep.RedisClient.DBOneSRem("temp_"+hostPath, svcport)
@@ -197,8 +198,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 				path := httpPath.Path
 				hostPath := util.ConstructHostPathString(scheme, host, path)
 
-				service := httpPath.Backend.ServiceName
-				port := httpPath.Backend.ServicePort.String()
+				service := httpPath.Backend.Service.Name
+				port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 				svcport := util.ConstructSvcPortString(namespace, service, port)
 
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
@@ -230,9 +231,9 @@ func (g *IgHandler) Delete(obj interface{}) {
 
 // Helper for Deletes
 func (g *IgHandler) delete(obj interface{}) {
-	ingressObj, ok := obj.(*v1beta1.Ingress)
+	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Delete; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Delete; cannot cast to *nv1.Ingress")
 		return
 	}
 
@@ -264,8 +265,8 @@ func (g *IgHandler) delete(obj interface{}) {
 
 			path := httpPath.Path
 			hostPath := util.ConstructHostPathString(scheme, host, path)
-			service := httpPath.Backend.ServiceName
-			port := httpPath.Backend.ServicePort.String()
+			service := httpPath.Backend.Service.Name
+			port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 			svcport := util.ConstructSvcPortString(namespace, service, port)
 
 			g.Ep.RedisClient.DBOneSRem(hostPath, svcport)

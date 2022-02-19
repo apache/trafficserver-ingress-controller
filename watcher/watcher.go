@@ -27,7 +27,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	nv1 "k8s.io/api/networking/v1"
 
 	"k8s.io/apimachinery/pkg/fields"
 	pkgruntime "k8s.io/apimachinery/pkg/runtime"
@@ -59,9 +59,9 @@ type EventHandler interface {
 func (w *Watcher) Watch() error {
 	//================= Watch for Ingress ==================
 	igHandler := IgHandler{"ingresses", w.Ep}
-	igListWatch := cache.NewListWatchFromClient(w.Cs.ExtensionsV1beta1().RESTClient(), igHandler.GetResourceName(), v1.NamespaceAll, fields.Everything())
-	err := w.allNamespacesWatchFor(&igHandler, w.Cs.ExtensionsV1beta1().RESTClient(),
-		fields.Everything(), &v1beta1.Ingress{}, 0, igListWatch)
+	igListWatch := cache.NewListWatchFromClient(w.Cs.NetworkingV1().RESTClient(), igHandler.GetResourceName(), v1.NamespaceAll, fields.Everything())
+	err := w.allNamespacesWatchFor(&igHandler, w.Cs.NetworkingV1().RESTClient(),
+		fields.Everything(), &nv1.Ingress{}, 0, igListWatch)
 	if err != nil {
 		return err
 	}
@@ -94,8 +94,8 @@ func (w *Watcher) allNamespacesWatchFor(h EventHandler, c cache.Getter,
 	switch objType.(type) {
 	case *v1.Endpoints:
 		sharedInformer = factory.Core().V1().Endpoints().Informer()
-	case *v1beta1.Ingress:
-		sharedInformer = factory.Extensions().V1beta1().Ingresses().Informer()
+	case *nv1.Ingress:
+		sharedInformer = factory.Networking().V1().Ingresses().Informer()
 	}
 
 	sharedInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -130,8 +130,8 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 		switch objType.(type) {
 		case *v1.Endpoints:
 			sharedInformer = factory.Core().V1().Endpoints().Informer()
-		case *v1beta1.Ingress:
-			sharedInformer = factory.Extensions().V1beta1().Ingresses().Informer()
+		case *nv1.Ingress:
+			sharedInformer = factory.Networking().V1().Ingresses().Informer()
 		case *v1.ConfigMap:
 			sharedInformer = factory.Core().V1().ConfigMaps().Informer()
 		}

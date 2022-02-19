@@ -30,7 +30,7 @@ import (
 
 	_ "k8s.io/client-go/util/workqueue"
 
-	_ "k8s.io/api/extensions/v1beta1"
+	_ "k8s.io/api/networking/v1"
 
 	ep "ingress-ats/endpoint"
 	"ingress-ats/namespace"
@@ -139,8 +139,6 @@ func main() {
 		log.Panicln("Redis Error: ", err)
 	}
 
-	// IMPORTANT:
-	// We're assuming ingress must be using EXTENSIONS V1BETA1 API
 	// ALL services must be using CORE V1 API
 	endpoint := ep.Endpoint{
 		RedisClient: rClient,
