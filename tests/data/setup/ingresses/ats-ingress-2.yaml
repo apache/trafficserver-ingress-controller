@@ -21,7 +21,7 @@ metadata:
 
 ---
 
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: app-ingress
@@ -42,6 +42,9 @@ spec:
     http:
       paths:
       - path: /app2
+        pathType: Exact
         backend:
-          serviceName: appsvc2
-          servicePort: 8080
+          service:
+            name: appsvc2
+            port:
+              number: 8080
