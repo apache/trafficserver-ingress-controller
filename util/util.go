@@ -18,8 +18,11 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"sync"
+
+	nv1 "k8s.io/api/networking/v1"
 )
 
 // Writer writes the JSON file synchronously
@@ -143,6 +146,20 @@ func ExtractIngressClass(ann map[string]string) (class string, err error) {
 	}
 
 	return ingress_class, nil
+}
+
+func ExtractIngressClassName(obj interface{}) (class string, err error) {
+	ingressObj, ok := obj.(*nv1.Ingress)
+	if !ok {
+		log.Println("Extracting ingress class name; cannot cast to *nv1.Ingress")
+		return "", fmt.Errorf("Extracting ingress class name; cannot cast to *nv1.Ingress")
+	}
+
+	if ingressObj.Spec.IngressClassName == nil {
+		return "", fmt.Errorf("Extracting ingress class name; missing the field")
+	}
+
+	return *ingressObj.Spec.IngressClassName, nil
 }
 
 // FmtMarshalled converts json marshalled bytes to string

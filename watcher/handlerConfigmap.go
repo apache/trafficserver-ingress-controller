@@ -68,7 +68,6 @@ func (c *CMHandler) Update(obj, newObj interface{}) {
 // Delete for EventHandler
 func (c *CMHandler) Delete(obj interface{}) {
 	// do not handle delete events for now
-	return
 }
 
 // GetResourceName returns the resource name

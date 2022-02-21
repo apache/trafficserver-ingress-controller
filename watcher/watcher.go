@@ -75,7 +75,7 @@ func (w *Watcher) Watch() error {
 	}
 	//================= Watch for ConfigMaps =================
 	cmHandler := CMHandler{"configmaps", w.Ep}
-	targetNs := make([]string, 1, 1)
+	targetNs := make([]string, 1)
 	targetNs[0] = w.Ep.ATSManager.(*proxy.ATSManager).Namespace
 	err = w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
 		targetNs, fields.Everything(), &v1.ConfigMap{}, 0)

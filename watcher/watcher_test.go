@@ -227,7 +227,7 @@ func TestInNamespacesWatchFor_Add(t *testing.T) {
 	w, _ := getTestWatcher()
 
 	cmHandler := CMHandler{"configmaps", w.Ep}
-	targetNs := make([]string, 1, 1)
+	targetNs := make([]string, 1)
 	targetNs[0] = "trafficserver"
 
 	err := w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
@@ -282,7 +282,7 @@ func TestInNamespacesWatchFor_Update(t *testing.T) {
 	w, _ := getTestWatcher()
 
 	cmHandler := CMHandler{"configmaps", w.Ep}
-	targetNs := make([]string, 1, 1)
+	targetNs := make([]string, 1)
 	targetNs[0] = "trafficserver"
 
 	err := w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
@@ -353,7 +353,7 @@ func TestInNamespacesWatchFor_ShouldNotAdd(t *testing.T) {
 	w, _ := getTestWatcher()
 
 	cmHandler := CMHandler{"configmaps", w.Ep}
-	targetNs := make([]string, 1, 1)
+	targetNs := make([]string, 1)
 	targetNs[0] = "trafficserver"
 
 	err := w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),

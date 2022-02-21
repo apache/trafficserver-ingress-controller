@@ -45,7 +45,9 @@ func (g *IgHandler) add(obj interface{}) {
 	}
 
 	namespace := ingressObj.GetNamespace()
-	ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	// v1.18 ingress class name field in ingress object
+	//ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	ingressClass, _ := util.ExtractIngressClassName(obj)
 	if !g.Ep.NsManager.IncludeNamespace(namespace) || !g.Ep.ATSManager.IncludeIngressClass(ingressClass) {
 		log.Println("Namespace not included or Ingress Class not matched")
 		return
@@ -119,7 +121,9 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 	m := make(map[string]string)
 
 	namespace := ingressObj.GetNamespace()
-	ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	// v1.18 ingress class name field in ingress object
+	//ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	ingressClass, _ := util.ExtractIngressClassName(obj)
 	if g.Ep.NsManager.IncludeNamespace(namespace) && g.Ep.ATSManager.IncludeIngressClass(ingressClass) {
 		log.Println("Old Namespace included")
 
@@ -165,8 +169,10 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 		}
 	}
 
-	newNamespace := ingressObj.GetNamespace()
-	newIngressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	newNamespace := newIngressObj.GetNamespace()
+	// v1.18 ingress class name field in ingress object
+	//newIngressClass, _ := util.ExtractIngressClass(newIngressObj.GetAnnotations())
+	newIngressClass, _ := util.ExtractIngressClassName(newObj)
 	if g.Ep.NsManager.IncludeNamespace(newNamespace) && g.Ep.ATSManager.IncludeIngressClass(newIngressClass) {
 		log.Println("New Namespace included")
 
@@ -238,7 +244,9 @@ func (g *IgHandler) delete(obj interface{}) {
 	}
 
 	namespace := ingressObj.GetNamespace()
-	ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	// v1.18 ingress class name field in ingress object
+	//ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	ingressClass, _ := util.ExtractIngressClassName(obj)
 	if !g.Ep.NsManager.IncludeNamespace(namespace) || !g.Ep.ATSManager.IncludeIngressClass(ingressClass) {
 		log.Println("Namespace not included or Ingress Class not matched")
 		return
