@@ -69,8 +69,8 @@ func TestAdd_ExampleIngressWithTLS(t *testing.T) {
 	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
 
 	expectedKeys := getExpectedKeysForAdd()
-	expectedKeys["https://test.edge.com/app1"] = expectedKeys["http://test.edge.com/app1"]
-	delete(expectedKeys, "http://test.edge.com/app1")
+	expectedKeys["E+https://test.edge.com/app1"] = expectedKeys["E+http://test.edge.com/app1"]
+	delete(expectedKeys, "E+http://test.edge.com/app1")
 
 	if !util.IsSameMap(returnedKeys, expectedKeys) {
 		t.Errorf("returned \n%v,  but expected \n%v", returnedKeys, expectedKeys)
@@ -187,8 +187,8 @@ func TestUpdate_ModifyTLS(t *testing.T) {
 
 	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
 	expectedKeys := getExpectedKeysForAdd()
-	expectedKeys["https://test.edge.com/app1"] = expectedKeys["http://test.edge.com/app1"]
-	expectedKeys["http://test.edge.com/app1"] = []string{}
+	expectedKeys["E+https://test.edge.com/app1"] = expectedKeys["E+http://test.edge.com/app1"]
+	expectedKeys["E+http://test.edge.com/app1"] = []string{}
 
 	if !util.IsSameMap(returnedKeys, expectedKeys) {
 		t.Errorf("returned \n%v,  but expected \n%v", returnedKeys, expectedKeys)
@@ -347,8 +347,8 @@ func getExpectedKeysForUpdate_ModifySnippet() map[string][]string {
 	expectedKeys["$trafficserver-test/example-ingress/10"] = []string{}
 	expectedKeys["$trafficserver-test/example-ingress/10"] = append(expectedKeys["$trafficserver-test/example-ingress/10"], updatedSnippet)
 
-	expectedKeys["http://test.edge.com/app1"] = expectedKeys["http://test.edge.com/app1"][:1]
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "$trafficserver-test/example-ingress/10")
+	expectedKeys["E+http://test.edge.com/app1"] = expectedKeys["E+http://test.edge.com/app1"][:1]
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "$trafficserver-test/example-ingress/10")
 
 	return expectedKeys
 }
@@ -356,13 +356,13 @@ func getExpectedKeysForUpdate_ModifySnippet() map[string][]string {
 func getExpectedKeysForUpdate_ModifyIngress() map[string][]string {
 	expectedKeys := getExpectedKeysForAdd()
 
-	expectedKeys["http://test.media.com/app2"] = []string{}
+	expectedKeys["E+http://test.media.com/app2"] = []string{}
 
-	expectedKeys["http://test.media.com/app2-modified"] = []string{}
-	expectedKeys["http://test.media.com/app2-modified"] = append(expectedKeys["http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
+	expectedKeys["E+http://test.media.com/app2-modified"] = []string{}
+	expectedKeys["E+http://test.media.com/app2-modified"] = append(expectedKeys["E+http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
 
-	expectedKeys["http://test.edge.com/app1"] = []string{}
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "trafficserver-test:appsvc1-modified:9090")
+	expectedKeys["E+http://test.edge.com/app1"] = []string{}
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "trafficserver-test:appsvc1-modified:9090")
 
 	return expectedKeys
 }
@@ -370,20 +370,20 @@ func getExpectedKeysForUpdate_ModifyIngress() map[string][]string {
 func getExpectedKeysForUpdate_DeleteService() map[string][]string {
 	expectedKeys := getExpectedKeysForAdd()
 
-	expectedKeys["http://test.media.com/app2"] = []string{}
+	expectedKeys["E+http://test.media.com/app2"] = []string{}
 
 	return expectedKeys
 }
 
 func getExpectedKeysForAdd() map[string][]string {
 	expectedKeys := make(map[string][]string)
-	expectedKeys["http://test.edge.com/app1"] = []string{}
-	expectedKeys["http://test.media.com/app1"] = []string{}
-	expectedKeys["http://test.media.com/app2"] = []string{}
+	expectedKeys["E+http://test.edge.com/app1"] = []string{}
+	expectedKeys["E+http://test.media.com/app1"] = []string{}
+	expectedKeys["E+http://test.media.com/app2"] = []string{}
 
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "trafficserver-test:appsvc1:8080")
-	expectedKeys["http://test.media.com/app2"] = append(expectedKeys["http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
-	expectedKeys["http://test.media.com/app1"] = append(expectedKeys["http://test.media.com/app1"], "trafficserver-test:appsvc1:8080")
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "trafficserver-test:appsvc1:8080")
+	expectedKeys["E+http://test.media.com/app2"] = append(expectedKeys["E+http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
+	expectedKeys["E+http://test.media.com/app1"] = append(expectedKeys["E+http://test.media.com/app1"], "trafficserver-test:appsvc1:8080")
 
 	return expectedKeys
 }
@@ -391,10 +391,10 @@ func getExpectedKeysForAdd() map[string][]string {
 func getExpectedKeysForAddWithAnnotation() map[string][]string {
 	expectedKeys := getExpectedKeysForAdd()
 
-	delete(expectedKeys, "http://test.media.com/app1")
-	delete(expectedKeys, "http://test.media.com/app2")
+	delete(expectedKeys, "E+http://test.media.com/app1")
+	delete(expectedKeys, "E+http://test.media.com/app2")
 
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "$trafficserver-test/example-ingress/")
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "$trafficserver-test/example-ingress/")
 
 	exampleSnippet := getExampleSnippet()
 

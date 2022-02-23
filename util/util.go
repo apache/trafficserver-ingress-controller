@@ -98,11 +98,16 @@ func (w *Writer) CreateFileIfNotExist() (file *os.File, err error) {
 }
 
 // ConstructHostPathString constructs the string representation of Host + Path
-func ConstructHostPathString(scheme, host, path string) string {
+func ConstructHostPathString(scheme, host, path string, pathType nv1.PathType) string {
 	if path == "" {
 		path = "/"
 	}
-	return scheme + "://" + host + path
+	// default pathType is "Exact"
+	if pathType == nv1.PathTypePrefix {
+		return "P+" + scheme + "://" + host + path
+	} else {
+		return "E+" + scheme + "://" + host + path
+	}
 	//return p.Clean(fmt.Sprintf("%s/%s", host, path))
 }
 
