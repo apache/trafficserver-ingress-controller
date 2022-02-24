@@ -58,7 +58,7 @@ function do_global_read_request()
   ts.debug("req_path: " .. req_path)
   ts.debug("-----------------")
 
-  local host_path = req_scheme .. "://" .. req_host .. req_path
+  local host_path = "E+"..req_scheme .. "://" .. req_host .. req_path
   
   client:select(1) -- go with hostpath table first
   local svcs = client:smembers(host_path) -- redis blocking call

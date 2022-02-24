@@ -108,7 +108,7 @@ describe("Unit tests - Lua", function()
       client = redis.connect()
 
       client:select(1)
-      client:sadd("http://test.edge.com/app1","trafficserver-test-2:appsvc1:8080")
+      client:sadd("E+http://test.edge.com/app1","trafficserver-test-2:appsvc1:8080")
       client:select(0)
       client:sadd("trafficserver-test-2:appsvc1:8080","172.17.0.3#8080#http","172.17.0.5#8080#http")
       --require 'pl.pretty'.dump(client)
@@ -136,7 +136,7 @@ describe("Unit tests - Lua", function()
 
     it("Test - Snippet", function()
       client:select(1)
-      client:sadd("http://test.edge.com/app1","$trafficserver-test-3/app-ingress/411990")
+      client:sadd("E+http://test.edge.com/app1","$trafficserver-test-3/app-ingress/411990")
       snippet = "ts.debug('Debug msg example')\nts.error('Error msg example')\n-- ts.hook(TS_LUA_HOOK_SEND_RESPONSE_HDR, function()\n--   ts.client_response.header['Location'] = 'https://test.edge.com/app2'\n-- end)\nts.http.skip_remapping_set(0)\nts.http.set_resp(301, 'Redirect')\nts.debug('Uncomment the above lines to redirect http request to https')\nts.debug('Modification for testing')\n"
       client:sadd("$trafficserver-test-3/app-ingress/411990",snippet) 
 
