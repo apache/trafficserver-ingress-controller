@@ -58,7 +58,7 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 5. `$ docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/` 
 6. `$ docker build -t node-app-1 k8s/images/node-app-1/`    
 7. `$ docker build -t node-app-2 k8s/images/node-app-2/`
-8. `$ docker pull fluent/fluentd:v1.6-debian-1`
+8. `$ docker pull fluent/fluentd:v1.14-debian-1`
 
 - At this point, we have created necessary images for our example:
   - Step 4 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.

@@ -22,7 +22,7 @@ metadata:
 data:
   fluent.conf: |
     <source>
-      type tail
+      @type tail
       path /var/log/trafficserver/squid.log
       pos_file /var/log/trafficserver/squid.log.pos
       <parse>
@@ -33,7 +33,7 @@ data:
     </source>
 
     <source>
-      type tail
+      @type tail
       path /var/log/ingress/ingress_ats.err
       pos_file /var/log/ingress/ingress_ats.err.pos
       <parse>
@@ -47,6 +47,3 @@ data:
       @type stdout
     </match>
 
-    <match fluent.**>
-      @type null
-    </match>

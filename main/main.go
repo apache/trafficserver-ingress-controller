@@ -120,7 +120,7 @@ func main() {
 	/* creates the clientset */
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Panic(err.Error())
+		log.Panicln(err.Error())
 	}
 
 	stopChan := make(chan struct{})

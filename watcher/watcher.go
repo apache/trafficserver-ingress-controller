@@ -120,7 +120,7 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 	namespaces []string, fieldSelector fields.Selector, objType pkgruntime.Object,
 	resyncPeriod time.Duration) error {
 	if len(namespaces) == 0 {
-		log.Panic("inNamespacesWatchFor must have at least 1 namespace")
+		log.Panicln("inNamespacesWatchFor must have at least 1 namespace")
 	}
 	syncFuncs := make([]cache.InformerSynced, len(namespaces))
 	for i, ns := range namespaces {

@@ -32,7 +32,7 @@ type IgHandler struct {
 }
 
 func (g *IgHandler) Add(obj interface{}) {
-	log.Printf("\n\nIn INGRESS_HANDLER ADD %#v \n\n", obj)
+	log.Printf("In INGRESS_HANDLER ADD %#v \n", obj)
 	g.add(obj)
 	g.Ep.RedisClient.PrintAllKeys()
 }
@@ -130,7 +130,7 @@ func (g *IgHandler) add(obj interface{}) {
 
 // Update for EventHandler
 func (g *IgHandler) Update(obj, newObj interface{}) {
-	log.Printf("\n\nIn INGRESS_HANDLER UPDATE %#v \n\n", newObj)
+	log.Printf("In INGRESS_HANDLER UPDATE %#v \n", newObj)
 	g.update(obj, newObj)
 	g.Ep.RedisClient.PrintAllKeys()
 }
@@ -333,7 +333,7 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 
 // Delete for EventHandler
 func (g *IgHandler) Delete(obj interface{}) {
-	log.Printf("\n\nIn INGRESS_HANDLER DELETE %#v \n\n", obj)
+	log.Printf("In INGRESS_HANDLER DELETE %#v \n", obj)
 	g.delete(obj)
 	g.Ep.RedisClient.PrintAllKeys()
 }
