@@ -27,7 +27,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	nv1 "k8s.io/api/networking/v1"
 
 	"k8s.io/apimachinery/pkg/fields"
 	pkgruntime "k8s.io/apimachinery/pkg/runtime"
@@ -59,9 +59,9 @@ type EventHandler interface {
 func (w *Watcher) Watch() error {
 	//================= Watch for Ingress ==================
 	igHandler := IgHandler{"ingresses", w.Ep}
-	igListWatch := cache.NewListWatchFromClient(w.Cs.ExtensionsV1beta1().RESTClient(), igHandler.GetResourceName(), v1.NamespaceAll, fields.Everything())
-	err := w.allNamespacesWatchFor(&igHandler, w.Cs.ExtensionsV1beta1().RESTClient(),
-		fields.Everything(), &v1beta1.Ingress{}, 0, igListWatch)
+	igListWatch := cache.NewListWatchFromClient(w.Cs.NetworkingV1().RESTClient(), igHandler.GetResourceName(), v1.NamespaceAll, fields.Everything())
+	err := w.allNamespacesWatchFor(&igHandler, w.Cs.NetworkingV1().RESTClient(),
+		fields.Everything(), &nv1.Ingress{}, 0, igListWatch)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (w *Watcher) Watch() error {
 	}
 	//================= Watch for ConfigMaps =================
 	cmHandler := CMHandler{"configmaps", w.Ep}
-	targetNs := make([]string, 1, 1)
+	targetNs := make([]string, 1)
 	targetNs[0] = w.Ep.ATSManager.(*proxy.ATSManager).Namespace
 	err = w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
 		targetNs, fields.Everything(), &v1.ConfigMap{}, 0)
@@ -94,8 +94,8 @@ func (w *Watcher) allNamespacesWatchFor(h EventHandler, c cache.Getter,
 	switch objType.(type) {
 	case *v1.Endpoints:
 		sharedInformer = factory.Core().V1().Endpoints().Informer()
-	case *v1beta1.Ingress:
-		sharedInformer = factory.Extensions().V1beta1().Ingresses().Informer()
+	case *nv1.Ingress:
+		sharedInformer = factory.Networking().V1().Ingresses().Informer()
 	}
 
 	sharedInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
@@ -120,7 +120,7 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 	namespaces []string, fieldSelector fields.Selector, objType pkgruntime.Object,
 	resyncPeriod time.Duration) error {
 	if len(namespaces) == 0 {
-		log.Panic("inNamespacesWatchFor must have at least 1 namespace")
+		log.Panicln("inNamespacesWatchFor must have at least 1 namespace")
 	}
 	syncFuncs := make([]cache.InformerSynced, len(namespaces))
 	for i, ns := range namespaces {
@@ -130,8 +130,8 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 		switch objType.(type) {
 		case *v1.Endpoints:
 			sharedInformer = factory.Core().V1().Endpoints().Informer()
-		case *v1beta1.Ingress:
-			sharedInformer = factory.Extensions().V1beta1().Ingresses().Informer()
+		case *nv1.Ingress:
+			sharedInformer = factory.Networking().V1().Ingresses().Informer()
 		case *v1.ConfigMap:
 			sharedInformer = factory.Core().V1().ConfigMaps().Informer()
 		}

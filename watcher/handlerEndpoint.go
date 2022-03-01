@@ -32,7 +32,7 @@ type EpHandler struct {
 }
 
 func (e *EpHandler) Add(obj interface{}) {
-	log.Printf("\n\nIn EndpointHandler ADD %#v \n\n", obj)
+	log.Printf("Endpoint ADD %#v \n", obj)
 	e.add(obj)
 	e.Ep.RedisClient.PrintAllKeys()
 }
@@ -40,7 +40,7 @@ func (e *EpHandler) Add(obj interface{}) {
 func (e *EpHandler) add(obj interface{}) {
 	eps, ok := obj.(*v1.Endpoints)
 	if !ok {
-		log.Println("In EndpointHandler Add; cannot cast to *v1.Endpoints.")
+		log.Println("In Endpoint Add; cannot cast to *v1.Endpoints.")
 		return
 	}
 	podSvcName := eps.GetObjectMeta().GetName()
@@ -67,7 +67,7 @@ func (e *EpHandler) add(obj interface{}) {
 
 // Update for EventHandler
 func (e *EpHandler) Update(obj, newObj interface{}) {
-	log.Printf("\n\nEndpoint Update\n Obj: %#v \n newObj: %#v", obj, newObj)
+	log.Printf("Endpoint Update Obj: %#v , newObj: %#v \n", obj, newObj)
 	e.update(newObj)
 	e.Ep.RedisClient.PrintAllKeys()
 }
@@ -75,7 +75,7 @@ func (e *EpHandler) Update(obj, newObj interface{}) {
 func (e *EpHandler) update(obj interface{}) {
 	eps, ok := obj.(*v1.Endpoints)
 	if !ok {
-		log.Println("In EndpointHandler Add; cannot cast to *v1.Endpoints.")
+		log.Println("In Endpoint Update; cannot cast to *v1.Endpoints.")
 		return
 	}
 	podSvcName := eps.GetObjectMeta().GetName()
@@ -105,7 +105,7 @@ func (e *EpHandler) update(obj interface{}) {
 
 // Delete for EventHandler
 func (e *EpHandler) Delete(obj interface{}) {
-	log.Printf("\n\nEndpoint Delete: %#v \n\n", obj)
+	log.Printf("Endpoint Delete: %#v \n", obj)
 	e.delete(obj)
 	e.Ep.RedisClient.PrintAllKeys()
 }
@@ -113,7 +113,7 @@ func (e *EpHandler) Delete(obj interface{}) {
 func (e *EpHandler) delete(obj interface{}) {
 	eps, ok := obj.(*v1.Endpoints)
 	if !ok {
-		log.Println("In EndpointHandler DELETE; cannot cast to *v1.Endpoints.")
+		log.Println("In Endpoint DELETE; cannot cast to *v1.Endpoints.")
 		return
 	}
 	podSvcName := eps.GetObjectMeta().GetName()

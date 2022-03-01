@@ -24,10 +24,11 @@ import (
 	"ingress-ats/redis"
 	"ingress-ats/util"
 
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	nv1 "k8s.io/api/networking/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
+
+var pathExact nv1.PathType = nv1.PathTypeExact
 
 func TestAdd_ExampleIngress(t *testing.T) {
 	igHandler := createExampleIgHandler()
@@ -68,8 +69,8 @@ func TestAdd_ExampleIngressWithTLS(t *testing.T) {
 	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
 
 	expectedKeys := getExpectedKeysForAdd()
-	expectedKeys["https://test.edge.com/app1"] = expectedKeys["http://test.edge.com/app1"]
-	delete(expectedKeys, "http://test.edge.com/app1")
+	expectedKeys["E+https://test.edge.com/app1"] = expectedKeys["E+http://test.edge.com/app1"]
+	delete(expectedKeys, "E+http://test.edge.com/app1")
 
 	if !util.IsSameMap(returnedKeys, expectedKeys) {
 		t.Errorf("returned \n%v,  but expected \n%v", returnedKeys, expectedKeys)
@@ -120,8 +121,8 @@ func TestUpdate_ModifyIngress(t *testing.T) {
 	updatedExampleIngress := createExampleIngress()
 
 	updatedExampleIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[1].Path = "/app2-modified"
-	updatedExampleIngress.Spec.Rules[1].IngressRuleValue.HTTP.Paths[0].Backend.ServiceName = "appsvc1-modified"
-	updatedExampleIngress.Spec.Rules[1].IngressRuleValue.HTTP.Paths[0].Backend.ServicePort = intstr.FromString("9090")
+	updatedExampleIngress.Spec.Rules[1].IngressRuleValue.HTTP.Paths[0].Backend.Service.Name = "appsvc1-modified"
+	updatedExampleIngress.Spec.Rules[1].IngressRuleValue.HTTP.Paths[0].Backend.Service.Port.Number = 9090
 
 	igHandler.add(&exampleIngress)
 	igHandler.update(&exampleIngress, &updatedExampleIngress)
@@ -186,8 +187,8 @@ func TestUpdate_ModifyTLS(t *testing.T) {
 
 	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
 	expectedKeys := getExpectedKeysForAdd()
-	expectedKeys["https://test.edge.com/app1"] = expectedKeys["http://test.edge.com/app1"]
-	expectedKeys["http://test.edge.com/app1"] = []string{}
+	expectedKeys["E+https://test.edge.com/app1"] = expectedKeys["E+http://test.edge.com/app1"]
+	expectedKeys["E+http://test.edge.com/app1"] = []string{}
 
 	if !util.IsSameMap(returnedKeys, expectedKeys) {
 		t.Errorf("returned \n%v,  but expected \n%v", returnedKeys, expectedKeys)
@@ -210,10 +211,10 @@ func TestDelete(t *testing.T) {
 
 }
 
-func createExampleIngressWithTLS() v1beta1.Ingress {
+func createExampleIngressWithTLS() nv1.Ingress {
 	exampleIngress := createExampleIngress()
 
-	exampleIngress.Spec.TLS = []v1beta1.IngressTLS{
+	exampleIngress.Spec.TLS = []nv1.IngressTLS{
 		{
 			Hosts: []string{"test.edge.com"},
 		},
@@ -222,7 +223,7 @@ func createExampleIngressWithTLS() v1beta1.Ingress {
 	return exampleIngress
 }
 
-func createExampleIngressWithAnnotation() v1beta1.Ingress {
+func createExampleIngressWithAnnotation() nv1.Ingress {
 	exampleIngress := createExampleIngress()
 
 	exampleIngress.ObjectMeta.Annotations = make(map[string]string)
@@ -232,31 +233,41 @@ func createExampleIngressWithAnnotation() v1beta1.Ingress {
 	return exampleIngress
 }
 
-func createExampleIngress() v1beta1.Ingress {
-	exampleIngress := v1beta1.Ingress{
+func createExampleIngress() nv1.Ingress {
+	exampleIngress := nv1.Ingress{
 		ObjectMeta: meta_v1.ObjectMeta{
 			Name:      "example-ingress",
 			Namespace: "trafficserver-test",
 		},
-		Spec: v1beta1.IngressSpec{
-			Rules: []v1beta1.IngressRule{
+		Spec: nv1.IngressSpec{
+			Rules: []nv1.IngressRule{
 				{
 					Host: "test.media.com",
-					IngressRuleValue: v1beta1.IngressRuleValue{
-						HTTP: &v1beta1.HTTPIngressRuleValue{
-							Paths: []v1beta1.HTTPIngressPath{
+					IngressRuleValue: nv1.IngressRuleValue{
+						HTTP: &nv1.HTTPIngressRuleValue{
+							Paths: []nv1.HTTPIngressPath{
 								{
-									Path: "/app1",
-									Backend: v1beta1.IngressBackend{
-										ServiceName: "appsvc1",
-										ServicePort: intstr.FromString("8080"),
+									Path:     "/app1",
+									PathType: &pathExact,
+									Backend: nv1.IngressBackend{
+										Service: &nv1.IngressServiceBackend{
+											Name: "appsvc1",
+											Port: nv1.ServiceBackendPort{
+												Number: 8080,
+											},
+										},
 									},
 								},
 								{
-									Path: "/app2",
-									Backend: v1beta1.IngressBackend{
-										ServiceName: "appsvc2",
-										ServicePort: intstr.FromString("8080"),
+									Path:     "/app2",
+									PathType: &pathExact,
+									Backend: nv1.IngressBackend{
+										Service: &nv1.IngressServiceBackend{
+											Name: "appsvc2",
+											Port: nv1.ServiceBackendPort{
+												Number: 8080,
+											},
+										},
 									},
 								},
 							},
@@ -265,14 +276,19 @@ func createExampleIngress() v1beta1.Ingress {
 				},
 				{
 					Host: "test.edge.com",
-					IngressRuleValue: v1beta1.IngressRuleValue{
-						HTTP: &v1beta1.HTTPIngressRuleValue{
-							Paths: []v1beta1.HTTPIngressPath{
+					IngressRuleValue: nv1.IngressRuleValue{
+						HTTP: &nv1.HTTPIngressRuleValue{
+							Paths: []nv1.HTTPIngressPath{
 								{
-									Path: "/app1",
-									Backend: v1beta1.IngressBackend{
-										ServiceName: "appsvc1",
-										ServicePort: intstr.FromString("8080"),
+									Path:     "/app1",
+									PathType: &pathExact,
+									Backend: nv1.IngressBackend{
+										Service: &nv1.IngressServiceBackend{
+											Name: "appsvc1",
+											Port: nv1.ServiceBackendPort{
+												Number: 8080,
+											},
+										},
 									},
 								},
 							},
@@ -331,8 +347,8 @@ func getExpectedKeysForUpdate_ModifySnippet() map[string][]string {
 	expectedKeys["$trafficserver-test/example-ingress/10"] = []string{}
 	expectedKeys["$trafficserver-test/example-ingress/10"] = append(expectedKeys["$trafficserver-test/example-ingress/10"], updatedSnippet)
 
-	expectedKeys["http://test.edge.com/app1"] = expectedKeys["http://test.edge.com/app1"][:1]
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "$trafficserver-test/example-ingress/10")
+	expectedKeys["E+http://test.edge.com/app1"] = expectedKeys["E+http://test.edge.com/app1"][:1]
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "$trafficserver-test/example-ingress/10")
 
 	return expectedKeys
 }
@@ -340,13 +356,13 @@ func getExpectedKeysForUpdate_ModifySnippet() map[string][]string {
 func getExpectedKeysForUpdate_ModifyIngress() map[string][]string {
 	expectedKeys := getExpectedKeysForAdd()
 
-	expectedKeys["http://test.media.com/app2"] = []string{}
+	expectedKeys["E+http://test.media.com/app2"] = []string{}
 
-	expectedKeys["http://test.media.com/app2-modified"] = []string{}
-	expectedKeys["http://test.media.com/app2-modified"] = append(expectedKeys["http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
+	expectedKeys["E+http://test.media.com/app2-modified"] = []string{}
+	expectedKeys["E+http://test.media.com/app2-modified"] = append(expectedKeys["E+http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
 
-	expectedKeys["http://test.edge.com/app1"] = []string{}
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "trafficserver-test:appsvc1-modified:9090")
+	expectedKeys["E+http://test.edge.com/app1"] = []string{}
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "trafficserver-test:appsvc1-modified:9090")
 
 	return expectedKeys
 }
@@ -354,20 +370,20 @@ func getExpectedKeysForUpdate_ModifyIngress() map[string][]string {
 func getExpectedKeysForUpdate_DeleteService() map[string][]string {
 	expectedKeys := getExpectedKeysForAdd()
 
-	expectedKeys["http://test.media.com/app2"] = []string{}
+	expectedKeys["E+http://test.media.com/app2"] = []string{}
 
 	return expectedKeys
 }
 
 func getExpectedKeysForAdd() map[string][]string {
 	expectedKeys := make(map[string][]string)
-	expectedKeys["http://test.edge.com/app1"] = []string{}
-	expectedKeys["http://test.media.com/app1"] = []string{}
-	expectedKeys["http://test.media.com/app2"] = []string{}
+	expectedKeys["E+http://test.edge.com/app1"] = []string{}
+	expectedKeys["E+http://test.media.com/app1"] = []string{}
+	expectedKeys["E+http://test.media.com/app2"] = []string{}
 
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "trafficserver-test:appsvc1:8080")
-	expectedKeys["http://test.media.com/app2"] = append(expectedKeys["http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
-	expectedKeys["http://test.media.com/app1"] = append(expectedKeys["http://test.media.com/app1"], "trafficserver-test:appsvc1:8080")
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "trafficserver-test:appsvc1:8080")
+	expectedKeys["E+http://test.media.com/app2"] = append(expectedKeys["E+http://test.media.com/app2"], "trafficserver-test:appsvc2:8080")
+	expectedKeys["E+http://test.media.com/app1"] = append(expectedKeys["E+http://test.media.com/app1"], "trafficserver-test:appsvc1:8080")
 
 	return expectedKeys
 }
@@ -375,10 +391,10 @@ func getExpectedKeysForAdd() map[string][]string {
 func getExpectedKeysForAddWithAnnotation() map[string][]string {
 	expectedKeys := getExpectedKeysForAdd()
 
-	delete(expectedKeys, "http://test.media.com/app1")
-	delete(expectedKeys, "http://test.media.com/app2")
+	delete(expectedKeys, "E+http://test.media.com/app1")
+	delete(expectedKeys, "E+http://test.media.com/app2")
 
-	expectedKeys["http://test.edge.com/app1"] = append(expectedKeys["http://test.edge.com/app1"], "$trafficserver-test/example-ingress/")
+	expectedKeys["E+http://test.edge.com/app1"] = append(expectedKeys["E+http://test.edge.com/app1"], "$trafficserver-test/example-ingress/")
 
 	exampleSnippet := getExampleSnippet()
 

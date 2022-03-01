@@ -17,11 +17,12 @@ package watcher
 
 import (
 	"log"
+	"strconv"
 
 	"ingress-ats/endpoint"
 	"ingress-ats/util"
 
-	v1beta1 "k8s.io/api/extensions/v1beta1"
+	nv1 "k8s.io/api/networking/v1"
 )
 
 // IgHandler implements EventHandler
@@ -31,32 +32,63 @@ type IgHandler struct {
 }
 
 func (g *IgHandler) Add(obj interface{}) {
-	log.Printf("\n\nIn INGRESS_HANDLER ADD %#v \n\n", obj)
+	log.Printf("In INGRESS_HANDLER ADD %#v \n", obj)
 	g.add(obj)
 	g.Ep.RedisClient.PrintAllKeys()
 }
 
 func (g *IgHandler) add(obj interface{}) {
-	ingressObj, ok := obj.(*v1beta1.Ingress)
+	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Add; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Add; cannot cast to *nv1.Ingress")
 		return
 	}
 
 	namespace := ingressObj.GetNamespace()
-	ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	// v1.18 ingress class name field in ingress object
+	//ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	ingressClass, _ := util.ExtractIngressClassName(obj)
 	if !g.Ep.NsManager.IncludeNamespace(namespace) || !g.Ep.ATSManager.IncludeIngressClass(ingressClass) {
 		log.Println("Namespace not included or Ingress Class not matched")
 		return
 	}
 
+	name := ingressObj.GetName()
+	version := ingressObj.GetResourceVersion()
+	nameversion := util.ConstructNameVersionString(namespace, name, version)
+
 	// add the script before adding route
 	snippet, snippetErr := util.ExtractServerSnippet(ingressObj.GetAnnotations())
 	if snippetErr == nil {
-		name := ingressObj.GetName()
-		version := ingressObj.GetResourceVersion()
-		nameversion := util.ConstructNameVersionString(namespace, name, version)
 		g.Ep.RedisClient.DBOneSAdd(nameversion, snippet)
+	}
+
+	// add default backend rules
+	if ingressObj.Spec.DefaultBackend != nil {
+		host := "*"
+		scheme := "http"
+		path := "/"
+		pathType := nv1.PathTypePrefix
+		hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
+		service := ingressObj.Spec.DefaultBackend.Service.Name
+		port := strconv.Itoa(int(ingressObj.Spec.DefaultBackend.Service.Port.Number))
+		svcport := util.ConstructSvcPortString(namespace, service, port)
+
+		g.Ep.RedisClient.DBOneSAdd(hostPath, svcport)
+
+		if snippetErr == nil {
+			g.Ep.RedisClient.DBOneSAdd(hostPath, nameversion)
+		}
+
+		// add default backend rule for https as well
+		scheme = "https"
+		hostPath = util.ConstructHostPathString(scheme, host, path, pathType)
+
+		g.Ep.RedisClient.DBOneSAdd(hostPath, svcport)
+
+		if snippetErr == nil {
+			g.Ep.RedisClient.DBOneSAdd(hostPath, nameversion)
+		}
 	}
 
 	tlsHosts := make(map[string]string)
@@ -69,6 +101,9 @@ func (g *IgHandler) add(obj interface{}) {
 
 	for _, ingressRule := range ingressObj.Spec.Rules {
 		host := ingressRule.Host
+		if host == "" {
+			host = "*"
+		}
 		scheme := "http"
 		if _, ok := tlsHosts[host]; ok {
 			scheme = "https"
@@ -77,17 +112,15 @@ func (g *IgHandler) add(obj interface{}) {
 		for _, httpPath := range ingressRule.HTTP.Paths {
 
 			path := httpPath.Path
-			hostPath := util.ConstructHostPathString(scheme, host, path)
-			service := httpPath.Backend.ServiceName
-			port := httpPath.Backend.ServicePort.String()
+			pathType := *httpPath.PathType
+			hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
+			service := httpPath.Backend.Service.Name
+			port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 			svcport := util.ConstructSvcPortString(namespace, service, port)
 
 			g.Ep.RedisClient.DBOneSAdd(hostPath, svcport)
 
 			if snippetErr == nil {
-				name := ingressObj.GetName()
-				version := ingressObj.GetResourceVersion()
-				nameversion := util.ConstructNameVersionString(namespace, name, version)
 				g.Ep.RedisClient.DBOneSAdd(hostPath, nameversion)
 			}
 		}
@@ -97,32 +130,73 @@ func (g *IgHandler) add(obj interface{}) {
 
 // Update for EventHandler
 func (g *IgHandler) Update(obj, newObj interface{}) {
-	log.Printf("\n\nIn INGRESS_HANDLER UPDATE %#v \n\n", newObj)
+	log.Printf("In INGRESS_HANDLER UPDATE %#v \n", newObj)
 	g.update(obj, newObj)
 	g.Ep.RedisClient.PrintAllKeys()
 }
 
 func (g *IgHandler) update(obj, newObj interface{}) {
-	ingressObj, ok := obj.(*v1beta1.Ingress)
+	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Update; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Update; cannot cast to *nv1.Ingress")
 		return
 	}
 
-	newIngressObj, ok := newObj.(*v1beta1.Ingress)
+	newIngressObj, ok := newObj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Update; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Update; cannot cast to *nv1.Ingress")
 		return
 	}
 
 	m := make(map[string]string)
 
 	namespace := ingressObj.GetNamespace()
-	ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	// v1.18 ingress class name field in ingress object
+	//ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	ingressClass, _ := util.ExtractIngressClassName(obj)
 	if g.Ep.NsManager.IncludeNamespace(namespace) && g.Ep.ATSManager.IncludeIngressClass(ingressClass) {
 		log.Println("Old Namespace included")
 
+		name := ingressObj.GetName()
+		version := ingressObj.GetResourceVersion()
+		nameversion := util.ConstructNameVersionString(namespace, name, version)
+
 		_, snippetErr := util.ExtractServerSnippet(ingressObj.GetAnnotations())
+
+		// handle default backend rules
+		if ingressObj.Spec.DefaultBackend != nil {
+			host := "*"
+			scheme := "http"
+			path := "/"
+			pathType := nv1.PathTypePrefix
+			hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
+
+			g.Ep.RedisClient.DBOneSUnionStore("temp_"+hostPath, hostPath)
+			m["temp_"+hostPath] = hostPath
+
+			service := ingressObj.Spec.DefaultBackend.Service.Name
+			port := strconv.Itoa(int(ingressObj.Spec.DefaultBackend.Service.Port.Number))
+			svcport := util.ConstructSvcPortString(namespace, service, port)
+
+			g.Ep.RedisClient.DBOneSRem("temp_"+hostPath, svcport)
+
+			if snippetErr == nil {
+				g.Ep.RedisClient.DBOneSRem("temp_"+hostPath, nameversion)
+			}
+
+			// handle default backend https rule
+			scheme = "https"
+			hostPath = util.ConstructHostPathString(scheme, host, path, pathType)
+
+			g.Ep.RedisClient.DBOneSUnionStore("temp_"+hostPath, hostPath)
+			m["temp_"+hostPath] = hostPath
+
+			g.Ep.RedisClient.DBOneSRem("temp_"+hostPath, svcport)
+
+			if snippetErr == nil {
+				g.Ep.RedisClient.DBOneSRem("temp_"+hostPath, nameversion)
+			}
+		}
 
 		tlsHosts := make(map[string]string)
 
@@ -134,6 +208,9 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 
 		for _, ingressRule := range ingressObj.Spec.Rules {
 			host := ingressRule.Host
+			if host == "" {
+				host = "*"
+			}
 			scheme := "http"
 			if _, ok := tlsHosts[host]; ok {
 				scheme = "https"
@@ -142,21 +219,19 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			for _, httpPath := range ingressRule.HTTP.Paths {
 
 				path := httpPath.Path
-				hostPath := util.ConstructHostPathString(scheme, host, path)
+				pathType := *httpPath.PathType
+				hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
 
 				g.Ep.RedisClient.DBOneSUnionStore("temp_"+hostPath, hostPath)
 				m["temp_"+hostPath] = hostPath
 
-				service := httpPath.Backend.ServiceName
-				port := httpPath.Backend.ServicePort.String()
+				service := httpPath.Backend.Service.Name
+				port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 				svcport := util.ConstructSvcPortString(namespace, service, port)
 
 				g.Ep.RedisClient.DBOneSRem("temp_"+hostPath, svcport)
 
 				if snippetErr == nil {
-					name := ingressObj.GetName()
-					version := ingressObj.GetResourceVersion()
-					nameversion := util.ConstructNameVersionString(namespace, name, version)
 					g.Ep.RedisClient.DBOneSRem("temp_"+hostPath, nameversion)
 				}
 			}
@@ -164,17 +239,51 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 		}
 	}
 
-	newNamespace := ingressObj.GetNamespace()
-	newIngressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	newNamespace := newIngressObj.GetNamespace()
+	// v1.18 ingress class name field in ingress object
+	//newIngressClass, _ := util.ExtractIngressClass(newIngressObj.GetAnnotations())
+	newIngressClass, _ := util.ExtractIngressClassName(newObj)
 	if g.Ep.NsManager.IncludeNamespace(newNamespace) && g.Ep.ATSManager.IncludeIngressClass(newIngressClass) {
 		log.Println("New Namespace included")
 
+		name := newIngressObj.GetName()
+		version := newIngressObj.GetResourceVersion()
+		nameversion := util.ConstructNameVersionString(newNamespace, name, version)
+
 		newSnippet, newSnippetErr := util.ExtractServerSnippet(newIngressObj.GetAnnotations())
 		if newSnippetErr == nil {
-			newName := newIngressObj.GetName()
-			newVersion := newIngressObj.GetResourceVersion()
-			newNameversion := util.ConstructNameVersionString(newNamespace, newName, newVersion)
-			g.Ep.RedisClient.DBOneSAdd(newNameversion, newSnippet)
+			g.Ep.RedisClient.DBOneSAdd(nameversion, newSnippet)
+		}
+
+		// handle default backend rule
+		if newIngressObj.Spec.DefaultBackend != nil {
+			host := "*"
+			scheme := "http"
+			path := "/"
+			pathType := nv1.PathTypePrefix
+			hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
+
+			service := newIngressObj.Spec.DefaultBackend.Service.Name
+			port := strconv.Itoa(int(newIngressObj.Spec.DefaultBackend.Service.Port.Number))
+			svcport := util.ConstructSvcPortString(newNamespace, service, port)
+
+			g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
+			m["temp_"+hostPath] = hostPath
+
+			if newSnippetErr == nil {
+				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
+			}
+
+			// handle default backend rule for https as well
+			scheme = "https"
+			hostPath = util.ConstructHostPathString(scheme, host, path, pathType)
+
+			g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
+			m["temp_"+hostPath] = hostPath
+
+			if newSnippetErr == nil {
+				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
+			}
 		}
 
 		newTlsHosts := make(map[string]string)
@@ -187,6 +296,9 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 
 		for _, ingressRule := range newIngressObj.Spec.Rules {
 			host := ingressRule.Host
+			if host == "" {
+				host = "*"
+			}
 			scheme := "http"
 			if _, ok := newTlsHosts[host]; ok {
 				scheme = "https"
@@ -195,20 +307,18 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			for _, httpPath := range ingressRule.HTTP.Paths {
 
 				path := httpPath.Path
-				hostPath := util.ConstructHostPathString(scheme, host, path)
+				pathType := *httpPath.PathType
+				hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
 
-				service := httpPath.Backend.ServiceName
-				port := httpPath.Backend.ServicePort.String()
-				svcport := util.ConstructSvcPortString(namespace, service, port)
+				service := httpPath.Backend.Service.Name
+				port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
+				svcport := util.ConstructSvcPortString(newNamespace, service, port)
 
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
 				m["temp_"+hostPath] = hostPath
 
 				if newSnippetErr == nil {
-					newName := newIngressObj.GetName()
-					newVersion := newIngressObj.GetResourceVersion()
-					newNameversion := util.ConstructNameVersionString(newNamespace, newName, newVersion)
-					g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, newNameversion)
+					g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
 				}
 			}
 
@@ -223,27 +333,59 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 
 // Delete for EventHandler
 func (g *IgHandler) Delete(obj interface{}) {
-	log.Printf("\n\nIn INGRESS_HANDLER DELETE %#v \n\n", obj)
+	log.Printf("In INGRESS_HANDLER DELETE %#v \n", obj)
 	g.delete(obj)
 	g.Ep.RedisClient.PrintAllKeys()
 }
 
 // Helper for Deletes
 func (g *IgHandler) delete(obj interface{}) {
-	ingressObj, ok := obj.(*v1beta1.Ingress)
+	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
-		log.Println("In HandlerIngress Delete; cannot cast to *v1beta1.Ingress")
+		log.Println("In HandlerIngress Delete; cannot cast to *nv1.Ingress")
 		return
 	}
 
 	namespace := ingressObj.GetNamespace()
-	ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	// v1.18 ingress class name field in ingress object
+	//ingressClass, _ := util.ExtractIngressClass(ingressObj.GetAnnotations())
+	ingressClass, _ := util.ExtractIngressClassName(obj)
 	if !g.Ep.NsManager.IncludeNamespace(namespace) || !g.Ep.ATSManager.IncludeIngressClass(ingressClass) {
 		log.Println("Namespace not included or Ingress Class not matched")
 		return
 	}
 
+	name := ingressObj.GetName()
+	version := ingressObj.GetResourceVersion()
+	nameversion := util.ConstructNameVersionString(namespace, name, version)
+
 	_, snippetErr := util.ExtractServerSnippet(ingressObj.GetAnnotations())
+
+	if ingressObj.Spec.DefaultBackend != nil {
+		host := "*"
+		scheme := "http"
+		path := "/"
+		pathType := nv1.PathTypePrefix
+		hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
+		service := ingressObj.Spec.DefaultBackend.Service.Name
+		port := strconv.Itoa(int(ingressObj.Spec.DefaultBackend.Service.Port.Number))
+		svcport := util.ConstructSvcPortString(namespace, service, port)
+
+		g.Ep.RedisClient.DBOneSRem(hostPath, svcport)
+
+		if snippetErr == nil {
+			g.Ep.RedisClient.DBOneSRem(hostPath, nameversion)
+		}
+
+		scheme = "https"
+		hostPath = util.ConstructHostPathString(scheme, host, path, pathType)
+
+		g.Ep.RedisClient.DBOneSRem(hostPath, svcport)
+
+		if snippetErr == nil {
+			g.Ep.RedisClient.DBOneSRem(hostPath, nameversion)
+		}
+	}
 
 	tlsHosts := make(map[string]string)
 
@@ -255,6 +397,9 @@ func (g *IgHandler) delete(obj interface{}) {
 
 	for _, ingressRule := range ingressObj.Spec.Rules {
 		host := ingressRule.Host
+		if host == "" {
+			host = "*"
+		}
 		scheme := "http"
 		if _, ok := tlsHosts[host]; ok {
 			scheme = "https"
@@ -263,17 +408,15 @@ func (g *IgHandler) delete(obj interface{}) {
 		for _, httpPath := range ingressRule.HTTP.Paths {
 
 			path := httpPath.Path
-			hostPath := util.ConstructHostPathString(scheme, host, path)
-			service := httpPath.Backend.ServiceName
-			port := httpPath.Backend.ServicePort.String()
+			pathType := *httpPath.PathType
+			hostPath := util.ConstructHostPathString(scheme, host, path, pathType)
+			service := httpPath.Backend.Service.Name
+			port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 			svcport := util.ConstructSvcPortString(namespace, service, port)
 
 			g.Ep.RedisClient.DBOneSRem(hostPath, svcport)
 
 			if snippetErr == nil {
-				name := ingressObj.GetName()
-				version := ingressObj.GetResourceVersion()
-				nameversion := util.ConstructNameVersionString(namespace, name, version)
 				g.Ep.RedisClient.DBOneSRem(hostPath, nameversion)
 			}
 		}

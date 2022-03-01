@@ -37,7 +37,7 @@
 
 ### Requirements
 - Docker 
-- (Tested on) Kubernetes 1.21.4 (through Minikube 1.23.0)
+- (Tested on) Kubernetes 1.22.* (through Minikube 1.23.0)
 
 To install Docker, visit its [official page](https://docs.docker.com/) and install the correct version for your system.
 
@@ -58,7 +58,7 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
 5. `$ docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/` 
 6. `$ docker build -t node-app-1 k8s/images/node-app-1/`    
 7. `$ docker build -t node-app-2 k8s/images/node-app-2/`
-8. `$ docker pull fluent/fluentd:v1.6-debian-1`
+8. `$ docker pull fluent/fluentd:v1.14-debian-1`
 
 - At this point, we have created necessary images for our example:
   - Step 4 builds an image to create a Docker container that will contain the Apache Traffic Server (ATS) itself, the kubernetes ingress controller, along with other software required for the controller to do its job.
@@ -66,7 +66,7 @@ Once you have cloned the project repo and started Docker and Minikube, in the te
   - Steps 6 and 7 build 2 images that will serve as backends to [kubernetes services](https://kubernetes.io/docs/concepts/services-networking/service/) which we will shortly create
   - Step 8 builds an image for fluentd. This is for log collection.
 
-9. `$ kubectl create namespace trafficserver-test`
+9. `$ kubectl apply -f k8s/traffic-server/ats-ns.yaml`
 10. `$ openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"`
 11. `$ kubectl create secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -`
 12. `$ kubectl apply -f k8s/configmaps/fluentd-configmap.yaml`
@@ -107,11 +107,6 @@ ATS proxying should have started to work. To see proxy in action, we can use [cu
 
 You may have problem with minikube using docker driver as localhost (i.e. 127.0.0.1) will be used as the cluster ip. So you will need to forward the traffic designated for the port to the ports of the ATS pods inside the cluster before the above curl commands will work. Each command below needs to be run in separate terminal. 
 
-- `$ kubectl port-forward <pod name> 30443:8443 -n trafficserver-test`
-- `$ kubectl port-forward <pod name> 30080:8080 -n trafficserver-test`
-
-You may also use the following to fetch the Pod name automatically.
-
 - `$ kubectl port-forward $(kubectl -n trafficserver-test get pods -l=app="trafficserver-test" -o name) 30443:8443 -n trafficserver-test`
 - `$ kubectl port-forward $(kubectl -n trafficserver-test get pods -l=app="trafficserver-test" -o name) 30080:8080 -n trafficserver-test`
 
@@ -128,7 +123,7 @@ Below is an example of configuring Apache Traffic Server [_reloadable_ configura
 
 #### Namespaces for Ingresses
 
-You can specifiy the list of namespaces to look for ingress object by providing `INGRESS_NS`. The default is `all`, which tells the controller to look for ingress objects in all namespaces. Alternatively you can provide a comma-separated list of namespaces for the controller to look for ingresses. Similarly you can specifiy a comma-separated list of namespaces to ignore while the controller is looking for ingresses by providing `INGRESS_IGNORE_NS`. 
+You can specifiy the list of namespaces to look for ingress object by providing an environment variable called `INGRESS_NS`. The default is `all`, which tells the controller to look for ingress objects in all namespaces. Alternatively you can provide a comma-separated list of namespaces for the controller to look for ingresses. Similarly you can specifiy a comma-separated list of namespaces to ignore while the controller is looking for ingresses by providing `INGRESS_IGNORE_NS`.
 
 #### Snippet
 
@@ -136,11 +131,12 @@ You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/8.0.x/a
 
 #### Ingress Class
 
-You can provide an environment variable called `INGRESS_CLASS` in the deployment to specify the ingress class. See an example commented out [here](../k8s/trafficserver/ats-deployment.yaml). Only ingress object with annotation `kubernetes.io/ingress.class` with value equal to the environment variable value will be used by ATS for routing
+You can provide an environment variable called `INGRESS_CLASS` in the deployment to specify the ingress class. See an example commented out [here](../k8s/traffic-server/ats-deployment.yaml). Only ingress object with parameter `ingressClassName` in `spec` section with value equal to the environment variable value will be used by ATS for routing
 
 #### Customizing Logging and TLS
 
-You can specify a different [logging.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/logging.yaml.en.html) and [ssl_server_name.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/ssl_server_name.yaml.en.html) by providing environment variable `LOG_CONFIG_FNAME` and `SSL_SERVER_FNAME` respsectively. See an example commented out [here](../k8s/traffici-server/ats-deployment.yaml). The new contents of them can be provided through a ConfigMap and loaded to a volume mounted for the ATS container (Example [here](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) ). Similarly certificates needed for the connection between ATS and origin can be provided through a Secret that loaded to a volume mounted for the ATS container as well (Example [here](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod) ). To refresh these certificates we may need to override the entrypoint with our own command and add extra script to watch for changes in those secret in order to reload ATS (Example [here](../bin/tls-reload.sh) ).
+You can specify a different
+[logging.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/logging.yaml.en.html) and [ssl_server_name.yaml](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/ssl_server_name.yaml.en.html) by providing environment variable `LOG_CONFIG_FNAME` and `SSL_SERVER_FNAME` respsectively. See an example commented out [here](../k8s/traffic-server/ats-deployment.yaml). The new contents of them can be provided through a ConfigMap and loaded to a volume mounted for the ATS container (Example [here](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) ). Similarly certificates needed for the connection between ATS and origin can be provided through a Secret that loaded to a volume mounted for the ATS container as well (Example [here](https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod) ). To refresh these certificates we may need to override the entrypoint with our own command and add extra script to watch for changes in those secret in order to reload ATS (Example [here](../bin/tls-reload.sh) ).
 
 #### Customizing Plugins
 
@@ -152,7 +148,12 @@ You can specify extra plugins for [plugin.config](https://docs.trafficserver.apa
 
 The above tutorial is already integrated with [Fluentd](https://docs.fluentd.org/). The configuration file used for the same can be found [here](../k8s/configmaps/fluentd-configmap.yaml)
 
-As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at `/opt/ats/var/log/trafficserver/squid.log` and outputs them to `stdout`. The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output). 
+As can be seen from the default configuration file, Fluentd reads the Apache Traffic Server access logs located at
+`/opt/ats/var/log/trafficserver/squid.log` and outputs them to `stdout`. Use `kubectl logs` to check the logs
+
+- `kubectl logs $(kubectl -n trafficserver-test get pods -l=app="trafficserver-test" -o name) -n trafficserver-test -c log-collector`
+
+The ouput plugin for Fluentd can be changed to send the logs to any desired location supported by Fluentd including Elasticsearch, Kafka, MongoDB etc. You can read more about output plugins [here](https://docs.fluentd.org/output).
 
 #### Prometheus and Grafana
 
