@@ -33,8 +33,8 @@ RUN addgroup -Sg 1000 ats
 RUN adduser -S -D -H -u 1000 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 # download and build ATS
-RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.1.1.tar.bz2 | bzip2 -dc | tar xf - \
-  && cd trafficserver-9.1.1/ \
+RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.1.2.tar.bz2 | bzip2 -dc | tar xf - \
+  && cd trafficserver-9.1.2/ \
   && autoreconf -if \
   && ./configure --enable-debug=yes --prefix=/opt/ats --with-user=ats \
   && make \
@@ -70,8 +70,8 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
   bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
-RUN wget https://dl.google.com/go/go1.16.14.src.tar.gz \
-    && tar -C /opt/ats -xzf go1.16.14.src.tar.gz && cd /opt/ats/go/src/ && ./make.bash
+RUN wget https://dl.google.com/go/go1.17.8.src.tar.gz \
+    && tar -C /opt/ats -xzf go1.17.8.src.tar.gz && cd /opt/ats/go/src/ && ./make.bash
 ENV PATH=${PATH}:/opt/ats/go/bin
 ENV GOPATH="/opt/ats/go/bin"
 
