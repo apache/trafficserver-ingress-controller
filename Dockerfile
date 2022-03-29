@@ -50,9 +50,9 @@ RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/va
 RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
 
 # luasocket
-RUN wget https://github.com/diegonehab/luasocket/archive/v3.0-rc1.tar.gz \
-  && tar zxf v3.0-rc1.tar.gz \
-  && cd luasocket-3.0-rc1 \
+RUN https://github.com/lunarmodules/luasocket/archive/refs/tags/v3.0.0.tar.gz \
+  && tar zxf v3.0.0.tar.gz \
+  && cd luasocket-3.0.0 \
   && sed -i "s/LDFLAGS_linux=-O -shared -fpic -o/LDFLAGS_linux=-O -shared -fpic -L\/usr\/lib -lluajit-5.1 -o/" src/makefile \
   && ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so \
   && mkdir -p /usr/include/lua \

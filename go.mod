@@ -6,6 +6,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.13.0
 	github.com/evanphx/json-patch v4.9.0+incompatible // indirect
 	github.com/go-redis/redis v6.15.2+incompatible
+	golang.org/x/text v0.3.7 // indirect
 	k8s.io/api v0.21.9
 	k8s.io/apimachinery v0.21.9
 	k8s.io/client-go v0.21.9
