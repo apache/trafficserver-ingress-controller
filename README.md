@@ -35,6 +35,6 @@ ATS Kubernetes Ingress Controller
 - LuaJIT 2.0.4
 - Go 1.17.8
 - Other Packages
-  - luasocket 3.0rc1
+  - luasocket 3.0.0
   - redis-lua 2.0.4
 
