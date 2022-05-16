@@ -33,7 +33,7 @@ ATS Kubernetes Ingress Controller
 - Alpine Linux 3.14.6
 - Apache Traffic Server 9.1.2
 - LuaJIT 2.0.4
-- Go 1.17.9
+- Go 1.17.10
 - Other Packages
   - luasocket 3.0.0
   - redis-lua 2.0.4

@@ -20,7 +20,7 @@
 ## Development
 
 ### Develop with Go-Lang in Linux
-1. Get Go-lang 1.17.9 from [official site](https://golang.org/dl/)
+1. Get Go-lang 1.17.10 from [official site](https://golang.org/dl/)
 2. Add `go` command to your PATH: `export PATH=$PATH:/usr/local/go/bin`
 3. Define GOPATH: `export GOPATH=$(go env GOPATH)`
 4. Add Go workspace to your PATH: `export PATH=$PATH:$(go env GOPATH)/bin`
