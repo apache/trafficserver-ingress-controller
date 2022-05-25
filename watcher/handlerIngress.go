@@ -19,8 +19,8 @@ import (
 	"log"
 	"strconv"
 
-	"ingress-ats/endpoint"
-	"ingress-ats/util"
+	"github.com/apache/trafficserver-ingress-controller/endpoint"
+	"github.com/apache/trafficserver-ingress-controller/util"
 
 	nv1 "k8s.io/api/networking/v1"
 )

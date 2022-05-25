@@ -18,7 +18,7 @@ package watcher
 import (
 	"log"
 
-	"ingress-ats/endpoint"
+	"github.com/apache/trafficserver-ingress-controller/endpoint"
 
 	v1 "k8s.io/api/core/v1"
 )

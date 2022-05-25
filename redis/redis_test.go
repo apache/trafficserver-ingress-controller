@@ -15,7 +15,7 @@
 package redis
 
 import (
-	"ingress-ats/util"
+	"github.com/apache/trafficserver-ingress-controller/util"
 	"testing"
 )
 

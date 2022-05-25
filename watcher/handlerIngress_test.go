@@ -18,11 +18,11 @@ import (
 	"log"
 	"testing"
 
-	ep "ingress-ats/endpoint"
-	"ingress-ats/namespace"
-	"ingress-ats/proxy"
-	"ingress-ats/redis"
-	"ingress-ats/util"
+	ep "github.com/apache/trafficserver-ingress-controller/endpoint"
+	"github.com/apache/trafficserver-ingress-controller/namespace"
+	"github.com/apache/trafficserver-ingress-controller/proxy"
+	"github.com/apache/trafficserver-ingress-controller/redis"
+	"github.com/apache/trafficserver-ingress-controller/util"
 
 	nv1 "k8s.io/api/networking/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
