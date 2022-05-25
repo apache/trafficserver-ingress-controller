@@ -16,9 +16,9 @@
 package endpoint
 
 import (
-	"ingress-ats/namespace"
-	"ingress-ats/proxy"
-	"ingress-ats/redis"
+	"github.com/apache/trafficserver-ingress-controller/namespace"
+	"github.com/apache/trafficserver-ingress-controller/proxy"
+	"github.com/apache/trafficserver-ingress-controller/redis"
 )
 
 const (

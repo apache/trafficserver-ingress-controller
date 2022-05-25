@@ -24,11 +24,11 @@
 2. Add `go` command to your PATH: `export PATH=$PATH:/usr/local/go/bin`
 3. Define GOPATH: `export GOPATH=$(go env GOPATH)`
 4. Add Go workspace to your PATH: `export PATH=$PATH:$(go env GOPATH)/bin`
-5. Define the base path: `mkdir -p $GOPATH/src/github.com/`
+5. Define the base path: `mkdir -p $GOPATH/src/github.com/apache`
 6. Clone the project:
-   - `cd $GOPATH/src/github.com/`
+   - `cd $GOPATH/src/github.com/apache`
    - `git clone <project>`
-   - `cd <project>`
+   - `cd $GOPATH/src/github.com/apache/<project>`
 7. Define GO111MODULE: `export GO111MODULE=on` to be able to compile locally. 
 
 ### Compilation

@@ -21,6 +21,8 @@ ATS Kubernetes Ingress Controller
 =================================
 ![Test](https://github.com/apache/trafficserver-ingress-controller/workflows/Test/badge.svg)
 ![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/workflows/Build%20and%20Integrate/badge.svg)
+[![Go Report
+Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-controller)](https://goreportcard.com/report/github.com/apache/trafficserver-ingress-controller)
 
 ## Introduction
 [Apache Traffic Server (ATS)](https://trafficserver.apache.org/) is a high performance, open-source, caching proxy server that is scalable and configurable. This project uses ATS as a [Kubernetes(K8s)](https://kubernetes.io/) [ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/)

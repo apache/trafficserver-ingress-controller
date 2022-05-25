@@ -44,5 +44,5 @@ if [ -z "${INGRESS_NS}" ]; then
 	INGRESS_NS="all"
 fi
 
-/opt/ats/go/bin/src/ingress-ats/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T 2>>/opt/ats/var/log/ingress/ingress_ats.err
+/opt/ats/go/bin/src/github.com/apache/trafficserver-ingress-controller/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T 2>>/opt/ats/var/log/ingress/ingress_ats.err
 

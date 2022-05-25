@@ -15,10 +15,10 @@
 package watcher
 
 import (
-	ep "ingress-ats/endpoint"
-	"ingress-ats/namespace"
-	"ingress-ats/proxy"
-	"ingress-ats/redis"
+	ep "github.com/apache/trafficserver-ingress-controller/endpoint"
+	"github.com/apache/trafficserver-ingress-controller/namespace"
+	"github.com/apache/trafficserver-ingress-controller/proxy"
+	"github.com/apache/trafficserver-ingress-controller/redis"
 	"log"
 	"reflect"
 	"testing"

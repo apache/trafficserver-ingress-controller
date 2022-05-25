@@ -33,8 +33,8 @@ import (
 	pkgruntime "k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 
-	"ingress-ats/endpoint"
-	"ingress-ats/proxy"
+	"github.com/apache/trafficserver-ingress-controller/endpoint"
+	"github.com/apache/trafficserver-ingress-controller/proxy"
 )
 
 // FIXME: watching all namespace does not work...

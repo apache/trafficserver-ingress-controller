@@ -76,21 +76,21 @@ ENV PATH=${PATH}:/opt/ats/go/bin
 ENV GOPATH="/opt/ats/go/bin"
 
 # ----------------------- Copy over Project Code to Go path ------------------------
-RUN mkdir -p /opt/ats/go/bin/src/ingress-ats 
+RUN mkdir -p /opt/ats/go/bin/src/github.com/apache/trafficserver-ingress-controller 
 
-COPY ["./main/", "$GOPATH/src/ingress-ats/main"]
-COPY ["./proxy/", "$GOPATH/src/ingress-ats/proxy"]
-COPY ["./namespace/", "$GOPATH/src/ingress-ats/namespace"]
-COPY ["./endpoint/", "$GOPATH/src/ingress-ats/endpoint"]
-COPY ["./util/", "$GOPATH/src/ingress-ats/util"]
-COPY ["./watcher/", "$GOPATH/src/ingress-ats/watcher"]
-COPY ["./pluginats/", "$GOPATH/src/ingress-ats/pluginats"]
-COPY ["./redis/", "$GOPATH/src/ingress-ats/redis"]
-COPY ["./go.mod", "$GOPATH/src/ingress-ats/go.mod"]
-COPY ["./go.sum", "$GOPATH/src/ingress-ats/go.sum"]
+COPY ["./main/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/main"]
+COPY ["./proxy/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/proxy"]
+COPY ["./namespace/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/namespace"]
+COPY ["./endpoint/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/endpoint"]
+COPY ["./util/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/util"]
+COPY ["./watcher/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/watcher"]
+COPY ["./pluginats/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/pluginats"]
+COPY ["./redis/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/redis"]
+COPY ["./go.mod", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/go.mod"]
+COPY ["./go.sum", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/go.sum"]
 
 # Building Project Main
-WORKDIR /opt/ats/go/bin/src/ingress-ats
+WORKDIR /opt/ats/go/bin/src/github.com/apache/trafficserver-ingress-controller
 ENV GO111MODULE=on
 RUN go build -o ingress_ats main/main.go 
 

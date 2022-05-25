@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"log"
 
-	"ingress-ats/endpoint"
-	"ingress-ats/util"
+	"github.com/apache/trafficserver-ingress-controller/endpoint"
+	"github.com/apache/trafficserver-ingress-controller/util"
 
 	v1 "k8s.io/api/core/v1"
 )
