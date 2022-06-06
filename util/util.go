@@ -70,7 +70,10 @@ func (w *Writer) SyncWriteJSONFile(obj interface{}) error {
 	if writeErr != nil {
 		return writeErr
 	}
-	file.Sync() // flushing to disk
+	syncErr := file.Sync() // flushing to disk
+	if syncErr != nil {
+		return syncErr
+	}
 	return nil
 }
 
@@ -228,8 +231,5 @@ func IsSameSlice(x, y []string) bool {
 			delete(diff, _y)
 		}
 	}
-	if len(diff) == 0 {
-		return true
-	}
-	return false
+	return len(diff) == 0
 }
