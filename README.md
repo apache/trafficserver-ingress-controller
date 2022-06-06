@@ -35,7 +35,7 @@ Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-con
 - Alpine Linux 3.14.6
 - Apache Traffic Server 9.1.2
 - LuaJIT 2.0.4
-- Go 1.17.11
+- Go (Version can be found in `GO_VERSION` file found at the base of this repository)
 - Other Packages
   - luasocket 3.0.0
   - redis-lua 2.0.4
