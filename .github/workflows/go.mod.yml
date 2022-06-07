@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-name: Go Fmt
+name: Go Mod
 
 on:
   push:
@@ -34,7 +34,7 @@ on:
     - 'docs/**'
 
 jobs:
-  go-fmt:
+  go-mod:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -45,13 +45,22 @@ jobs:
     - uses: actions/setup-go@v2
       with:
         go-version: ${{ steps.go-version.outputs.value }} # The Go version to download (if necessary) and use.
-    - name: go fmt
+    - name: go mod
       run: |
-        go fmt ./... > /tmp/go.fmt.temp
-        if [ -s /tmp/go.fmt.temp ]; then
-          printf "Files need to go through go fmt.\n";
-          cat /tmp/go.fmt.temp;
-          rm /tmp/go.fmt.temp;
-          exit 1;
+        go mod tidy
+    - name: check go.sum
+      run: |
+        if git diff --exit-code -- go.sum; then
+          printf "go.sum is up-to-date.\n"
+          exit 0
         fi
-
+        printf "Changes found in go.sum. Please run go mod tidy\n"
+        exit 1
+    - name: check go.mod
+      run: |
+        if git diff --exit-code -- go.mod; then
+          printf "go.mod is up-to-date.\n"
+          exit 0
+        fi
+        printf "Changes found in go.mod. Please run go mod tidy\n"
+        exit 1
