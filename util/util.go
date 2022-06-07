@@ -160,11 +160,11 @@ func ExtractIngressClassName(obj interface{}) (class string, err error) {
 	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
 		log.Println("Extracting ingress class name; cannot cast to *nv1.Ingress")
-		return "", fmt.Errorf("Extracting ingress class name; cannot cast to *nv1.Ingress")
+		return "", fmt.Errorf("extracting ingress class name; cannot cast to *nv1.Ingress")
 	}
 
 	if ingressObj.Spec.IngressClassName == nil {
-		return "", fmt.Errorf("Extracting ingress class name; missing the field")
+		return "", fmt.Errorf("extracting ingress class name; missing the field")
 	}
 
 	return *ingressObj.Spec.IngressClassName, nil

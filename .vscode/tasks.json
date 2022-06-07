@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "golangci-lint",
+            "type": "shell",
+            "command": "golangci-lint run"
+        },
+        {
+            "label": "go mod tidy",
+            "type": "shell",
+            "command": "go mod tidy"
+        },
+        {
+            "label": "go vet",
+            "type": "shell",
+            "command": "go vet ./..."
+        },
+        {
+            "label": "go fmt",
+            "type": "shell",
+            "command": "go fmt ./..."
+        },
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "go build -o ingress-ats main/main.go"
+        },
+        {
+            "label": "Test",
+            "type": "shell",
+            "command": "go test ./watcher/ && go test ./redis/"
+        }
+     ]
+}
