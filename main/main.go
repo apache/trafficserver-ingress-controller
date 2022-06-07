@@ -165,5 +165,5 @@ func main() {
 		log.Println("Shutdown signal received, exiting...")
 		close(stopChan)
 		os.Exit(0)
-        }
+	}
 }
