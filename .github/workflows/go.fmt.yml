@@ -48,7 +48,7 @@ jobs:
     - name: go fmt
       run: |
         go fmt ./... > /tmp/go.fmt.temp
-        if [ -s "/tmp/go.fmt.temp" ];
+        if [ -s /tmp/go.fmt.temp ]; then
           printf "Files need to go through go fmt";
           cat /tmp/go.fmt.temp;
           rm /tmp/go.fmt.temp;
