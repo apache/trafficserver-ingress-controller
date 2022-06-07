@@ -161,12 +161,9 @@ func main() {
 	/* Program termination */
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
-	for {
-		select {
-		case <-signalChan:
-			log.Println("Shutdown signal received, exiting...")
-			close(stopChan)
-			os.Exit(0)
-		}
+	for range signalChan {
+		log.Println("Shutdown signal received, exiting...")
+		close(stopChan)
+		os.Exit(0)
 	}
 }

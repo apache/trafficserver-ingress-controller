@@ -20,7 +20,7 @@
 ## Development
 
 ### Develop with Go-Lang in Linux
-1. Get Go-lang 1.17.10 from [official site](https://golang.org/dl/)
+1. Get Go-lang from [official site](https://golang.org/dl/). Check out the version used in `GO_VERSION` file at the base of this repository.
 2. Add `go` command to your PATH: `export PATH=$PATH:/usr/local/go/bin`
 3. Define GOPATH: `export GOPATH=$(go env GOPATH)`
 4. Add Go workspace to your PATH: `export PATH=$PATH:$(go env GOPATH)/bin`
@@ -30,6 +30,12 @@
    - `git clone <project>`
    - `cd $GOPATH/src/github.com/apache/<project>`
 7. Define GO111MODULE: `export GO111MODULE=on` to be able to compile locally. 
+
+### GO code guidelines
+1. Run `golangci-lint run`
+2. Run `go mod tidy`
+3. Run `go fmt ./...`
+4. Run `go vet ./...`
 
 ### Compilation
 To compile, type: `go build -o ingress-ats main/main.go`
@@ -47,11 +53,10 @@ To run the Lua unit tests:
 - `busted connect_redis_test.lua` 
 
 ### Text-Editor
-The repository comes with basic support for both [vscode](https://code.visualstudio.com/) and `vim`. 
+The repository comes with basic support for both [vscode](https://code.visualstudio.com/). 
 
 If you're using `vscode`:
 - `.vscode/settings.json` contains some basic settings for whitespaces and tabs
 - `.vscode/extensions.json` contains a few recommended extensions for this project.
 - It is highly recommended to install the Go extension since it contains the code lint this project used during development.
 
-If you're using `vim`, a `vimrc` file with basic whitespace and tab configurations is also provided

@@ -70,7 +70,10 @@ func (w *Writer) SyncWriteJSONFile(obj interface{}) error {
 	if writeErr != nil {
 		return writeErr
 	}
-	file.Sync() // flushing to disk
+	syncErr := file.Sync() // flushing to disk
+	if syncErr != nil {
+		return syncErr
+	}
 	return nil
 }
 
@@ -157,11 +160,11 @@ func ExtractIngressClassName(obj interface{}) (class string, err error) {
 	ingressObj, ok := obj.(*nv1.Ingress)
 	if !ok {
 		log.Println("Extracting ingress class name; cannot cast to *nv1.Ingress")
-		return "", fmt.Errorf("Extracting ingress class name; cannot cast to *nv1.Ingress")
+		return "", fmt.Errorf("extracting ingress class name; cannot cast to *nv1.Ingress")
 	}
 
 	if ingressObj.Spec.IngressClassName == nil {
-		return "", fmt.Errorf("Extracting ingress class name; missing the field")
+		return "", fmt.Errorf("extracting ingress class name; missing the field")
 	}
 
 	return *ingressObj.Spec.IngressClassName, nil
@@ -228,8 +231,5 @@ func IsSameSlice(x, y []string) bool {
 			delete(diff, _y)
 		}
 	}
-	if len(diff) == 0 {
-		return true
-	}
-	return false
+	return len(diff) == 0
 }
