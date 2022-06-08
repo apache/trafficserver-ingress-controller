@@ -1,0 +1,42 @@
+name: Build and Release Helm Chart
+
+on:
+  push:
+    branches:
+    - 'master'
+    paths:
+    - 'charts/**'
+
+jobs:
+  build-and-release-helm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+        with:
+          submodules: 'true'
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.5.4
+
+      - name: Build Helm Chart
+        run: |
+          cd trafficserver-ingress-controller/charts
+          helm package ats-ingress
+          helm repo index . --url https://apache.github.io/trafficserver-ingress-controller
+          cp index.yaml ../docs/
+          cp ats-ingress-*.tgz ../docs/
+          cd ../../
+          git add docs/index.yaml
+          git add docs/ats-ingress-*.tgz
+          git commit -m 'Release new version of helm chart'
+          git push origin master
+
