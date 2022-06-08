@@ -9,6 +9,7 @@ on:
 
 jobs:
   build-and-release-helm:
+    if: github.repository == 'apache/trafficserver-ingress-controller'
     runs-on: ubuntu-latest
 
     steps:
