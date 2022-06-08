@@ -39,7 +39,7 @@ controller:
 
   ## Image Information
   image:
-    repository: kichan/ats-ingress
+    repository: ghcr.io/apache/ats-ingress
     pullPolicy: IfNotPresent
     tag: latest
 
