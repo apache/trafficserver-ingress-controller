@@ -30,12 +30,12 @@ jobs:
 
       - name: Build Helm Chart
         run: |
-          cd trafficserver-ingress-controller/charts
+          cd charts
           helm package ats-ingress
           helm repo index . --url https://apache.github.io/trafficserver-ingress-controller
           cp index.yaml ../docs/
           cp ats-ingress-*.tgz ../docs/
-          cd ../../
+          cd ..
           git add docs/index.yaml
           git add docs/ats-ingress-*.tgz
           git commit -m 'Release new version of helm chart'
