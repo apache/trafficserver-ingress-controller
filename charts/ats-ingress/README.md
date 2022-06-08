@@ -21,7 +21,7 @@
 This is the ats-ingress chart repository for Helm V3. 
 
 ## To build and push new version of the helm chart
-1. Check out the [github action for helm release](https://github.com/apache/trafficserver-ingress-controller/blob/master/.github/workflows/helm.yml)
+1. Done through [github action for helm release](https://github.com/apache/trafficserver-ingress-controller/blob/master/.github/workflows/helm.yml)
 
 ## To install from git source
 1. git clone the project
