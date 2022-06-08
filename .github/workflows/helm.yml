@@ -13,22 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-        with:
-          submodules: 'true'
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
-
       - name: Install Helm
         uses: azure/setup-helm@v1
         with:
           version: v3.5.4
 
-      - name: Build Helm Chart
+      - name: Checkout
+        uses: actions/checkout@v3
         run: |
           cd charts
           helm package ats-ingress
@@ -36,8 +27,10 @@ jobs:
           cp index.yaml ../docs/
           cp ats-ingress-*.tgz ../docs/
           cd ..
+          git config user.name github-actions
+          git config user.email github-actions@github.com
           git add docs/index.yaml
           git add docs/ats-ingress-*.tgz
           git commit -m 'Release new version of helm chart'
-          git push origin master
+          git push
 
