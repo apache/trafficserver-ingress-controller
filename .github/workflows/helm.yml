@@ -18,9 +18,8 @@ jobs:
         with:
           version: v3.5.4
 
-      - name: Checkout
-        uses: actions/checkout@v3
-        run: |
+      - uses: actions/checkout@v3
+      - run: |
           cd charts
           helm package ats-ingress
           helm repo index . --url https://apache.github.io/trafficserver-ingress-controller
