@@ -3,12 +3,12 @@ entries:
   ats-ingress:
   - apiVersion: v2
     appVersion: 0.1.0
-    created: "2022-06-08T01:17:00.271507-07:00"
+    created: "2022-06-08T18:28:17.849370736Z"
     description: A Helm chart for Kubernetes
-    digest: ede1f813e682bae7e7f3e38ba3c423368b6591656a2f26113e2f9473a5791367
+    digest: a45f33d184f769d74f5347cacba33ad18f58a9f2504b881122a509ae5a407859
     name: ats-ingress
     type: application
     urls:
     - https://apache.github.io/trafficserver-ingress-controller/ats-ingress-0.1.0.tgz
     version: 0.1.0
-generated: "2022-06-08T01:17:00.270572-07:00"
+generated: "2022-06-08T18:28:17.848257154Z"
