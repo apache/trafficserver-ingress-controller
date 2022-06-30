@@ -142,6 +142,14 @@ You can specify a different
 
 You can specify extra plugins for [plugin.config](https://docs.trafficserver.apache.org/en/8.1.x/admin-guide/files/plugin.config.en.html) by providing environment variable `EXTRA_PLUGIN_FNAME`. Its contents can be provided through a ConfigMap and loaded to a volume mounted for the ATS container (Example [here](https://kubernetes.io/docs/concepts/storage/volumes/#configmap) ).
 
+#### Enabling Controller Debug Log
+
+You can enable debug for the controller by providing environment variable `INGRESS_DEBUG`. See an example commented out [here](../k8s/traffic-server/ats-deployment.yaml).
+
+#### Tune Resync Period of Controller
+
+You can adjust the resync period for the controller by providing environment variable `RESYNC_PRIOD`.
+
 ### Logging and Monitoring
 
 #### Fluentd
