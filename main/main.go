@@ -22,6 +22,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"time"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -54,6 +55,8 @@ var (
 
 	atsNamespace    = flag.String("atsNamespace", "default", "Name of Namespace the ATS pod resides.")
 	atsIngressClass = flag.String("atsIngressClass", "", "Ingress Class of Ingress object that ATS will retrieve routing info from")
+
+	resyncPeriod = flag.Duration("resyncPeriod", 0*time.Second, "Resync period for the cache of informer")
 )
 
 func init() {
@@ -149,6 +152,7 @@ func main() {
 	watcher := w.Watcher{
 		Cs:           clientset,
 		ATSNamespace: *atsNamespace,
+		ResyncPeriod: *resyncPeriod,
 		Ep:           &endpoint,
 		StopChan:     stopChan,
 	}

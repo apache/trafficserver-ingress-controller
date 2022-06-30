@@ -43,6 +43,7 @@ import (
 type Watcher struct {
 	Cs           kubernetes.Interface
 	ATSNamespace string
+	ResyncPeriod time.Duration
 	Ep           *endpoint.Endpoint
 	StopChan     chan struct{}
 }
@@ -61,7 +62,7 @@ func (w *Watcher) Watch() error {
 	igHandler := IgHandler{"ingresses", w.Ep}
 	igListWatch := cache.NewListWatchFromClient(w.Cs.NetworkingV1().RESTClient(), igHandler.GetResourceName(), v1.NamespaceAll, fields.Everything())
 	err := w.allNamespacesWatchFor(&igHandler, w.Cs.NetworkingV1().RESTClient(),
-		fields.Everything(), &nv1.Ingress{}, 0, igListWatch)
+		fields.Everything(), &nv1.Ingress{}, w.ResyncPeriod, igListWatch)
 	if err != nil {
 		return err
 	}
@@ -69,7 +70,7 @@ func (w *Watcher) Watch() error {
 	epHandler := EpHandler{"endpoints", w.Ep}
 	epListWatch := cache.NewListWatchFromClient(w.Cs.CoreV1().RESTClient(), epHandler.GetResourceName(), v1.NamespaceAll, fields.Everything())
 	err = w.allNamespacesWatchFor(&epHandler, w.Cs.CoreV1().RESTClient(),
-		fields.Everything(), &v1.Endpoints{}, 0, epListWatch)
+		fields.Everything(), &v1.Endpoints{}, w.ResyncPeriod, epListWatch)
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func (w *Watcher) Watch() error {
 	targetNs := make([]string, 1)
 	targetNs[0] = w.Ep.ATSManager.(*proxy.ATSManager).Namespace
 	err = w.inNamespacesWatchFor(&cmHandler, w.Cs.CoreV1().RESTClient(),
-		targetNs, fields.Everything(), &v1.ConfigMap{}, 0)
+		targetNs, fields.Everything(), &v1.ConfigMap{}, w.ResyncPeriod)
 	if err != nil {
 		return err
 	}
