@@ -67,6 +67,8 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
 # Optional environment variables
+#            - name: INGRESS_DEBUG
+#              value: "true"
 #            - name: INGRESS_CLASS
 #              value: "ats"
 #            - name: LOG_CONFIG_FNAME
