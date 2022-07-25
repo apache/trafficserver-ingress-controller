@@ -15,15 +15,14 @@
 # limitations under the License.
 #
 
-FROM alpine:3.14.6 as builder 
+FROM alpine:3.14.7 as builder
 
 RUN apk add --no-cache --virtual .tools \
-  bzip2 curl git automake libtool autoconf make sed file perl openrc openssl=1.1.1q-r0 \
-  libssl1.1=1.1.1q-r0 libcrypto1.1=1.1.1q-r0
+  bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
 
 # ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
-  build-base openssl-dev=1.1.1q-r0 tcl-dev pcre-dev zlib-dev \
+  build-base openssl-dev tcl-dev pcre-dev zlib-dev \
   libexecinfo-dev linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev 
 
@@ -68,7 +67,7 @@ RUN wget https://github.com/nrk/redis-lua/archive/v2.0.4.tar.gz \
 
 # ingress-ats
 RUN apk add --no-cache --virtual .ingress-build-deps \
-  bash gcc musl-dev openssl=1.1.1q-r0 libssl1.1=1.1.1q-r0 libcrypto1.1=1.1.1q-r0 go
+  bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
 COPY GO_VERSION /
@@ -119,7 +118,7 @@ RUN mkdir -p /opt/ats/var/run/redis/ \
 # set up ingress log location
 RUN mkdir -p /opt/ats/var/log/ingress/
 
-FROM alpine:3.14.6
+FROM alpine:3.14.7
 
 # essential library  
 RUN apk add --no-cache -U \
@@ -128,9 +127,7 @@ RUN apk add --no-cache -U \
     curl ca-certificates \
     pcre \
     zlib \
-    openssl=1.1.1q-r0 \
-    libssl1.1=1.1.1q-r0 \
-    libcrypto1.1=1.1.1q-r0 \
+    openssl \
     brotli \
     jansson \
     luajit \
