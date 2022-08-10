@@ -22,7 +22,7 @@ RUN apk add --no-cache --virtual .tools \
 
 # ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
-  build-base openssl-dev tcl-dev pcre-dev zlib-dev \
+  build-base openssl-dev tcl-dev pcre-dev zlib-dev=1.2.12-r3 \
   libexecinfo-dev linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev 
 
@@ -126,7 +126,7 @@ RUN apk add --no-cache -U \
     build-base \
     curl ca-certificates \
     pcre \
-    zlib \
+    zlib=1.2.12-r3 \
     openssl \
     brotli \
     jansson \
