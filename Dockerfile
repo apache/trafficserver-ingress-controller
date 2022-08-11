@@ -15,14 +15,14 @@
 # limitations under the License.
 #
 
-FROM alpine:3.14.7 as builder
+FROM alpine:3.14.8 as builder
 
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
 
 # ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
-  build-base openssl-dev tcl-dev pcre-dev zlib-dev=1.2.12-r3 \
+  build-base openssl-dev tcl-dev pcre-dev zlib-dev \
   libexecinfo-dev linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev 
 
@@ -118,7 +118,7 @@ RUN mkdir -p /opt/ats/var/run/redis/ \
 # set up ingress log location
 RUN mkdir -p /opt/ats/var/log/ingress/
 
-FROM alpine:3.14.7
+FROM alpine:3.14.8
 
 # essential library  
 RUN apk add --no-cache -U \
@@ -126,7 +126,7 @@ RUN apk add --no-cache -U \
     build-base \
     curl ca-certificates \
     pcre \
-    zlib=1.2.12-r3 \
+    zlib \
     openssl \
     brotli \
     jansson \
