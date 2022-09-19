@@ -18,7 +18,7 @@
 FROM alpine:3.14.8 as builder
 
 RUN apk add --no-cache --virtual .tools \
-  bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
+  bzip2 curl=7.79.1-r3 git automake libtool autoconf make sed file perl openrc openssl
 
 # ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
@@ -124,7 +124,7 @@ FROM alpine:3.14.8
 RUN apk add --no-cache -U \
     bash \
     build-base \
-    curl ca-certificates \
+    curl=7.79.1-r3 ca-certificates \
     pcre \
     zlib \
     openssl \
