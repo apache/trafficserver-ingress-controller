@@ -24,7 +24,7 @@ jobs:
     steps:
 
     - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: go-version
       run: echo "::set-output name=value::$(cat GO_VERSION)"
