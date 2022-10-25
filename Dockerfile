@@ -24,7 +24,7 @@ RUN apk add --no-cache --virtual .tools \
 RUN apk add --no-cache --virtual .ats-build-deps \
   build-base openssl-dev tcl-dev pcre-dev zlib-dev \
   libexecinfo-dev linux-headers libunwind-dev \
-  brotli-dev jansson-dev luajit-dev readline-dev geoip-dev libxml2-dev=2.9.14-r1
+  brotli-dev jansson-dev luajit-dev readline-dev geoip-dev libxml2-dev=2.9.14-r2
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc-dev
 
@@ -140,7 +140,7 @@ RUN apk add --no-cache -U \
     openrc \
     inotify-tools \
     cpulimit \
-    libxml2=2.9.14-r1
+    libxml2=2.9.14-r2
 
 RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
 
