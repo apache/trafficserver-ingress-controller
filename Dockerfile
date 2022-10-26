@@ -73,7 +73,7 @@ RUN apk add --no-cache --virtual .ingress-build-deps \
 COPY GO_VERSION /
 RUN go_version=$(cat /GO_VERSION) \
     && wget https://dl.google.com/go/go${go_version}.src.tar.gz \
-    && tar -C /opt/ats -xzf go${go_version}.src.tar.gz && cd /opt/ats/go/src/ && ./make.bash
+    && rm -rf /opt/ats/go && tar -C /opt/ats -xzf go${go_version}.src.tar.gz && cd /opt/ats/go/src/ && ./make.bash
 ENV PATH=${PATH}:/opt/ats/go/bin
 ENV GOPATH="/opt/ats/go/bin"
 
@@ -94,7 +94,7 @@ COPY ["./go.sum", "$GOPATH/src/github.com/apache/trafficserver-ingress-controlle
 # Building Project Main
 WORKDIR /opt/ats/go/bin/src/github.com/apache/trafficserver-ingress-controller
 ENV GO111MODULE=on
-RUN go build -o ingress_ats main/main.go 
+RUN /opt/ats/go/bin/go build -o ingress_ats main/main.go 
 
 # redis conf 
 COPY ["./config/redis.conf", "/opt/ats/etc/redis.conf"]
