@@ -33,7 +33,7 @@ Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-con
 
 ## Versions of Software Used
 - Alpine Linux 3.14.8
-- Apache Traffic Server 9.1.3
+- Apache Traffic Server 9.1.4
 - LuaJIT 2.0.4
 - Go (Version can be found in `GO_VERSION` file found at the base of this repository)
 - Other Packages
