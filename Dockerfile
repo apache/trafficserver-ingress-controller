@@ -70,7 +70,7 @@ RUN wget https://github.com/nrk/redis-lua/archive/v2.0.4.tar.gz \
 
 # ingress-ats
 RUN apk add --no-cache --virtual .ingress-build-deps \
-  bash gcc musl-dev openssl
+  bash gcc musl-dev openssl go
 
 # Installing Golang https://github.com/CentOS/CentOS-Dockerfiles/blob/master/golang/centos7/Dockerfile
 COPY GO_VERSION /
