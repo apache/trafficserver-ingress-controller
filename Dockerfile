@@ -98,6 +98,7 @@ COPY ["./go.sum", "$GOPATH/src/github.com/apache/trafficserver-ingress-controlle
 WORKDIR /opt/ats/go/bin/src/github.com/apache/trafficserver-ingress-controller
 ENV GO111MODULE=on
 RUN /opt/ats/go/bin/go build -o ingress_ats main/main.go 
+RUN /opt/ats/go/bin/go clean -modcache
 
 # redis conf 
 COPY ["./config/redis.conf", "/opt/ats/etc/redis.conf"]
