@@ -49,7 +49,7 @@ if [ -z "${RESYNC_PERIOD}" ]; then
 fi
 
 if [ -z "${INGRESS_DEBUG}" ]; then
-  /opt/ats/go/bin/src/github.com/apache/trafficserver-ingress-controller/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T -resyncPeriod="$RESYNC_PERIOD"
+  /opt/ats/bin/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T -resyncPeriod="$RESYNC_PERIOD"
 else
-  /opt/ats/go/bin/src/github.com/apache/trafficserver-ingress-controller/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T -resyncPeriod="$RESYNC_PERIOD" 2>>/opt/ats/var/log/ingress/ingress_ats.err
+  /opt/ats/bin/ingress_ats -atsIngressClass="$INGRESS_CLASS" -atsNamespace="$POD_NAMESPACE" -namespaces="$INGRESS_NS" -ignoreNamespaces="$INGRESS_IGNORE_NS" -useInClusterConfig=T -resyncPeriod="$RESYNC_PERIOD" 2>>/opt/ats/var/log/ingress/ingress_ats.err
 fi
