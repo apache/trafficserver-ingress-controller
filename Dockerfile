@@ -89,7 +89,7 @@ COPY ["./namespace/", "$GOPATH/src/github.com/apache/trafficserver-ingress-contr
 COPY ["./endpoint/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/endpoint"]
 COPY ["./util/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/util"]
 COPY ["./watcher/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/watcher"]
-COPY ["./pluginats/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/pluginats"]
+COPY ["./pluginats/", "/opt/ats/var"]
 COPY ["./redis/", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/redis"]
 COPY ["./go.mod", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/go.mod"]
 COPY ["./go.sum", "$GOPATH/src/github.com/apache/trafficserver-ingress-controller/go.sum"]
