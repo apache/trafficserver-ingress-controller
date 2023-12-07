@@ -15,14 +15,14 @@
 # limitations under the License.
 #
 
-FROM alpine:3.16.5 as builder
+FROM alpine:3.16.7 as builder
 
 RUN apk add --no-cache --virtual .tools \
-  bzip2 curl git automake libtool autoconf make sed file perl openrc openssl
+  bzip2 curl=8.4.0-r0 nghttp2-libs=1.47.0-r2 git automake libtool autoconf make sed file perl openrc openssl=1.1.1w-r1
 
 # ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
-  build-base openssl-dev tcl-dev pcre-dev zlib-dev \
+  build-base openssl-dev=1.1.1w-r1 tcl-dev pcre-dev zlib-dev \
   libexecinfo-dev linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev libxml2-dev
 
@@ -34,8 +34,8 @@ RUN adduser -S -D -H -u 1000 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 # download and build ATS
 # patch 2 files due to pthread in musl vs glibc - see https://github.com/apache/trafficserver/pull/7611/files
-RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.2.0.tar.bz2 | bzip2 -dc | tar xf - \
-  && cd trafficserver-9.2.0/ \
+RUN curl -L https://downloads.apache.org/trafficserver/trafficserver-9.2.3.tar.bz2 | bzip2 -dc | tar xf - \
+  && cd trafficserver-9.2.3/ \
   && sed -i "s/PTHREAD_RWLOCK_WRITER_NONRECURSIVE_INITIALIZER_NP/PTHREAD_RWLOCK_INITIALIZER/" include/tscore/ink_rwlock.h \
   && sed -i "s/PTHREAD_RWLOCK_WRITER_NONRECURSIVE_INITIALIZER_NP/PTHREAD_RWLOCK_INITIALIZER/" include/tscpp/util/TsSharedMutex.h \
   && autoreconf -if \
@@ -123,16 +123,18 @@ RUN mkdir -p /opt/ats/var/run/redis/ \
 # set up ingress log location
 RUN mkdir -p /opt/ats/var/log/ingress/
 
-FROM alpine:3.16.5
+FROM alpine:3.16.7
 
 # essential library  
 RUN apk add --no-cache -U \
     bash \
     build-base \
-    curl ca-certificates \
+    curl=8.4.0-r0 \
+    nghttp2-libs=1.47.0-r2 \
+    ca-certificates \
     pcre \
     zlib \
-    openssl \
+    openssl=1.1.1w-r1 \
     brotli \
     jansson \
     luajit \
