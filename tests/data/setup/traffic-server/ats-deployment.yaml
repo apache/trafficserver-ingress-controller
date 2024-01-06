@@ -81,12 +81,12 @@ spec:
             mountPath: "/var/log"
           - name: config-volume
             mountPath: "/fluentd/etc"
-        - name: trafficserver-exporter
-          image: ats-ingress-exporter:latest
-          imagePullPolicy: IfNotPresent
-          args: ["--endpoint=http://127.0.0.1:8080/_stats"]
-          ports:
-          - containerPort: 9122
+#        - name: trafficserver-exporter
+#          image: ats-ingress-exporter:latest
+#          imagePullPolicy: IfNotPresent
+#          args: ["--endpoint=http://127.0.0.1:8080/_stats"]
+#          ports:
+#          - containerPort: 9122
       volumes:
         - name: ats-ssl
           secret:
