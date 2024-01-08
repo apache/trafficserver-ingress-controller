@@ -37,7 +37,7 @@ jobs:
       - name: Set up Python 3.7
         uses: actions/setup-python@v2
         with:
-          python-version: '3.7'
+          python-version: '3.7.16'
 
       - name: Build ATS Alpine
         run: docker build -t ats-ingress .
