@@ -31,7 +31,7 @@ jobs:
         uses: manusa/actions-setup-minikube@v2.10.0
         with:
           minikube version: 'v1.32.0'
-          kubernetes version: 'v1.26.11'
+          kubernetes version: 'v1.24.17'
           github token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python 3.7
