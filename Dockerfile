@@ -142,7 +142,7 @@ RUN apk add --no-cache -U \
     readline \
     geoip \
     libexecinfo \
-    redis \
+    redis=7.0.15-r0 \
     tcl \
     openrc \
     inotify-tools \

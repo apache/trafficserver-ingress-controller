@@ -43,6 +43,7 @@ def setup_module(module):
     kubectl_apply('data/setup/apps/')
     kubectl_apply('data/setup/ingresses/')
     time.sleep(90)
+    misc_command('kubectl get all -A')
 
 def teardown_module(module):
     kubectl_delete('namespace trafficserver-test-3')
