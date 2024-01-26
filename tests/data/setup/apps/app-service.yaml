@@ -36,6 +36,7 @@ metadata:
 spec:
   ports:
   - port: 8080
+    name: "appsvc1http"
     protocol: TCP
     targetPort: 8080
   selector:
@@ -49,7 +50,7 @@ metadata:
 spec:
   ports:
   - port: 8080
-    name: "main"
+    name: "appsvc2http"
     protocol: TCP
     targetPort: 8080
 
@@ -66,6 +67,7 @@ metadata:
 spec:
   ports:
   - port: 8080
+    name: "appsvc1http"
     protocol: TCP
     targetPort: 8080
   selector:
@@ -79,7 +81,7 @@ metadata:
 spec:
   ports:
   - port: 8080
-    name: "main"
+    name: "appsvc2http"
     protocol: TCP
     targetPort: 8080
 
