@@ -46,11 +46,13 @@ def setup_module(module):
     misc_command('kubectl get all -A')
     misc_command('kubectl get pod -A -o wide')
     misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2')
-    misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3 -- ps auxxx')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3 -- curl -v localhost:8080/')
+#    misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[1].status.podIP}):8080')
-    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-3 -o jsonpath={.items[1].status.podIP}):8080')
+#    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-3 -o jsonpath={.items[1].status.podIP}):8080')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc1 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080')
-    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc2 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080')
+#    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc2 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080')
 
 def teardown_module(module):
     kubectl_delete('namespace trafficserver-test-3')
