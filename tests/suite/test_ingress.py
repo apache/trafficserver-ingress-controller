@@ -44,8 +44,13 @@ def setup_module(module):
     kubectl_apply('data/setup/ingresses/')
     time.sleep(90)
     misc_command('kubectl get all -A')
+    misc_command('kubectl get pod -A -o wide')
     misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2')
+    misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[1].status.podIP}):8080')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-3 -o jsonpath={.items[1].status.podIP}):8080')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc1 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc2 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080')
 
 def teardown_module(module):
     kubectl_delete('namespace trafficserver-test-3')
@@ -110,7 +115,7 @@ class TestIngress:
     def test_basic_routing_edge_app1(self, minikubeip):
         req_url = "http://" + minikubeip + ":30080/app1"
         resp = requests.get(req_url, headers={"host": "test.edge.com"})
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
@@ -119,7 +124,7 @@ class TestIngress:
     def test_basic_routing_media_app1(self, minikubeip):
         req_url = "http://" + minikubeip + ":30080/app1"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
@@ -128,7 +133,7 @@ class TestIngress:
     def test_basic_routing_edge_app2(self, minikubeip):
         req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.edge.com"})
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
@@ -137,7 +142,7 @@ class TestIngress:
     def test_basic_routing_media_app2(self, minikubeip):
         req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
@@ -146,7 +151,7 @@ class TestIngress:
     def test_basic_routing_edge_app2_https(self, minikubeip):
         req_url = "https://" + minikubeip + ":30443/app2"
         resp = requests.get(req_url, headers={"host": "test.edge.com"}, verify=False)
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
@@ -156,7 +161,7 @@ class TestIngress:
         kubectl_apply('data/ats-ingress-update.yaml')
         req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
@@ -166,7 +171,7 @@ class TestIngress:
         kubectl_apply('data/ats-ingress-delete.yaml')
         req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 404,\
             f"Expected: 400 response code for test_basic_routing_deleted_ingress"
@@ -175,7 +180,7 @@ class TestIngress:
         kubectl_apply('data/ats-ingress-add.yaml')
         req_url = "http://" + minikubeip + ":30080/test"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
@@ -185,7 +190,7 @@ class TestIngress:
         kubectl_apply('data/ats-ingress-snippet.yaml')
         req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.edge.com"},allow_redirects=False)
-        misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/squid.log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 301,\
             f"Expected: 301 response code for test_snippet_edge_app2"
