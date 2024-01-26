@@ -52,6 +52,8 @@ spec:
           value: app1
         ports:
         - containerPort: 8080
+          name: http
+          protocol: TCP        
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -77,7 +79,8 @@ spec:
           value: app2
         ports:
         - containerPort: 8080
-
+          name: http
+          protocol: TCP
 ---
 
 apiVersion: apps/v1
@@ -104,6 +107,8 @@ spec:
           value: app1
         ports:
         - containerPort: 8080
+          name: http
+          protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -129,3 +134,5 @@ spec:
           value: app2
         ports:
         - containerPort: 8080
+          name: http
+          protocol: TCP
