@@ -44,7 +44,8 @@ def setup_module(module):
     kubectl_apply('data/setup/ingresses/')
     time.sleep(90)
     misc_command('kubectl get all -A')
-    misc_command('kubectl exec -it $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc1 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080')
+    misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc1 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080')
 
 def teardown_module(module):
     kubectl_delete('namespace trafficserver-test-3')
