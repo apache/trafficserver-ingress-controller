@@ -43,7 +43,6 @@ jobs:
 
       - name: Build ATS Alpine
         run: |
-          eval $(minikube -p minikube docker-env)
           docker build -t ats-ingress .
 
 #      - name: Build Exporter
