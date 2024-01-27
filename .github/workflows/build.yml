@@ -43,7 +43,8 @@ jobs:
 
       - name: Build ATS Alpine
         run: |
-          docker build -t ats-ingress .
+          eval $(minikube -p minikube docker-env)          
+          docker build -t ats-ingress . --network=host
 
 #      - name: Build Exporter
 #        run: docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/
