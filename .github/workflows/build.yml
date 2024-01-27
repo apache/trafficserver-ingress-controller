@@ -43,7 +43,6 @@ jobs:
 
       - name: Build ATS Alpine
         run: |
-          export SHELL=/bin/bash
           eval $(minikube -p minikube docker-env)
           docker build -t ats-ingress .
 
@@ -52,13 +51,11 @@ jobs:
 
       - name: Build App 1
         run: |
-          export SHELL=/bin/bash
           eval $(minikube -p minikube docker-env)
           docker build -t node-app-1 k8s/images/node-app-1/
 
       - name: Build App 2
         run: |
-          export SHELL=/bin/bash
           eval $(minikube -p minikube docker-env)
           docker build -t node-app-2 k8s/images/node-app-2/
 
