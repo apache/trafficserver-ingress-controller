@@ -42,16 +42,25 @@ jobs:
           python-version: '3.7'
 
       - name: Build ATS Alpine
-        run: docker build -t ats-ingress .
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker build -t ats-ingress .
 
-      - name: Build Exporter
-        run: docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/
+#      - name: Build Exporter
+#        run: docker build -t ats-ingress-exporter k8s/images/trafficserver_exporter/
 
       - name: Build App 1
-        run: docker build -t node-app-1 k8s/images/node-app-1/
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker build -t node-app-1 k8s/images/node-app-1/
 
       - name: Build App 2
-        run: docker build -t node-app-2 k8s/images/node-app-2/
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker build -t node-app-2 k8s/images/node-app-2/
 
       - name: Install dependencies
         run: |
