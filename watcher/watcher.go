@@ -99,7 +99,7 @@ func (w *Watcher) allNamespacesWatchFor(h EventHandler, c cache.Getter,
 		sharedInformer = factory.Networking().V1().Ingresses().Informer()
 	}
 
-	sharedInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, _ := sharedInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    h.Add,
 		UpdateFunc: h.Update,
 		DeleteFunc: h.Delete,
@@ -137,7 +137,7 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 			sharedInformer = factory.Core().V1().ConfigMaps().Informer()
 		}
 
-		sharedInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		_, _ := sharedInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 			AddFunc:    h.Add,
 			UpdateFunc: h.Update,
 			DeleteFunc: h.Delete,
