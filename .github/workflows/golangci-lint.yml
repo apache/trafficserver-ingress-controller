@@ -44,15 +44,15 @@ jobs:
 
     steps:
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: go-version
         run: echo "::set-output name=value::$(cat GO_VERSION)"
         id: go-version
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v5
         with:
           go-version: ${{ steps.go-version.outputs.value }}
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v5
         with:
           version: latest
           args: --timeout=10m
