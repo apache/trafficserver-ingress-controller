@@ -19,8 +19,8 @@
 
 ATS Kubernetes Ingress Controller
 =================================
-![Test](https://github.com/apache/trafficserver-ingress-controller/workflows/Test/badge.svg)
-![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/workflows/Build%20and%20Integrate/badge.svg)
+![Test](https://github.com/apache/trafficserver-ingress-controller/actions/workflows/test.yml/badge.svg)
+![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/actions/workflows/build.yml/badge.svg)
 [![Go Report
 Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-controller)](https://goreportcard.com/report/github.com/apache/trafficserver-ingress-controller)
 
@@ -31,7 +31,7 @@ Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-con
 - [Tutorial](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/TUTORIAL.md)
 - [Development](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/DEVELOPMENT.md)
 
-## Versions of Software Used
+## Dependencies
 - Alpine Linux 3.16.9
 - Apache Traffic Server 9.2.4
 - LuaJIT 2.0.4
@@ -39,4 +39,5 @@ Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-con
 - Other Packages
   - luasocket 3.0.0
   - redis-lua 2.0.4
+- Tested on Minikube 1.30.1 / Kubernetes 1.27.11 
 
