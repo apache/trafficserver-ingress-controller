@@ -32,11 +32,11 @@
 
 ### Usage
 
-Check out the project's github action "Build and Integrate". It has an example of building the docker image for the ingress controller. It also demonstrate the usage of the ingress controller throught integration tests. A Kubernetes cluster is setup with applications and ingress controller for them. 
+Check out the project's github action "Build and Integrate". It has an example of building the docker image for the ingress controller. It also demonstrates the usage of the ingress controller throught integration tests. A Kubernetes cluster is setup with applications and ingress controller for them. 
 
 #### ConfigMap
 
-The above also shows example of configuring Apache Traffic Server [_reloadable_ configurations](https://docs.trafficserver.apache.org/en/9.2.x/admin-guide/files/records.config.en.html#reloadable) using [kubernetes configmap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) resource:
+The above also shows example of configuring Apache Traffic Server [_reloadable_ configurations](https://docs.trafficserver.apache.org/en/9.2.x/admin-guide/files/records.config.en.html#reloadable) using [kubernetes configmap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) resource.
 
 #### Namespaces for Ingresses
 
@@ -48,7 +48,7 @@ You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/9.2.x/a
 
 #### Ingress Class
 
-You can provide an environment variable called `INGRESS_CLASS` in the deployment to specify the ingress class. The above contains an example commented out in the deployment yaml file. Only ingress object with parameter `ingressClassName` in `spec` section with value equal to the environment variable value will be used by ATS for routing
+You can provide an environment variable called `INGRESS_CLASS` in the deployment to specify the ingress class. The above contains an example commented out in the deployment yaml file. Only ingress object with parameter `ingressClassName` in `spec` section with value equal to the environment variable value will be used by ATS for routing.
 
 #### Customizing Logging and TLS
 
