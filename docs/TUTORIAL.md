@@ -18,12 +18,7 @@
 -->
 
 ## Tutorial
-- [Requirements](#requirements)
-- [Download project](#download-project)
-- [Example Walkthrough](#example-walkthrough)
-  - [Setting Up Proxy](#setting-up-proxy)
-  - [Setting Up Backend Applications](#setting-up-backend-applications)
-  - [Checking Results](#checking-results)
+- [Usage](#usage)
   - [ConfigMap](#configmap)
   - [Namespaces for Ingresses](#namespaces-for-ingresses)
   - [Snippet](#snippet)
@@ -31,8 +26,6 @@
   - [Customizing Logging and TLS](#customizing-logging-and-tls)
   - [Customizing plugins](#customizing-plugins)
 - [Logging and Monitoring](#logging-and-monitoring)
-  - [Fluentd](#fluentd)
-  - [Prometheus and Grafana](#prometheus-and-grafana)
 - [Helm Chart](#helm-chart)
 
 ### Usage
