@@ -25,7 +25,9 @@
   - [Ingress Class](#ingress-class)
   - [Customizing Logging and TLS](#customizing-logging-and-tls)
   - [Customizing plugins](#customizing-plugins)
-- [Logging and Monitoring](#logging-and-monitoring)
+  - [Enabling Controller Debug Log](#enabling-controller-debug-log)
+  - [Resync Period of Controller](#resync-period-of-controller)
+- [Integrating with Fluentd and Prometheus](#integrating-with-fluentd-and-prometheus)
 - [Helm Chart](#helm-chart)
 
 ### Usage
@@ -61,13 +63,13 @@ You can specify extra plugins for [plugin.config](https://docs.trafficserver.apa
 
 You can enable debug for the controller by providing environment variable `INGRESS_DEBUG`.
 
-#### Tune Resync Period of Controller
+#### Resync Period of Controller
 
 You can adjust the resync period for the controller by providing environment variable `RESYNC_PRIOD`.
 
-### Logging and Monitoring
+### Integrating with Fluentd and Prometheus
 
-You can use [Fluentd](https://docs.fluentd.org/) to capture the traffic server access logs. Prometheus can be used to capture metrics. Please checkout the below projects for examples.
+[Fluentd](https://docs.fluentd.org/) can be used to capture the traffic server access logs. [Prometheus](https://prometheus.io/) can be used to capture metrics. Please checkout the below projects for examples.
 
 * https://github.com/gdvalle/trafficserver_exporter
 * https://github.com/buraksarp/apache-traffic-server-exporter
