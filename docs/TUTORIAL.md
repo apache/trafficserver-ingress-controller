@@ -76,4 +76,4 @@ You can adjust the resync period for the controller by providing environment var
 
 ### Helm Chart
 
-Helm Chart is provided [here](../charts/ats-ingress/README.md).
+An example of Helm Chart is provided [here](../charts/ats-ingress/README.md) and is unsupported for now
