@@ -19,6 +19,7 @@
 
 ATS Kubernetes Ingress Controller
 =================================
+[![Project Status: Concept – Minimal or no implementation has been done yet, or the repository is only intended to be a limited example, demo, or proof-of-concept.](https://www.repostatus.org/badges/latest/concept.svg)](https://www.repostatus.org/#concept)
 ![Test](https://github.com/apache/trafficserver-ingress-controller/actions/workflows/test.yml/badge.svg)
 ![Build and Integrate](https://github.com/apache/trafficserver-ingress-controller/actions/workflows/build.yml/badge.svg)
 [![Go Report
