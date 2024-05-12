@@ -15,18 +15,20 @@
 # limitations under the License.
 #
 
-FROM alpine:3.16.9 as builder
+FROM alpine:3.19.1 as builder
 
 RUN apk add --no-cache --virtual .tools \
-  bzip2 curl nghttp2-libs=1.47.0-r2 git automake libtool autoconf make sed file perl openrc openssl=1.1.1w-r1
+  bzip2 curl nghttp2-libs git automake libtool autoconf make sed file perl openrc openssl
 
 # ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
-  build-base openssl-dev=1.1.1w-r1 tcl-dev pcre-dev zlib-dev \
-  libexecinfo-dev linux-headers libunwind-dev \
+  build-base openssl-dev tcl-dev pcre-dev zlib-dev \
+  linux-headers libunwind-dev \
   brotli-dev jansson-dev luajit-dev readline-dev geoip-dev libxml2-dev
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc-dev
+
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main libexecinfo-dev
 
 RUN addgroup -Sg 1000 ats
 
@@ -123,25 +125,24 @@ RUN mkdir -p /opt/ats/var/run/redis/ \
 # set up ingress log location
 RUN mkdir -p /opt/ats/var/log/ingress/
 
-FROM alpine:3.16.9
+FROM alpine:3.19.1
 
 # essential library  
 RUN apk add --no-cache -U \
     bash \
     build-base \
     curl \
-    nghttp2-libs=1.47.0-r2 \
+    nghttp2-libs \
     ca-certificates \
     pcre \
     zlib \
-    openssl=1.1.1w-r1 \
+    openssl \
     brotli \
     jansson \
     luajit \
     libunwind \ 
     readline \
     geoip \
-    libexecinfo \
     redis=7.0.15-r0 \
     tcl \
     openrc \
@@ -150,6 +151,8 @@ RUN apk add --no-cache -U \
     libxml2
 
 RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
+
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main libexecinfo
 
 # symlink for luajit
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
