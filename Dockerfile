@@ -143,7 +143,7 @@ RUN apk add --no-cache -U \
     libunwind \ 
     readline \
     geoip \
-    redis=7.0.15-r0 \
+    redis \
     tcl \
     openrc \
     inotify-tools \
