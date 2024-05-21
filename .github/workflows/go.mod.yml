@@ -40,9 +40,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
     - name: go-version
-      run: echo "::set-output name=value::$(cat GO_VERSION)"
+      run: echo "value=$(cat GO_VERSION)" >>$GITHUB_OUTPUT
       id: go-version
-    - uses: actions/setup-go@v2
+    - uses: actions/setup-go@v5
       with:
         go-version: ${{ steps.go-version.outputs.value }} # The Go version to download (if necessary) and use.
     - name: go mod
