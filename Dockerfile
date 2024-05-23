@@ -24,11 +24,13 @@ RUN apk add --no-cache --virtual .tools \
 RUN apk add --no-cache --virtual .ats-build-deps \
   build-base openssl-dev tcl-dev pcre-dev zlib-dev \
   linux-headers libunwind-dev \
-  brotli-dev jansson-dev luajit-dev readline-dev geoip-dev libxml2-dev
+  brotli-dev jansson-dev readline-dev geoip-dev libxml2-dev
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc-dev
 
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main libexecinfo-dev
+
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.19/main luajit-dev=2.1_p20230410-r3
 
 RUN addgroup -Sg 1000 ats
 
@@ -139,7 +141,6 @@ RUN apk add --no-cache -U \
     openssl \
     brotli \
     jansson \
-    luajit \
     libunwind \ 
     readline \
     geoip \
@@ -153,6 +154,8 @@ RUN apk add --no-cache -U \
 RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc
 
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main libexecinfo
+
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.19/main luajit=2.1_p20230410-r3
 
 # symlink for luajit
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
