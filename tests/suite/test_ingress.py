@@ -86,7 +86,7 @@ def get_expected_response_app1_updated():
 
             <HEAD>
             <TITLE>
-                Hello from app1
+                Hello from app1 - Request to path /app2
             </TITLE>
             </HEAD>
 

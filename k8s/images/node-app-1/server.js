@@ -33,7 +33,7 @@ app.get('/app1', (req, res) => { // lgtm[js/missing-rate-limiting]
 })
 
 app.get('/app2', (req, res) => { // lgtm[js/missing-rate-limiting]
-  res.sendFile('hello.html', {root: __dirname });
+  res.sendFile('hello-updated.html', {root: __dirname });
 })
 
 
