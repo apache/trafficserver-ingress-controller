@@ -99,7 +99,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         if: github.repository == 'apache/trafficserver-ingress-controller'
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           format: 'sarif'
