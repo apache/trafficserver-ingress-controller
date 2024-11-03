@@ -40,5 +40,5 @@ Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-con
 - Other Packages
   - luasocket 3.0.0
   - redis-lua 2.0.4
-- Tested on Minikube 1.33.1 / Kubernetes 1.30.6
+- Tested on Minikube 1.34.0 / Kubernetes 1.30.6
 
