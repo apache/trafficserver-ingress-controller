@@ -139,7 +139,8 @@ describe("Unit tests - Lua", function()
       client:sadd("E+http://test.edge.com/app1","$trafficserver-test-3/app-ingress/411990")
       snippet = "ts.debug('Debug msg example')\nts.error('Error msg example')\n-- ts.hook(TS_LUA_HOOK_SEND_RESPONSE_HDR, function()\n--   ts.client_response.header['Location'] = 'https://test.edge.com/app2'\n-- end)\nts.http.skip_remapping_set(0)\nts.http.set_resp(301, 'Redirect')\nts.debug('Uncomment the above lines to redirect http request to https')\nts.debug('Modification for testing')\n"
       client:sadd("$trafficserver-test-3/app-ingress/411990",snippet) 
-
+      snippet_enabled = true
+                        
       --require 'pl.pretty'.dump(client)
       require "connect_redis"
       local result = do_global_read_request()
