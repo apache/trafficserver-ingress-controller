@@ -44,7 +44,7 @@ You can specifiy the list of namespaces to look for ingress object by providing 
 
 #### Snippet
 
-You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/9.2.x/admin-guide/plugins/lua.en.html) to an ingress object and ATS will execute it for requests matching the routing rules defined in the ingress object. 
+You can attach [ATS lua script](https://docs.trafficserver.apache.org/en/9.2.x/admin-guide/plugins/lua.en.html) to an ingress object and ATS will execute it for requests matching the routing rules defined in the ingress object. This can be enabled by providing an environment variable called `SNIPPET` in the deployment. 
 
 #### Ingress Class
 

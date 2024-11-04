@@ -32,6 +32,11 @@ if [ ! -f "${EXTRA_PLUGIN_FNAME}" ]; then
 	cat $EXTRA_PLUGIN_FNAME >> /opt/ats/etc/trafficserver/plugin.config
 fi
 
+# replace lua plugin parameters to plugin.config if snippet is allowed
+if [ ! -z "${SNIPPET}" ]; then
+	sed -i 's/tslua.so \/opt\/ats\/var\/pluginats\/connect_redis.lua/tslua.so \/opt\/ats\/var\/pluginats\/connect_redis.lua snippet/' /opt/ats/etc/trafficserver/plugin.config
+fi
+
 # start redis
 redis-server /opt/ats/etc/redis.conf 
 

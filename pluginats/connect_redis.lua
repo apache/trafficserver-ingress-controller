@@ -22,6 +22,15 @@ local redis = require 'redis'
 -- connecting to unix domain socket
 local client = redis.connect('unix:///opt/ats/var/run/redis/redis.sock')
 
+local snippet_enabled = false
+
+function __init__(argtb)
+  if (#argtb) > 0 then
+    ts.debug("Parameter is given. Snippet is enabled.")
+    snippet_enabled = true
+  end
+end
+
 -- helper function to split a string
 function ipport_split(s, delimiter)
   result = {}
@@ -186,31 +195,32 @@ function do_global_read_request()
     end
   end
 
-  for _, svc in ipairs(svcs) do
-    if svc == nil then
-      ts.error("Redis Lookup Failure: svc == nil for hostpath")
-      return 0
-    end
-    if string.sub(svc, 1, 1) == "$" then
-      ts.debug("snippet")
-      client:select(1)
-      local snippets = client:smembers(svc)
-
-      if snippets == nil then
-        ts.error("Redis Lookup Failure: snippets == nil for hostpath")
+  if snippet_enabled == true then
+    for _, svc in ipairs(svcs) do
+      if svc == nil then
+        ts.error("Redis Lookup Failure: svc == nil for hostpath")
         return 0
       end
+      if string.sub(svc, 1, 1) == "$" then
+        ts.debug("snippet")
+        client:select(1)
+        local snippets = client:smembers(svc)
 
-      local snippet = snippets[1]
-      if snippet == nil then
-        ts.error("Redis Lookup Failure: snippet == nil for hostpath")
-        return 0
+        if snippets == nil then
+          ts.error("Redis Lookup Failure: snippets == nil for hostpath")
+          return 0
+        end
+
+        local snippet = snippets[1]
+        if snippet == nil then
+          ts.error("Redis Lookup Failure: snippet == nil for hostpath")
+          return 0
+        end
+
+        local f = loadstring(snippet)
+        f()
       end
-
-      local f = loadstring(snippet)
-      f()
     end
   end
-
 end
 
