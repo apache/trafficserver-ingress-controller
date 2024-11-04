@@ -33,7 +33,7 @@ if [ ! -f "${EXTRA_PLUGIN_FNAME}" ]; then
 fi
 
 # replace lua plugin parameters to plugin.config if snippet is allowed
-if [ ! -f "${SNIPPET}" ]; then
+if [ ! -z "${SNIPPET}" ]; then
 	sed -i 's/tslua.so \/opt\/ats\/var\/pluginats\/connect_redis.lua/tslua.so \/opt\/ats\/var\/pluginats\/connect_redis.lua snippet/' /opt/ats/etc/trafficserver/plugin.config
 fi
 
