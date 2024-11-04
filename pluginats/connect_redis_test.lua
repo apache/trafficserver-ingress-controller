@@ -16,10 +16,10 @@
 
 _G.ts = { client_request = {}, http = {} }
 _G.client = {dbone = {}, dbdefault = {}, selecteddb = 0}
-_G.snippet_enabled = false
+_G.snippet_enabled = true
 _G.TS_LUA_REMAP_DID_REMAP = 1
 
-snippet_enabled = false
+snippet_enabled = true
 
 function ts.client_request.get_url_scheme()
     return 'http'
@@ -116,7 +116,7 @@ describe("Unit tests - Lua", function()
       client:sadd("trafficserver-test-2:appsvc1:8080","172.17.0.3#8080#http","172.17.0.5#8080#http")
       --require 'pl.pretty'.dump(client)
 
-      snippet_enabled = false
+      snippet_enabled = true
                         
       stub(ts, "add_package_cpath")
       stub(ts, "add_package_path")
