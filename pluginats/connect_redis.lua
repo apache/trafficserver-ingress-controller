@@ -22,7 +22,7 @@ local redis = require 'redis'
 -- connecting to unix domain socket
 local client = redis.connect('unix:///opt/ats/var/run/redis/redis.sock')
 
-local snippet_enabled = true
+local snippet_enabled = false
 
 function __init__(argtb)
   if (#argtb) > 0 then
