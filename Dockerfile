@@ -23,7 +23,7 @@ RUN apk add --no-cache --virtual .tools \
 # ATS dependencies
 RUN apk add --no-cache --virtual .ats-build-deps \
   build-base openssl-dev tcl-dev pcre-dev zlib-dev \
-  linux-headers libunwind-dev \
+  linux-headers libunwind-dev curl-dev \
   brotli-dev jansson-dev readline-dev geoip-dev libxml2-dev
 
 RUN apk add --no-cache --virtual .ats-extra-build-deps --repository https://dl-cdn.alpinelinux.org/alpine/edge/community hwloc-dev
