@@ -1,7 +1,6 @@
 module github.com/apache/trafficserver-ingress-controller
 
-go 1.22.11
-toolchain go1.23.7
+go 1.23.7
 
 require (
 	github.com/alicebob/miniredis/v2 v2.31.1
