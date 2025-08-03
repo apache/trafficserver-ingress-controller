@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-FROM alpine:3.20.6 as builder
+FROM alpine:3.20.7 as builder
 
 RUN apk add --no-cache --virtual .tools \
   bzip2 curl nghttp2-libs git automake libtool autoconf make sed file perl openrc openssl
@@ -127,7 +127,7 @@ RUN mkdir -p /opt/ats/var/run/redis/ \
 # set up ingress log location
 RUN mkdir -p /opt/ats/var/log/ingress/
 
-FROM alpine:3.20.6
+FROM alpine:3.20.7
 
 # essential library  
 RUN apk add --no-cache -U \
