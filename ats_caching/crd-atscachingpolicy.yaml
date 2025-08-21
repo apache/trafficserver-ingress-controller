@@ -1,0 +1,68 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: atscachingpolicies.k8s.trafficserver.apache.com
+spec:
+  group: k8s.trafficserver.apache.com
+  scope: Cluster
+  names:
+    plural: atscachingpolicies
+    singular: atscachingpolicy
+    kind: ATSCachingPolicy
+    shortNames:
+      - atscp
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                rules:
+                  type: array
+                  description: List of caching rules
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        description: Human-friendly rule name
+                      primarySpecifier:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            description: 'One of url_regex, dest_domain, dest_host, dest_ip'
+                          pattern:
+                            type: string
+                            description: Pattern to match (regex, domain, host, or IP)
+                      secondarySpecifiers:
+                        type: object
+                        properties:
+                          port:
+                            type: integer
+                          scheme:
+                            type: string
+                          method:
+                            type: string
+                          prefix:
+                            type: string
+                          suffix:
+                            type: string
+                          src_ip:
+                            type: string
+                          time:
+                            type: string
+                          internal:
+                            type: boolean
+                      action:
+                        type: string
+                        description: Cache action (e.g., cache, never-cache)
+                      ttl:
+                        type: string
+                        description: Cache time to live (e.g., "10s", "1h")
+

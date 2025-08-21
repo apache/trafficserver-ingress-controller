@@ -17,7 +17,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: trafficserver-test
+    name: trafficserver-test
 
 ---
 
@@ -26,8 +26,13 @@ kind: ConfigMap
 metadata:
   namespace: trafficserver-test
   name: ats
+  annotations:
+    ats-configmap: "true"
 data:
   # reloadable data only
   proxy.config.output.logfile.rolling_enabled: "1"
   proxy.config.output.logfile.rolling_interval_sec: "3000"
   proxy.config.restart.active_client_threshold: "0"
+  
+  proxy.config.http.cache.http: "1"
+  proxy.config.http.cache.required_headers: "0"
