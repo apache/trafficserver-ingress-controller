@@ -44,9 +44,9 @@ def setup_module(module):
     kubectl_apply('data/setup/apps/')
     kubectl_apply('data/setup/ingresses/')
     time.sleep(90)
-    #kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
-    #kubectl_apply('../ats_caching/atscachingpolicy.yaml')
-    #time.sleep(5)
+    kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
+    kubectl_apply('../ats_caching/atscachingpolicy.yaml')
+    time.sleep(5)
     misc_command('kubectl get all -A')
     misc_command('kubectl get pod -A -o wide')
     misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2')
@@ -185,6 +185,7 @@ class TestIngress:
         response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response2 = response_2.stdout.strip()
         response2_list = response2.split('\n')
+        kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')
         for resp in response2_list:
             if resp.__contains__("Age"):
                 age2 = resp
@@ -215,6 +216,7 @@ class TestIngress:
                 age2 = resp
             if resp.__contains__("Date"):
                 mod_time2 = resp
+        kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')        
         expected_age = "Age: 0"
         assert mod_time1 != mod_time2 and age1 == age2 and age2 == expected_age, "Expected Date provided by both responses to be different and the Age mentioned in both responses to be 0"
 
@@ -241,6 +243,7 @@ class TestIngress:
                 age2 = resp
             if resp.__contains__("Date"):
                 mod_time2 = resp
+        kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')
         assert mod_time1 != mod_time2 and age1 == age2, "Expected Date provided by both the responses to be different and the Age to be 0 in both the responses"
     
 
