@@ -1,0 +1,19 @@
+apiVersion: k8s.trafficserver.apache.com/v1
+kind: ATSCachingPolicy
+metadata:
+  name: my-app-caching
+  namespace: caching-ats-new
+spec:
+  rules:
+    - name: home-endpoint
+      primarySpecifier:
+        type: url_regex
+        pattern: ".*/app1"
+      action: cache
+      ttl: "12s"
+    - name: static-assets
+      primarySpecifier:
+        type: url_regex
+        pattern: "^/app2"
+      action: cache
+      ttl: "20s"
