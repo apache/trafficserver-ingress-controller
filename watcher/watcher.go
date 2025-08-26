@@ -27,6 +27,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
+	"github.com/apache/trafficserver-ingress-controller/endpoint"
+	"github.com/apache/trafficserver-ingress-controller/proxy"
 	nv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -35,20 +37,18 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/dynamic/dynamicinformer"
-	"github.com/apache/trafficserver-ingress-controller/endpoint"
-	"github.com/apache/trafficserver-ingress-controller/proxy"
 )
 
 // FIXME: watching all namespace does not work...
 
 // Watcher stores all essential information to act on HostGroups
 type Watcher struct {
-	Cs           kubernetes.Interface
-	DynamicClient  dynamic.Interface
-	ATSNamespace string
-	ResyncPeriod time.Duration
-	Ep           *endpoint.Endpoint
-	StopChan     chan struct{}
+	Cs            kubernetes.Interface
+	DynamicClient dynamic.Interface
+	ATSNamespace  string
+	ResyncPeriod  time.Duration
+	Ep            *endpoint.Endpoint
+	StopChan      chan struct{}
 }
 
 // EventHandler interface defines the 3 required methods to implement for watchers
@@ -86,7 +86,7 @@ func (w *Watcher) Watch() error {
 	if err != nil {
 		return err
 	}
-	
+
 	log.Println("calling the Watch Ats Caching Policy function")
 	if err := w.WatchAtsCachingPolicy(); err != nil {
 		return err
@@ -169,21 +169,23 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 	return nil
 }
 
-func (w *Watcher)  WatchAtsCachingPolicy() error {
-	gvr := schema.GroupVersionResource{Group: "k8s.trafficserver.apache.com", Version:"v1", Resource:"atscachingpolicies"}
+func (w *Watcher) WatchAtsCachingPolicy() error {
+	gvr := schema.GroupVersionResource{Group: "k8s.trafficserver.apache.com", Version: "v1", Resource: "atscachingpolicies"}
 	dynamicFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(w.DynamicClient, w.ResyncPeriod, metav1.NamespaceAll, nil)
 	informer := dynamicFactory.ForResource(gvr).Informer()
 	cachehandler := NewAtsCacheHandler("atscaching", w.Ep)
-	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-                AddFunc:    cachehandler.Add,
-                UpdateFunc: cachehandler.Update,
-                DeleteFunc: cachehandler.Delete,
-        })
+	_, err := informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    cachehandler.Add,
+		UpdateFunc: cachehandler.Update,
+		DeleteFunc: cachehandler.Delete,
+	})
 
-
+	if err != nil {
+		return fmt.Errorf("failed to add event handler: %v\n", err)
+	}
 
 	go informer.Run(w.StopChan)
-	if !cache.WaitForCacheSync(w.StopChan, informer.HasSynced){
+	if !cache.WaitForCacheSync(w.StopChan, informer.HasSynced) {
 		return fmt.Errorf("failed to sync ATSCachingPolicy informer")
 	}
 	log.Println("ATSCachingPolicy informer running and synced")

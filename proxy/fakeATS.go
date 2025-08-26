@@ -18,6 +18,7 @@ package proxy
 import (
 	"errors"
 	"fmt"
+	"os/exec"
 )
 
 type FakeATSManager struct {
@@ -36,6 +37,16 @@ func (m *FakeATSManager) IncludeIngressClass(c string) bool {
 	}
 
 	return false
+}
+
+func (m *FakeATSManager) CacheSet() (msg string, err error) {
+	cmd := exec.Command("traffic_ctl", "config", "reload")
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("failed to execute: traffic_ctl config reload  Error: %s", err.Error())
+	}
+	return fmt.Sprintf("Reload succesful --> stdoutStderr: %q", stdoutStderr), nil
+
 }
 
 func (m *FakeATSManager) ConfigSet(k, v string) (msg string, err error) {
