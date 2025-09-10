@@ -14,16 +14,13 @@ import (
 type AtsCacheHandler struct {
 	ResourceName string
 	Ep           *endpoint.Endpoint
+	CachePath    string
 }
 
 // Constructor
-func NewAtsCacheHandler(resource string, ep *endpoint.Endpoint) *AtsCacheHandler {
+func NewAtsCacheHandler(resource string, ep *endpoint.Endpoint, path string) *AtsCacheHandler {
 	log.Println("ATS Cache Constructor initialized ")
-	return &AtsCacheHandler{ResourceName: resource, Ep: ep}
-}
-
-func (h *AtsCacheHandler) filePath() string {
-	return "/opt/ats/etc/trafficserver/cache.config"
+	return &AtsCacheHandler{ResourceName: resource, Ep: ep, CachePath: path}
 }
 
 // Update ATS config
@@ -75,7 +72,7 @@ func (h *AtsCacheHandler) Add(obj interface{}) {
 		}
 	}
 
-	configPath := h.filePath()
+	configPath := h.CachePath
 	f, err := os.OpenFile(configPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Printf("Add: Failed to open cache.config: %v", err)
@@ -103,7 +100,7 @@ func (h *AtsCacheHandler) Update(oldObj, newObj interface{}) {
 		return
 	}
 
-	configPath := h.filePath()
+	configPath := h.CachePath
 	existingData, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Printf("Update: Failed to read cache.config: %v", err)
@@ -150,7 +147,7 @@ func (h *AtsCacheHandler) Delete(obj interface{}) {
 	u := obj.(*unstructured.Unstructured)
 	log.Printf("[DELETE] ATSCachingPolicy: %s/%s", u.GetNamespace(), u.GetName())
 
-	configPath := h.filePath()
+	configPath := h.CachePath
 	existingData, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Printf("Delete: Failed to read cache.config: %v", err)

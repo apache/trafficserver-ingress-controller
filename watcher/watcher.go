@@ -39,6 +39,8 @@ import (
 	"k8s.io/client-go/dynamic/dynamicinformer"
 )
 
+const CACHE_PATH string = "/opt/ats/etc/trafficserver/cache.config"
+
 // FIXME: watching all namespace does not work...
 
 // Watcher stores all essential information to act on HostGroups
@@ -88,7 +90,7 @@ func (w *Watcher) Watch() error {
 	}
 
 	log.Println("calling the Watch Ats Caching Policy function")
-	if err := w.WatchAtsCachingPolicy(); err != nil {
+	if err := w.WatchAtsCachingPolicy(CACHE_PATH); err != nil {
 		return err
 	}
 	return nil
@@ -169,11 +171,11 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 	return nil
 }
 
-func (w *Watcher) WatchAtsCachingPolicy() error {
+func (w *Watcher) WatchAtsCachingPolicy(path string) error {
 	gvr := schema.GroupVersionResource{Group: "k8s.trafficserver.apache.com", Version: "v1", Resource: "atscachingpolicies"}
 	dynamicFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(w.DynamicClient, w.ResyncPeriod, metav1.NamespaceAll, nil)
 	informer := dynamicFactory.ForResource(gvr).Informer()
-	cachehandler := NewAtsCacheHandler("atscaching", w.Ep)
+	cachehandler := NewAtsCacheHandler("atscaching", w.Ep, path)
 	_, err := informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    cachehandler.Add,
 		UpdateFunc: cachehandler.Update,
