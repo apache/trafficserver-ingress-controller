@@ -24,9 +24,9 @@ import (
 	"syscall"
 	"time"
 
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-
 	"k8s.io/client-go/tools/clientcmd"
 
 	_ "k8s.io/client-go/util/workqueue"
@@ -126,6 +126,11 @@ func main() {
 		log.Panicln(err.Error())
 	}
 
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		log.Panicln(err.Error())
+	}
+
 	stopChan := make(chan struct{})
 
 	// ------------ Resolving Namespaces --------------------------------------
@@ -150,11 +155,12 @@ func main() {
 	}
 
 	watcher := w.Watcher{
-		Cs:           clientset,
-		ATSNamespace: *atsNamespace,
-		ResyncPeriod: *resyncPeriod,
-		Ep:           &endpoint,
-		StopChan:     stopChan,
+		Cs:            clientset,
+		DynamicClient: dynamicClient,
+		ATSNamespace:  *atsNamespace,
+		ResyncPeriod:  *resyncPeriod,
+		Ep:            &endpoint,
+		StopChan:      stopChan,
 	}
 
 	err = watcher.Watch()

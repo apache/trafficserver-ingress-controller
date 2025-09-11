@@ -19,6 +19,7 @@ import pytest
 import os
 import time
 import textwrap
+import subprocess
 
 def kubectl_apply(yaml_path):
     os.system('kubectl apply -f ' + yaml_path)
@@ -43,6 +44,9 @@ def setup_module(module):
     kubectl_apply('data/setup/apps/')
     kubectl_apply('data/setup/ingresses/')
     time.sleep(90)
+    kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
+    kubectl_apply('../ats_caching/atscachingpolicy.yaml')
+    time.sleep(5)
     misc_command('kubectl get all -A')
     misc_command('kubectl get pod -A -o wide')
     misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2')
@@ -116,6 +120,7 @@ def get_expected_response_app2():
     
     return ' '.join(resp.split())
 
+
 class TestIngress:
     def test_basic_routing_edge_app1(self, minikubeip):
         req_url = "http://" + minikubeip + ":30080/app1"
@@ -162,6 +167,86 @@ class TestIngress:
             f"Expected: 200 response code for test_basic_routing"
         assert ' '.join(resp.text.split()) == get_expected_response_app2()
     
+    def test_cache_app1(self, minikubeip):
+        kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
+        kubectl_apply('../ats_caching/atscachingpolicy.yaml')
+        time.sleep(15)
+
+        command = f'curl -i -v -H "Host: test.media.com" http://{minikubeip}:30080/app1'
+        response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
+        response1 = response_1.stdout.strip()
+        response1_list = response1.split('\n')
+        for res in response1_list:
+            if res.__contains__("Age"):
+                age1 = res
+            if res.__contains__("Date"):
+                mod_time1 = res
+        time.sleep(5)
+        response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
+        response2 = response_2.stdout.strip()
+        response2_list = response2.split('\n')
+        kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')
+        for resp in response2_list:
+            if resp.__contains__("Age"):
+                age2 = resp
+            if resp.__contains__("Date"):
+                mod_time2 = resp
+        assert mod_time1 == mod_time2 and age1 != age2, "Expected Date provided by both responses to be same and the Age mentioned in second response to be more than 0"
+
+    def test_cache_app1_beyond_ttl(self, minikubeip):
+        kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
+        kubectl_apply('../ats_caching/atscachingpolicy.yaml')
+        time.sleep(15)
+
+        command = f'curl -i -v -H "Host: test.media.com" http://{minikubeip}:30080/app1'
+        response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
+        response1 = response_1.stdout.strip()
+        response1_list = response1.split('\n')
+        for res in response1_list:
+            if res.__contains__("Age"):
+                age1 = res
+            if res.__contains__("Date"):
+                mod_time1 = res
+        time.sleep(16)
+        response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
+        response2 = response_2.stdout.strip()
+        response2_list = response2.split('\n')
+        for resp in response2_list:
+            if resp.__contains__("Age"):
+                age2 = resp
+            if resp.__contains__("Date"):
+                mod_time2 = resp
+        kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')        
+        expected_age = "Age: 0"
+        assert mod_time1 != mod_time2 and age1 == age2 and age2 == expected_age, "Expected Date provided by both responses to be different and the Age mentioned in both responses to be 0"
+
+    def test_cache_app2(self, minikubeip):
+        kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
+        kubectl_apply('../ats_caching/atscachingpolicy.yaml')
+        time.sleep(15)
+
+        command = f'curl -i -v -H "Host: test.edge.com" http://{minikubeip}:30080/app2'
+        response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
+        response1 = response_1.stdout.strip()
+        response1_list = response1.split('\n')
+        for res in response1_list:
+            if res.__contains__("Age"):
+                age1 = res
+            if res.__contains__("Date"):
+                mod_time1 = res
+        time.sleep(9)
+        response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
+        response2 = response_2.stdout.strip()
+        response2_list = response2.split('\n')
+        for resp in response2_list:
+            if resp.__contains__("Age"):
+                age2 = resp
+            if resp.__contains__("Date"):
+                mod_time2 = resp
+        kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')
+        assert mod_time1 != mod_time2 and age1 == age2, "Expected Date provided by both the responses to be different and the Age to be 0 in both the responses"
+    
+
     def test_updating_ingress_media_app2(self, minikubeip):
         kubectl_apply('data/ats-ingress-update.yaml')
         req_url = "http://" + minikubeip + ":30080/app2"
@@ -200,5 +285,4 @@ class TestIngress:
         assert resp.status_code == 301,\
             f"Expected: 301 response code for test_snippet_edge_app2"
         assert resp.headers['Location'] == 'https://test.edge.com/app2'
-    
-        
+   

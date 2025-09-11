@@ -38,6 +38,11 @@ func (m *FakeATSManager) IncludeIngressClass(c string) bool {
 	return false
 }
 
+func (m *FakeATSManager) CacheSet() (msg string, err error) {
+	return "Config reload succesful", nil
+
+}
+
 func (m *FakeATSManager) ConfigSet(k, v string) (msg string, err error) {
 	m.Config[k] = v
 	return fmt.Sprintf("Ran p.Key: %s p.Val: %s", k, v), nil
