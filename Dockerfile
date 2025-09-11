@@ -167,7 +167,7 @@ RUN adduser -S -D -H -u 1000 -h /tmp -s /sbin/nologin -G ats -g ats ats
 
 COPY --from=builder --chown=ats:ats /opt/ats /opt/ats
 
-ENV PATH="/opt/ats/bin:${PATH}
+ENV PATH="/opt/ats/bin:${PATH}"
 
 USER ats
 
