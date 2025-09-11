@@ -39,7 +39,7 @@ func (m *FakeATSManager) IncludeIngressClass(c string) bool {
 }
 
 func (m *FakeATSManager) CacheSet() (msg string, err error) {
-	return fmt.Sprintf("traffic_ctl config reload succesful"), nil
+	return "Config reload succesful", nil
 
 }
 
