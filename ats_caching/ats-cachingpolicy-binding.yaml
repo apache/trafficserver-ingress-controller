@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ats-cachingpolicy-binding
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: trafficserver-test
+roleRef:
+  kind: ClusterRole
+  name: ats-cachingpolicy-role
+  apiGroup: rbac.authorization.k8s.io
