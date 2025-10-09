@@ -226,7 +226,7 @@ class TestIngress:
         assert mod_time1 != mod_time2 and age1 == age2 and age2 == expected_age, "Expected Date provided by both responses should be different and the Age mentioned in both responses should be 0"
 
     def test_cache_app2(self, minikubeip):
-        # waiting for cache from previous test case to expire
+        # here caching will not work because url will not match with information in caching crd
         command = f'curl -i -v -H "Host: test.edge.com" http://{minikubeip}:30080/app2'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response1 = response_1.stdout.strip()
