@@ -37,14 +37,9 @@ def misc_command(command):
 
 def setup_module(module):
     misc_command('openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"')
-    misc_command('openssl genrsa -out ca.key 4096 ')
-    misc_command('openssl req -x509 -new -nodes -key ca.key -sha256 -days 3650 -out ca.crt -subj "/CN=TestCA" ')
-    misc_command('openssl req -new -newkey rsa:2048 -nodes -keyout edge.key -out edge.csr -subj "/CN=test.edge.com" -addext "subjectAltName=DNS:test.edge.com"')
-    misc_command('openssl x509 -req -in edge.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out edge.crt -days 365 -sha256 -extfile <(printf "subjectAltName=DNS:test.edge.com") ')
 
     kubectl_create('namespace trafficserver-test')
     kubectl_create('secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
-    kubectl_create('secret tls host-secret --key edge.key --cert edge.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
     kubectl_apply('data/setup/configmaps/')
     kubectl_apply('data/setup/traffic-server/')
     kubectl_apply('data/setup/apps/')
@@ -73,11 +68,14 @@ def setup_module(module):
 #    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc2 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080/app1')
 
 def teardown_module(module):
-    #kubectl_delete('namespace trafficserver-test-3')
-    #kubectl_delete('namespace trafficserver-test-2')
-    #kubectl_delete('namespace trafficserver-test')
-    #kubectl_delete('namespace cache-test-ns')
-    pass
+
+    kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')
+    kubectl_delete('-f data/setup/ats_caching/ats-cachingpolicy-role.yaml')
+    kubectl_delete('-f data/setup/ats_caching/ats-cachingpolicy-binding.yaml')
+    kubectl_delete('namespace trafficserver-test-3')
+    kubectl_delete('namespace trafficserver-test-2')
+    kubectl_delete('namespace trafficserver-test')
+    kubectl_delete('namespace cache-test-ns')
     
 
 def get_expected_response_app1():
@@ -229,7 +227,6 @@ class TestIngress:
 
     def test_cache_app2(self, minikubeip):
         # waiting for cache from previous test case to expire
-        time.sleep(13)
         command = f'curl -i -v -H "Host: test.edge.com" http://{minikubeip}:30080/app2'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response1 = response_1.stdout.strip()
@@ -248,9 +245,6 @@ class TestIngress:
                 age2 = resp
             if resp.__contains__("Date"):
                 mod_time2 = resp
-        kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')
-        kubectl_delete('-f data/setup/ats_caching/ats-cachingpolicy-role.yaml')
-        kubectl_delete('-f data/setup/ats_caching/ats-cachingpolicy-binding.yaml')
         assert mod_time1 != mod_time2 and age1 == age2, "Expected Date provided by both the responses to be different and the Age to be 0 in both the responses"
     
 
