@@ -1,0 +1,69 @@
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cache-test-ns
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-test
+  namespace: cache-test-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache-test
+  template:
+    metadata:
+      labels:
+        app: cache-test
+    spec:
+      containers:
+      - name: cache-test
+        image: localhost:5000/caching-app
+        imagePullPolicy: Always
+        env:
+        - name: AUTHOR
+          value: cache-test
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cachingsvc
+  namespace: cache-test-ns
+spec:
+  ports:
+  - port: 8080
+    name: "cachingsvchttp"
+    protocol: TCP
+    targetPort: 8080
+
+  selector:
+    app: cache-test
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: cache-test-ns
+spec:
+  #ingressClassName: ats
+  rules:
+  - host: test.media.com
+    http:
+      paths:
+      - path: /cache-test
+        pathType: Exact
+        backend:
+          service:
+            name: cachingsvc
+            port:
+              number: 8080
