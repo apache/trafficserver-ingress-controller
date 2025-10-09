@@ -37,7 +37,7 @@ func newTestHandler(t *testing.T) (*AtsCacheHandler, string) {
 func newCachingPolicy(name string, rules []interface{}) *unstructured.Unstructured {
 	u := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "example.com/v1",
+			"apiVersion": "example.com/v1alpha1",
 			"kind":       "ATSCachingPolicy",
 			"metadata": map[string]interface{}{
 				"name":      name,

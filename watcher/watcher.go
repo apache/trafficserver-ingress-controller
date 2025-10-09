@@ -172,7 +172,7 @@ func (w *Watcher) inNamespacesWatchFor(h EventHandler, c cache.Getter,
 }
 
 func (w *Watcher) WatchAtsCachingPolicy(path string) error {
-	gvr := schema.GroupVersionResource{Group: "k8s.trafficserver.apache.com", Version: "v1", Resource: "atscachingpolicies"}
+	gvr := schema.GroupVersionResource{Group: "k8s.trafficserver.apache.com", Version: "v1alpha1", Resource: "atscachingpolicies"}
 	dynamicFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(w.DynamicClient, w.ResyncPeriod, metav1.NamespaceAll, nil)
 	informer := dynamicFactory.ForResource(gvr).Informer()
 	cachehandler := NewAtsCacheHandler("atscaching", w.Ep, path)
