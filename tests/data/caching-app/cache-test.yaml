@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: cache-test
-        image: localhost:5000/caching-app
+        image: caching-app:latest
         imagePullPolicy: Always
         env:
         - name: AUTHOR

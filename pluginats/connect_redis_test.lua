@@ -112,7 +112,7 @@ describe("Unit tests - Lua", function()
       client:select(0)
       client:sadd("trafficserver-test-2:appsvc1:8080","172.17.0.3#8080#http","172.17.0.5#8080#http")
       --require 'pl.pretty'.dump(client)
-                        
+
       stub(ts, "add_package_cpath")
       stub(ts, "add_package_path")
       stub(ts, "debug")
@@ -123,6 +123,52 @@ describe("Unit tests - Lua", function()
       stub(ts.client_request, "set_uri")
       stub(ts.http, "skip_remapping_set")
       stub(ts.http, "set_resp")
+
+      -- calling get_version on client request
+      stub(ts.client_request, "get_version").returns("1.1")
+
+      -- calling get_pristine_url on client request
+      stub(ts.client_request, "get_pristine_url").returns("http://test.edge.com/app1")
+      
+      -- Used for setting the cache url
+      stub(ts.http, "set_cache_url")
+
+      _G.TS_LUA_HOOK_SEND_RESPONSE_HDR = "TS_LUA_HOOK_SEND_RESPONSE_HDR"
+      stub(ts, "hook")
+    end)
+
+     -- Test - Verify caching for Http/1.1  -------------------------
+
+     it("Test - Verify caching for Http/1.1", function()
+       require("connect_redis")
+       local result = do_global_read_request()
+
+       -- Verifies the HTTP version check and host set for 1.1
+       assert.stub(ts.client_request.get_version).was.called()
+       assert.stub(ts.client_request.set_url_host).was.called_with("test.edge.com")
+
+       -- Verifies that pristine URL is used to set up cache
+       assert.stub(ts.http.set_cache_url).was.called_with("http://test.edge.com/app1")
+     end)
+
+    -- Test - Verify caching for Http/2.0  -------------------
+
+    it("Test - Verify caching for Http/2.0", function()
+    -- Clear cached module first
+    package.loaded["connect_redis"] = nil
+
+    -- Re-stub get_version to return "2" before requiring
+    stub(ts.client_request, "get_version").returns("2.0")
+
+    -- Reload module
+    require("connect_redis")
+
+    -- Execute target function
+    do_global_read_request()
+
+    -- Assertions
+    assert.stub(ts.client_request.get_version).was.called()
+    assert.stub(ts.http.set_cache_url).was.called_with("http://test.edge.com/app1")
     end)
 
     it("Test - Redirect to correct IP", function()
@@ -139,7 +185,7 @@ describe("Unit tests - Lua", function()
       client:sadd("E+http://test.edge.com/app1","$trafficserver-test-3/app-ingress/411990")
       snippet = "ts.debug('Debug msg example')\nts.error('Error msg example')\n-- ts.hook(TS_LUA_HOOK_SEND_RESPONSE_HDR, function()\n--   ts.client_response.header['Location'] = 'https://test.edge.com/app2'\n-- end)\nts.http.skip_remapping_set(0)\nts.http.set_resp(301, 'Redirect')\nts.debug('Uncomment the above lines to redirect http request to https')\nts.debug('Modification for testing')\n"
       client:sadd("$trafficserver-test-3/app-ingress/411990",snippet) 
-                        
+      
       --require 'pl.pretty'.dump(client)
       require "connect_redis"
       local input_args = {"snippet"}
@@ -151,5 +197,7 @@ describe("Unit tests - Lua", function()
       assert.stub(ts.http.set_resp).was.called_with(301,"Redirect")
     end)
 
+
   end)
 end)
+

@@ -104,7 +104,17 @@ function get_wildcard_domain(req_host)
   return "*" .. string.sub (req_host, pos)
 end
 
----------------------------------------------
+function cache_lookup()
+  local cache = ts.http.get_cache_lookup_url()
+
+  if (cache == nil or #cache == 0) then
+    ts.debug("Cache lookup is empty")
+  else
+    ts.debug("Cache lookup using the get cache lookup url " .. cache)
+  end
+
+end
+
 ----------------- DO_REMAP ------------------
 ---------------------------------------------
 function do_global_read_request()
@@ -116,13 +126,24 @@ function do_global_read_request()
     ts.debug("In 'not response: '", response)
     return 0
   end
-
+  
   -- We only care about host, path, and port#
   local req_scheme = ts.client_request.get_url_scheme() or 'http'
   local req_host = ts.client_request.get_url_host() or ''
   local req_path = ts.client_request.get_uri() or ''
   local req_port = ts.client_request.get_url_port() or ''
-
+  
+  -- Checking the http version
+  local ver = ts.client_request.get_version()
+  ts.debug("Requested http version is: " .. ver)
+  if (ver == "1.1" and req_scheme == "http") then
+     ts.client_request.set_url_host(req_host)
+     ts.debug("Host for http version 1.1 is: " .. req_host)
+  end
+  -- ts.client_request.set_url_host(req_host)
+  -- Extracting original url
+  local url = ts.client_request.get_pristine_url()
+  ts.debug("Pristine url is: " .. url)
   local wildcard_req_host = get_wildcard_domain(req_host)
   ts.debug("-----Request-----")
   ts.debug("req_scheme: "..req_scheme)
@@ -131,7 +152,8 @@ function do_global_read_request()
   ts.debug("req_path: " .. req_path)
   ts.debug("wildcard_req_host: " .. (wildcard_req_host or 'invalid domain name'))
   ts.debug("-----------------")
-
+  ts.hook(TS_LUA_HOOK_CACHE_LOOKUP_COMPLETE, cache_lookup)
+    
   -- check for path exact match
   local svcs = check_path_exact_match(req_scheme, req_host, req_path)
 
@@ -186,12 +208,17 @@ function do_global_read_request()
         ts.error("Redis Lookup Failure: wrong format - "..ipport)
         return 0
       end
+      
+       -- Setting up cache key
+      ts.debug("setting up the cache url key using the set_cache_url" .. url)
+      ts.http.set_cache_url(url)
 
       ts.http.skip_remapping_set(1)
       ts.client_request.set_url_scheme(values[3])
       ts.client_request.set_uri(req_path)
       ts.client_request.set_url_host(values[1])
       ts.client_request.set_url_port(values[2])
+      
     end
   end
 
@@ -216,7 +243,7 @@ function do_global_read_request()
           ts.error("Redis Lookup Failure: snippet == nil for hostpath")
           return 0
         end
-
+	ts.debug("Snippet in the Connect Redis lua file " .. snippet)
         local f = loadstring(snippet)
         f()
       end
