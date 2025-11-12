@@ -210,7 +210,7 @@ function do_global_read_request()
       end
       
        -- Setting up cache key
-      ts.debug("setting up the cache url key using the set_cache_url" .. url)
+      ts.debug("setting up the cache url key using the set_cache_url " .. url)
       ts.http.set_cache_url(url)
 
       ts.http.skip_remapping_set(1)
