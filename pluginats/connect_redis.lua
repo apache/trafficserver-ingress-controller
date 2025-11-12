@@ -243,7 +243,7 @@ function do_global_read_request()
           ts.error("Redis Lookup Failure: snippet == nil for hostpath")
           return 0
         end
-	ts.debug("Snippet in the Connect Redis lua file " .. snippet)
+      ts.debug("Snippet in the Connect Redis lua file " .. snippet)
         local f = loadstring(snippet)
         f()
       end
