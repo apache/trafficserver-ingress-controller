@@ -153,23 +153,23 @@ describe("Unit tests - Lua", function()
 
     -- Test - Verify caching for Http/2.0  -------------------
 
-    it("Test - Verify caching for Http/2.0", function()
-    -- Clear cached module first
-    package.loaded["connect_redis"] = nil
+     it("Test - Verify caching for Http/2.0", function()
+       -- Clear cached module first
+       package.loaded["connect_redis"] = nil
 
-    -- Re-stub get_version to return "2" before requiring
-    stub(ts.client_request, "get_version").returns("2.0")
+       -- Re-stub get_version to return "2" before requiring
+       stub(ts.client_request, "get_version").returns("2.0")
 
-    -- Reload module
-    require("connect_redis")
+       -- Reload module
+       require("connect_redis")
 
-    -- Execute target function
-    do_global_read_request()
+       -- Execute target function
+       do_global_read_request()
 
-    -- Assertions
-    assert.stub(ts.client_request.get_version).was.called()
-    assert.stub(ts.http.set_cache_url).was.called_with("http://test.edge.com/app1")
-    end)
+       -- Assertions
+       assert.stub(ts.client_request.get_version).was.called()
+       assert.stub(ts.http.set_cache_url).was.called_with("http://test.edge.com/app1")
+     end)
 
     it("Test - Redirect to correct IP", function()
       require("connect_redis")
