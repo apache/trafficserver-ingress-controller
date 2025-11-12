@@ -76,8 +76,6 @@ def teardown_module(module):
     kubectl_delete('namespace trafficserver-test-2')
     kubectl_delete('namespace trafficserver-test')
     kubectl_delete('namespace cache-test-ns')
-    
-
 def get_expected_response_app1():
     resp = """<!DOCTYPE html>
             <HTML>
