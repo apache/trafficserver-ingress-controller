@@ -219,7 +219,7 @@ class TestIngress:
             if resp.__contains__("Age"):
                 age2 = resp
             if resp.__contains__("Date"):
-                mod_time2 = resp       
+                mod_time2 = resp
         expected_age = "Age: 0"
         assert mod_time1 != mod_time2 and age1 == age2 and age2 == expected_age, "Expected Date provided by both responses should be different and the Age mentioned in both responses should be 0"
 
