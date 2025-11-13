@@ -46,10 +46,10 @@ def setup_module(module):
     kubectl_apply('data/setup/ingresses/')
 
     #Applying here as it takes some time for controller to get notification from kubernetes.
-    kubectl_apply('../../ats_caching/ats-cachingpolicy-role.yaml')
-    kubectl_apply('../../ats_caching/ats-cachingpolicy-binding.yaml')
-    kubectl_apply('../../ats_caching/crd-atscachingpolicy.yaml')
-    kubectl_apply('../../ats_caching/atscachingpolicy.yaml')
+    kubectl_apply('../ats_caching/ats-cachingpolicy-role.yaml')
+    kubectl_apply('../ats_caching/ats-cachingpolicy-binding.yaml')
+    kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
+    kubectl_apply('../ats_caching/atscachingpolicy.yaml')
     kubectl_apply('data/caching-app/')
 
     time.sleep(90)
@@ -70,8 +70,8 @@ def setup_module(module):
 def teardown_module(module):
 
     kubectl_delete('crd atscachingpolicies.k8s.trafficserver.apache.com')
-    kubectl_delete('-f data/setup/ats_caching/ats-cachingpolicy-role.yaml')
-    kubectl_delete('-f data/setup/ats_caching/ats-cachingpolicy-binding.yaml')
+    kubectl_delete('-f ../ats_caching/ats-cachingpolicy-role.yaml')
+    kubectl_delete('-f ../ats_caching/ats-cachingpolicy-binding.yaml')
     kubectl_delete('namespace trafficserver-test-3')
     kubectl_delete('namespace trafficserver-test-2')
     kubectl_delete('namespace trafficserver-test')
