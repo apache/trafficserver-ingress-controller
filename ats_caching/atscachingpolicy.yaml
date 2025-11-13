@@ -2,7 +2,7 @@ apiVersion: k8s.trafficserver.apache.com/v1alpha1
 kind: ATSCachingPolicy
 metadata:
   name: my-app-caching
-  namespace: caching-ats-new
+  namespace: cache-test-ns
 spec:
   rules:
     - name: static-assets
