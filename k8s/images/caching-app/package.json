@@ -4,6 +4,7 @@
   "description": "docker-ize a very simple express.js app",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Apache Software Foundation",
