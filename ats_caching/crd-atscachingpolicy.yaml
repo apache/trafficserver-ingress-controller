@@ -12,7 +12,7 @@ spec:
     shortNames:
       - atscp
   versions:
-    - name: v1
+    - name: v1alpha1
       served: true
       storage: true
       schema:
@@ -65,4 +65,3 @@ spec:
                       ttl:
                         type: string
                         description: Cache time to live (e.g., "10s", "1h")
-

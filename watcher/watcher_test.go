@@ -21,8 +21,6 @@ import (
 	framework "k8s.io/client-go/tools/cache/testing"
 )
 
-// --- Existing endpoint/configmap/endpoint-watcher tests left intact ---
-
 func TestAllNamespacesWatchFor_Add(t *testing.T) {
 	w, fc := getTestWatcher()
 
@@ -397,7 +395,7 @@ func getTestWatcherForCache() (Watcher, *framework.FakeControllerSource) {
 
 	gvr := schema.GroupVersionResource{
 		Group:    "k8s.trafficserver.apache.com",
-		Version:  "v1",
+		Version:  "v1alpha1",
 		Resource: "atscachingpolicies",
 	}
 
@@ -411,7 +409,7 @@ func getTestWatcherForCache() (Watcher, *framework.FakeControllerSource) {
 
 	clientset := fake.NewSimpleClientset()
 	fc := framework.NewFakeControllerSource()
-	exampleEndpoint := createExampleEndpointWithFakeATS()
+	exampleEndpoint := createExampleEndpointWithFakeATSCache()
 	stopChan := make(chan struct{})
 
 	ingressWatcher := Watcher{
@@ -456,7 +454,7 @@ func TestWatchAtsCachingPolicy_Add(t *testing.T) {
 
 	gvr := schema.GroupVersionResource{
 		Group:    "k8s.trafficserver.apache.com",
-		Version:  "v1",
+		Version:  "v1alpha1",
 		Resource: "atscachingpolicies",
 	}
 	dynClient := w.DynamicClient.Resource(gvr).Namespace("default")
@@ -464,7 +462,7 @@ func TestWatchAtsCachingPolicy_Add(t *testing.T) {
 	// Create a new caching policy
 	policy := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "k8s.trafficserver.apache.com/v1",
+			"apiVersion": "k8s.trafficserver.apache.com/v1alpha1",
 			"kind":       "ATSCachingPolicy",
 			"metadata": map[string]interface{}{
 				"name":      "policy-add",
@@ -509,7 +507,7 @@ func TestWatchAtsCachingPolicy_Update(t *testing.T) {
 
 	gvr := schema.GroupVersionResource{
 		Group:    "k8s.trafficserver.apache.com",
-		Version:  "v1",
+		Version:  "v1alpha1",
 		Resource: "atscachingpolicies",
 	}
 	dynClient := w.DynamicClient.Resource(gvr).Namespace("default")
@@ -517,7 +515,7 @@ func TestWatchAtsCachingPolicy_Update(t *testing.T) {
 	// Create a policy first
 	policy := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "k8s.trafficserver.apache.com/v1",
+			"apiVersion": "k8s.trafficserver.apache.com/v1alpha1",
 			"kind":       "ATSCachingPolicy",
 			"metadata": map[string]interface{}{
 				"name":      "policy-update",
@@ -577,7 +575,7 @@ func TestWatchAtsCachingPolicy_Delete(t *testing.T) {
 
 	gvr := schema.GroupVersionResource{
 		Group:    "k8s.trafficserver.apache.com",
-		Version:  "v1",
+		Version:  "v1alpha1",
 		Resource: "atscachingpolicies",
 	}
 	dynClient := w.DynamicClient.Resource(gvr).Namespace("default")
@@ -585,7 +583,7 @@ func TestWatchAtsCachingPolicy_Delete(t *testing.T) {
 	// Create a policy first
 	policy := &unstructured.Unstructured{
 		Object: map[string]interface{}{
-			"apiVersion": "k8s.trafficserver.apache.com/v1",
+			"apiVersion": "k8s.trafficserver.apache.com/v1alpha1",
 			"kind":       "ATSCachingPolicy",
 			"metadata": map[string]interface{}{
 				"name":      "policy-delete",
