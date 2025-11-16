@@ -59,14 +59,14 @@ RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/va
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main luajit=2.1_p20240815-r1
 
 # symlink for luajit
-RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
+RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.1723681758 /usr/lib/libluajit-5.1.so
 
 # luasocket
 RUN wget https://github.com/lunarmodules/luasocket/archive/refs/tags/v3.0.0.tar.gz \
   && tar zxf v3.0.0.tar.gz \
   && cd luasocket-3.0.0 \
   && sed -i "s/LDFLAGS_linux=-O -shared -fpic -o/LDFLAGS_linux=-O -shared -fpic -L\/usr\/lib -lluajit-5.1 -o/" src/makefile \
-  && ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so \
+  && ln -sf /usr/lib/libluajit-5.1.so.2.1.1723681758 /usr/lib/libluajit-5.1.so \
   && mkdir -p /usr/include/lua \
   && ln -sf /usr/include/luajit-2.1 /usr/include/lua/5.1 \
   && make \
