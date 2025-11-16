@@ -32,12 +32,6 @@ RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/
 
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main luajit-dev=2.1_p20240815-r1
 
-RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main luajit=2.1_p20240815-r1
-
-# symlink for luajit
-RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
-
-
 RUN addgroup -Sg 1000 ats
 
 RUN adduser -S -D -H -u 1000 -h /tmp -s /sbin/nologin -G ats -g ats ats
@@ -61,6 +55,11 @@ COPY ["./config/logging.yaml", "/opt/ats/etc/trafficserver/logging.yaml"]
 # enable traffic.out for alpine/gentoo
 RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
 RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
+
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main luajit=2.1_p20240815-r1
+
+# symlink for luajit
+RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
 
 # luasocket
 RUN wget https://github.com/lunarmodules/luasocket/archive/refs/tags/v3.0.0.tar.gz \
@@ -161,7 +160,7 @@ RUN apk add --no-cache -U --repository https://dl-cdn.alpinelinux.org/alpine/edg
 
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/main libexecinfo
 
-RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.19/main luajit=2.1_p20230410-r3
+RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main luajit=2.1_p20240815-r1
 
 # symlink for luajit
 RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
