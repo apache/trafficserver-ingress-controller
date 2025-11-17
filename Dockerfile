@@ -56,11 +56,6 @@ COPY ["./config/logging.yaml", "/opt/ats/etc/trafficserver/logging.yaml"]
 RUN sed -i "s/TM_DAEMON_ARGS=\"\"/TM_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
 RUN sed -i "s/TS_DAEMON_ARGS=\"\"/TS_DAEMON_ARGS=\" --bind_stdout \/opt\/ats\/var\/log\/trafficserver\/traffic.out --bind_stderr \/opt\/ats\/var\/log\/trafficserver\/traffic.out \"/" /opt/ats/bin/trafficserver
 
-RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main luajit=2.1_p20240815-r1
-
-# symlink for luajit
-RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.1723681758 /usr/lib/libluajit-5.1.so
-
 # luasocket
 RUN wget https://github.com/lunarmodules/luasocket/archive/refs/tags/v3.0.0.tar.gz \
   && tar zxf v3.0.0.tar.gz \
@@ -163,7 +158,7 @@ RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/v3.16/
 RUN apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main luajit=2.1_p20240815-r1
 
 # symlink for luajit
-RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.0 /usr/lib/libluajit-5.1.so
+RUN ln -sf /usr/lib/libluajit-5.1.so.2.1.1723681758 /usr/lib/libluajit-5.1.so
 
 # create ats user/group
 RUN addgroup -Sg 1000 ats
