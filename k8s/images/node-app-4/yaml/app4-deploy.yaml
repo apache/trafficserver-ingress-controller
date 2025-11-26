@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: backend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-app-4
+  namespace: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: node-app-4
+  template:
+    metadata:
+      labels:
+        app: node-app-4
+    spec:
+      containers:
+        - name: node-app-4-container
+          image: localhost:5000/node-app-4
+          ports:
+            - containerPort: 8443
+              name: https
+              protocol: TCP
+          volumeMounts:
+            - name: https-tls
+              mountPath: /etc/ats/ssl/server2
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: https-tls
+          secret:
+            secretName: app3-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appsvc4
+  namespace: backend
+spec:
+  selector:
+    app: node-app-4
+  ports:
+    - name: https
+      port: 8443
+      targetPort: 8443
+      protocol: TCP
+  type: ClusterIP
+
