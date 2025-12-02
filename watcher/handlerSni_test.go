@@ -32,7 +32,7 @@ func newSniConfig(name string, fqdns []string) *unstructured.Unstructured {
 	u := &unstructured.Unstructured{
 		Object: map[string]interface{}{
 			"apiVersion": "trafficserver.apache.org/v1alpha1",
-			"kind":       "TrafficServerSNIConfig",
+			"kind":       "ATSSniPolicy",
 			"metadata": map[string]interface{}{
 				"name":      name,
 				"namespace": "default",
@@ -170,6 +170,35 @@ func TestLoadWriteSniFile(t *testing.T) {
 	}
 }
 
+// TestArrayPreservation verifies that arrays (e.g. valid_tls_versions_in) are preserved as native YAML sequences
+func TestArrayPreservation(t *testing.T) {
+	h, tmpFile := newTestSniHandler(t)
+
+	obj := newSniConfig("array-test", []string{"arr.test.com"})
+	h.Add(obj)
+
+	entries := parseSniYaml(t, tmpFile)
+	if len(entries) != 1 {
+		t.Fatalf("expected 1 entry, got %d", len(entries))
+	}
+
+	v, ok := entries[0]["valid_tls_versions_in"]
+	if !ok {
+		t.Fatalf("missing valid_tls_versions_in in entry: %+v", entries[0])
+	}
+
+	arr, ok := v.([]interface{})
+	if !ok {
+		t.Fatalf("expected valid_tls_versions_in to be []interface{}, got %T", v)
+	}
+	if len(arr) != 2 {
+		t.Fatalf("expected 2 elements in valid_tls_versions_in, got %d", len(arr))
+	}
+	if arr[0].(string) != "TLSv1_2" || arr[1].(string) != "TLSv1_3" {
+		t.Errorf("unexpected values in valid_tls_versions_in: %v", arr)
+	}
+}
+
 // verifyFqdnOrder ensures fqdn is the first key in each entry
 func verifyFqdnOrder(t *testing.T, path string) {
 	data, _ := os.ReadFile(path)
@@ -177,14 +206,26 @@ func verifyFqdnOrder(t *testing.T, path string) {
 	if err := yaml.Unmarshal(data, &root); err != nil {
 		t.Fatalf("failed to parse yaml nodes: %v", err)
 	}
-	// Find the "sni" sequence node
-	for i := 0; i < len(root.Content); i++ {
-		if root.Content[i].Value == "sni" {
-			sniNode := root.Content[i+1]
-			for _, item := range sniNode.Content {
-				if len(item.Content) == 0 {
+
+	// Descend to the top-level mapping node (document -> mapping)
+	var mappingNode *yaml.Node
+	if root.Kind == yaml.DocumentNode && len(root.Content) > 0 {
+		mappingNode = root.Content[0]
+	} else {
+		mappingNode = &root
+	}
+
+	// mappingNode.Content contains key/value node pairs
+	for i := 0; i < len(mappingNode.Content); i += 2 {
+		keyNode := mappingNode.Content[i]
+		valNode := mappingNode.Content[i+1]
+		if keyNode.Value == "sni" && valNode.Kind == yaml.SequenceNode {
+			// iterate sequence items (each item should be a mapping node)
+			for _, item := range valNode.Content {
+				if item.Kind != yaml.MappingNode || len(item.Content) == 0 {
 					continue
 				}
+				// mapping node Content is key/value pairs; first key is at index 0
 				firstKey := item.Content[0].Value
 				if firstKey != "fqdn" {
 					t.Errorf("expected fqdn as first key, got %q in %v", firstKey, item)

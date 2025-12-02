@@ -6,17 +6,19 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"sync"
 
 	"github.com/apache/trafficserver-ingress-controller/endpoint"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// AtsSniHandler handles TrafficServerSNIConfig CR events
+// AtsSniHandler handles Atssnipolicy CR events
 type AtsSniHandler struct {
 	ResourceName string
 	Ep           *endpoint.Endpoint
 	FilePath     string
+	mu           sync.Mutex
 }
 
 // Constructor
@@ -28,18 +30,42 @@ func NewAtsSniHandler(resource string, ep *endpoint.Endpoint, path string) *AtsS
 // SniEntry represents one fqdn entry in sni.yaml (flexible, dynamic)
 type SniEntry map[string]interface{}
 
-// Custom YAML marshaller to ensure fqdn appears first
+// nodeFromInterface creates a yaml.Node from any arbitrary Go value, preserving
+// sequences/maps/numbers/booleans instead of converting to a plain string.
+func nodeFromInterface(v interface{}) (*yaml.Node, error) {
+	var node yaml.Node
+	// First marshal the value to YAML bytes, then unmarshal into a Node to
+	// obtain a properly-typed node.
+	b, err := yaml.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal(b, &node); err != nil {
+		return nil, err
+	}
+	// When unmarshalling into a node the top-level is a DocumentNode; return its content.
+	if node.Kind == yaml.DocumentNode && len(node.Content) > 0 {
+		return node.Content[0], nil
+	}
+	return &node, nil
+}
+
+// Custom YAML marshaller to ensure fqdn appears first and to preserve native types
 func (s SniEntry) MarshalYAML() (interface{}, error) {
 	node := &yaml.Node{
 		Kind: yaml.MappingNode,
+		Tag:  "!!map",
 	}
 
 	// Write fqdn first if present
 	if fqdn, ok := s["fqdn"]; ok {
-		node.Content = append(node.Content,
-			&yaml.Node{Kind: yaml.ScalarNode, Value: "fqdn"},
-			&yaml.Node{Kind: yaml.ScalarNode, Value: fmt.Sprintf("%v", fqdn)},
-		)
+		keyNode := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "fqdn"}
+		valNode, err := nodeFromInterface(fqdn)
+		if err != nil {
+			// fallback to string scalar
+			valNode = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: fmt.Sprintf("%v", fqdn)}
+		}
+		node.Content = append(node.Content, keyNode, valNode)
 	}
 
 	// Collect remaining keys (excluding fqdn)
@@ -53,13 +79,16 @@ func (s SniEntry) MarshalYAML() (interface{}, error) {
 	// Sort the other keys alphabetically for consistent output
 	sort.Strings(keys)
 
-	// Append other keys
+	// Append other keys with proper YAML nodes (preserving arrays/maps/etc)
 	for _, k := range keys {
 		v := s[k]
-		node.Content = append(node.Content,
-			&yaml.Node{Kind: yaml.ScalarNode, Value: k},
-			&yaml.Node{Kind: yaml.ScalarNode, Value: fmt.Sprintf("%v", v)},
-		)
+		keyNode := &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: k}
+		valNode, err := nodeFromInterface(v)
+		if err != nil {
+			// fallback to string representation if marshalling fails
+			valNode = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: fmt.Sprintf("%v", v)}
+		}
+		node.Content = append(node.Content, keyNode, valNode)
 	}
 
 	return node, nil
@@ -70,10 +99,13 @@ type SniFile struct {
 	Sni []SniEntry `yaml:"sni,omitempty"`
 }
 
-// Add handles creation of TrafficServerSNIConfig
+// Add handles creation of Atssnipolicy
 func (h *AtsSniHandler) Add(obj interface{}) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	u := obj.(*unstructured.Unstructured)
-	log.Printf("[ADD] TrafficServerSNIConfig: %s/%s", u.GetNamespace(), u.GetName())
+	log.Printf("[ADD] Ats Sni Policy: #%v", u)
 
 	newSni, found, err := unstructured.NestedSlice(u.Object, "spec", "sni")
 	if err != nil || !found {
@@ -112,10 +144,13 @@ func (h *AtsSniHandler) Add(obj interface{}) {
 	h.reloadSni()
 }
 
-// Update handles updates of TrafficServerSNIConfig
+// Update handles updates of Atssnipolicy
 func (h *AtsSniHandler) Update(oldObj, newObj interface{}) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	newU := newObj.(*unstructured.Unstructured)
-	log.Printf("[UPDATE] TrafficServerSNIConfig: %s/%s", newU.GetNamespace(), newU.GetName())
+	log.Printf("[UPDATE] Atssnipolicy: #%v", newU)
 
 	newSni, found, err := unstructured.NestedSlice(newU.Object, "spec", "sni")
 	if err != nil || !found {
@@ -159,10 +194,13 @@ func (h *AtsSniHandler) Update(oldObj, newObj interface{}) {
 	h.reloadSni()
 }
 
-// Delete handles deletion of TrafficServerSNIConfig
+// Delete handles deletion of Atssnipolicy
 func (h *AtsSniHandler) Delete(obj interface{}) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
 	u := obj.(*unstructured.Unstructured)
-	log.Printf("[DELETE] TrafficServerSNIConfig: %s/%s", u.GetNamespace(), u.GetName())
+	log.Printf("[DELETE] Atssnipolicy: #%v", u)
 
 	sniFile := h.loadSniFile()
 
