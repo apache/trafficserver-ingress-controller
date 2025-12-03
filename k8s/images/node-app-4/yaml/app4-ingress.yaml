@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: node-app
+  namespace: backend
+  annotations:
+    ats.ingress.kubernetes.io/origin-server-protocol: "https"
+spec:
+  ingressClassName: ats
+  tls:
+    - hosts:
+        - test.example.com
+      secretName: app3-secret
+  rules:
+    - host: test.example.com
+      http:
+        paths:
+          - path: /node-app4
+            pathType: Prefix
+            backend:
+              service:
+                name: appsvc4
+                port:
+                  number: 8443
+          - path: /node-app3
+            pathType: Prefix
+            backend:
+              service:
+                name: appsvc3
+                port:
+                  number: 8443

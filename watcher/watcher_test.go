@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -620,5 +621,191 @@ func TestWatchAtsCachingPolicy_Delete(t *testing.T) {
 	}
 	if msg == "" {
 		t.Errorf("expected non-empty CacheSet message after delete")
+	}
+}
+
+func getTestWatcherForSni() Watcher {
+	scheme := runtime.NewScheme()
+	gvr := schema.GroupVersionResource{
+		Group:    "trafficserver.apache.org",
+		Version:  "v1alpha1",
+		Resource: "atssnipolicies",
+	}
+	gvrToListKind := map[schema.GroupVersionResource]string{
+		gvr: "ATSSniPolicyList",
+	}
+	dynClient := dynamicfake.NewSimpleDynamicClientWithCustomListKinds(scheme, gvrToListKind)
+	clientset := fake.NewSimpleClientset()
+	exampleEndpoint := createExampleEndpointWithFakeATSSni()
+	stopChan := make(chan struct{})
+
+	sniWatcher := Watcher{
+		Cs:            clientset,
+		DynamicClient: dynClient,
+		ATSNamespace:  "trafficserver-test-2",
+		Ep:            &exampleEndpoint,
+		StopChan:      stopChan,
+		ResyncPeriod:  0,
+	}
+
+	return sniWatcher
+}
+
+func tempSniFile(t *testing.T) string {
+	tmpDir := t.TempDir()
+	tmpFile := filepath.Join(tmpDir, "sni.yaml")
+	if err := os.WriteFile(tmpFile, []byte{}, 0644); err != nil {
+		t.Fatal(err)
+	}
+	return tmpFile
+}
+
+func newSniCR(name, fqdn string) *unstructured.Unstructured {
+	return &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"apiVersion": "trafficserver.apache.org/v1alpha1",
+			"kind":       "ATSSniPolicy",
+			"metadata": map[string]interface{}{
+				"name":      name,
+				"namespace": "default",
+			},
+			"spec": map[string]interface{}{
+				"sni": []interface{}{
+					map[string]interface{}{
+						"fqdn":            fqdn,
+						"verify_client":   "STRICT",
+						"host_sni_policy": "PERMISSIVE",
+						"valid_tls_versions_in": []interface{}{
+							"TLSv1_2",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+// --- TESTS ---
+
+func TestWatchAtsSniPolicy_Add(t *testing.T) {
+	w := getTestWatcherForSni()
+	path := tempSniFile(t)
+
+	err := w.WatchAtsSniPolicy(path)
+	if err != nil {
+		t.Fatalf("failed to start watcher: %v", err)
+	}
+
+	gvr := schema.GroupVersionResource{
+		Group:    "trafficserver.apache.org",
+		Version:  "v1alpha1",
+		Resource: "atssnipolicies",
+	}
+	dynClient := w.DynamicClient.Resource(gvr).Namespace("default")
+
+	// Create CR
+	cr := newSniCR("policy-add", "ats.test.com")
+	_, err = dynClient.Create(context.TODO(), cr, meta_v1.CreateOptions{})
+	if err != nil {
+		t.Fatalf("failed to create SNI CR: %v", err)
+	}
+	time.Sleep(200 * time.Millisecond)
+
+	// File must contain fqdn
+	data, _ := os.ReadFile(path)
+	if !strings.Contains(string(data), "ats.test.com") {
+		t.Errorf("expected fqdn ats.test.com in sni.yaml, got:\n%s", string(data))
+	}
+}
+
+func TestWatchAtsSniPolicy_Update(t *testing.T) {
+	w := getTestWatcherForSni()
+	path := tempSniFile(t)
+
+	err := w.WatchAtsSniPolicy(path)
+	if err != nil {
+		t.Fatalf("failed to start watcher: %v", err)
+	}
+
+	gvr := schema.GroupVersionResource{
+		Group:    "trafficserver.apache.org",
+		Version:  "v1alpha1",
+		Resource: "atssnipolicies",
+	}
+	dynClient := w.DynamicClient.Resource(gvr).Namespace("default")
+
+	// Create CR with fqdn
+	cr := newSniCR("policy-update", "ats.test.com")
+	_, err = dynClient.Create(context.TODO(), cr, meta_v1.CreateOptions{})
+	if err != nil {
+		t.Fatalf("failed to create SNI CR: %v", err)
+	}
+
+	// Update CR: keep ats.test.com, add new-site.com
+	cr.Object["spec"] = map[string]interface{}{
+		"sni": []interface{}{
+			map[string]interface{}{
+				"fqdn":            "ats.test.com",
+				"verify_client":   "NONE",
+				"host_sni_policy": "ENFORCE",
+			},
+			map[string]interface{}{
+				"fqdn":            "new-site.com",
+				"verify_client":   "NONE",
+				"host_sni_policy": "ENFORCE",
+			},
+		},
+	}
+	_, err = dynClient.Update(context.TODO(), cr, meta_v1.UpdateOptions{})
+	if err != nil {
+		t.Fatalf("failed to update SNI CR: %v", err)
+	}
+	time.Sleep(200 * time.Millisecond)
+
+	// File should contain ats.test.com and new-site.com, but not host-test.com
+	data, _ := os.ReadFile(path)
+	content := string(data)
+	if !strings.Contains(content, "ats.test.com") {
+		t.Errorf("expected fqdn ats.test.com in sni.yaml after update, got:\n%s", content)
+	}
+	if !strings.Contains(content, "new-site.com") {
+		t.Errorf("expected fqdn new-site.com in sni.yaml after update, got:\n%s", content)
+	}
+}
+
+func TestWatchAtsSniPolicy_Delete(t *testing.T) {
+	w := getTestWatcherForSni()
+	path := tempSniFile(t)
+
+	err := w.WatchAtsSniPolicy(path)
+	if err != nil {
+		t.Fatalf("failed to start watcher: %v", err)
+	}
+
+	gvr := schema.GroupVersionResource{
+		Group:    "trafficserver.apache.org",
+		Version:  "v1alpha1",
+		Resource: "atssnipolicies",
+	}
+	dynClient := w.DynamicClient.Resource(gvr).Namespace("default")
+
+	// Create CR with fqdn
+	cr := newSniCR("policy-delete", "ats.test.com")
+	_, err = dynClient.Create(context.TODO(), cr, meta_v1.CreateOptions{})
+	if err != nil {
+		t.Fatalf("failed to create SNI CR: %v", err)
+	}
+
+	// Delete CR
+	err = dynClient.Delete(context.TODO(), "policy-delete", meta_v1.DeleteOptions{})
+	if err != nil {
+		t.Fatalf("failed to delete SNI CR: %v", err)
+	}
+	time.Sleep(200 * time.Millisecond)
+
+	// File should be empty, because both fqdn entries came from the deleted CR
+	data, _ := os.ReadFile(path)
+	if len(strings.TrimSpace(string(data))) != 0 {
+		t.Errorf("expected sni.yaml to be empty after delete, got:\n%s", string(data))
 	}
 }

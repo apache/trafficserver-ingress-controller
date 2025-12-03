@@ -40,6 +40,7 @@ import (
 )
 
 const CACHE_PATH string = "/opt/ats/etc/trafficserver/cache.config"
+const SNI_PATH string = "/opt/ats/etc/trafficserver/sni.yaml"
 
 // FIXME: watching all namespace does not work...
 
@@ -91,6 +92,11 @@ func (w *Watcher) Watch() error {
 
 	log.Println("calling the Watch Ats Caching Policy function")
 	if err := w.WatchAtsCachingPolicy(CACHE_PATH); err != nil {
+		return err
+	}
+
+	log.Println("calling the Watch Ats Sni Policy function")
+	if err := w.WatchAtsSniPolicy(SNI_PATH); err != nil {
 		return err
 	}
 	return nil
@@ -183,7 +189,7 @@ func (w *Watcher) WatchAtsCachingPolicy(path string) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("failed to add event handler: %v\n", err)
+		return fmt.Errorf("failed to add event handler: %v", err)
 	}
 
 	go informer.Run(w.StopChan)
@@ -191,5 +197,28 @@ func (w *Watcher) WatchAtsCachingPolicy(path string) error {
 		return fmt.Errorf("failed to sync ATSCachingPolicy informer")
 	}
 	log.Println("ATSCachingPolicy informer running and synced")
+	return nil
+}
+
+func (w *Watcher) WatchAtsSniPolicy(path string) error {
+	gvr := schema.GroupVersionResource{Group: "trafficserver.apache.org", Version: "v1alpha1", Resource: "atssnipolicies"}
+	dynamicFactory := dynamicinformer.NewFilteredDynamicSharedInformerFactory(w.DynamicClient, w.ResyncPeriod, metav1.NamespaceAll, nil)
+	informer := dynamicFactory.ForResource(gvr).Informer()
+	snihandler := NewAtsSniHandler("atssnipolicy", w.Ep, path)
+	_, err := informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+		AddFunc:    snihandler.Add,
+		UpdateFunc: snihandler.Update,
+		DeleteFunc: snihandler.Delete,
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to add event handler: %v", err)
+	}
+
+	go informer.Run(w.StopChan)
+	if !cache.WaitForCacheSync(w.StopChan, informer.HasSynced) {
+		return fmt.Errorf("failed to sync ATSSNIPolicy informer")
+	}
+	log.Println("ATSSNIPolicy informer running and synced")
 	return nil
 }
