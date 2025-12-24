@@ -1,0 +1,10 @@
+apiVersion: trafficserver.apache.org/v1alpha1
+kind: ATSSniPolicy
+metadata:
+  name: my-sni-config
+spec:
+  sni:
+    - fqdn: test.example.com
+      verify_server_policy: "PERMISSIVE"
+
+

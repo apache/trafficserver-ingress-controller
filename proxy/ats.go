@@ -28,6 +28,7 @@ type ATSManagerInterface interface {
 	ConfigSet(k, v string) (string, error)
 	ConfigGet(k string) (string, error)
 	CacheSet() (string, error)
+	SniSet() (string, error)
 	IncludeIngressClass(c string) bool
 }
 
@@ -64,6 +65,16 @@ func (m *ATSManager) CacheSet() (msg string, err error) {
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("failed to execute: traffic_ctl config reload  Error: %s", err.Error())
+	}
+	return fmt.Sprintf("Reload succesful --> stdoutStderr: %q", stdoutStderr), nil
+
+}
+
+func (m *ATSManager) SniSet() (msg string, err error) {
+	cmd := exec.Command("traffic_ctl", "config", "reload")
+	stdoutStderr, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("failed to execute: traffic_ctl config reload Error: %s", err.Error())
 	}
 	return fmt.Sprintf("Reload succesful --> stdoutStderr: %q", stdoutStderr), nil
 

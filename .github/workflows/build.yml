@@ -64,6 +64,16 @@ jobs:
           eval $(minikube -p minikube docker-env)
           docker build -t caching-app k8s/images/caching-app/
 
+      - name: Build App 3
+        run: |
+          eval $(minikube -p minikube docker-env)
+          docker build -t node-app-3 k8s/images/node-app-3/
+
+      - name: Build App 4
+        run: |
+          eval $(minikube -p minikube docker-env)
+          docker build -t node-app-4 k8s/images/node-app-4/
+
       - name: Install dependencies
         run: |
           cd tests

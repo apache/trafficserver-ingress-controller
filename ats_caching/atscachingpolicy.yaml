@@ -17,3 +17,9 @@ spec:
         pattern: ".*/cache-test"
       action: cache
       ttl: "12s"
+    - name: app3-endpoint
+      primarySpecifier:
+        type: url_regex
+        pattern: ".*/node-app3"
+      action: cache
+      ttl: "12s"
