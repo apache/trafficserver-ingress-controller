@@ -366,7 +366,7 @@ class TestIngress:
         assert mod_time1 == mod_time2 and age1 != age2, "Expected Date provided by both responses to be same and the Age mentioned in second response to be more than 0"
 
     def test_cache_https_node_app3(self, minikubeip):
-        command = f'curl -k -i -v --cacert certs/rootCA.crt --resolve test.example.com:30443:10.63.20.30 https://test.example.com:30443/node-app3'
+        command = f'curl -k -i -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response1 = response_1.stdout.strip()
         response1_list = response1.split('\n')
@@ -538,7 +538,7 @@ class TestIngress:
         
         kubectl_apply('../ats_sni/verify-client/strict.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge. com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode != 0, "Curl unexpectedly succeeded without client certificate"
         expected_error = "tlsv13 alert certificate required"
@@ -549,7 +549,7 @@ class TestIngress:
     def test_host_sni_none(self, minikubeip):
         kubectl_apply('../ats_sni/host-sni-policy/disabled.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge. com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -738,7 +738,7 @@ class TestIngress:
         time.sleep(7)
         
         # Connect to Flask on 8449 with self-signed origin.crt
-        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test. example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
+        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
         
