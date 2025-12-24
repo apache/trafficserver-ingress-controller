@@ -638,7 +638,7 @@ class TestIngress:
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in full_output, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in full_output or "HTTP/2 200" in full_output or "200 OK" in full_output, \
-            f"Expected 200 OK. Got: {result.stdout[: 200]}"
+            f"Expected 200 OK. Got: {result.stdout[:200]}"
 
         print("ENFORCED mode with valid cert: 200 OK")
 
@@ -767,7 +767,7 @@ class TestIngress:
         if not log_result.stdout:
             recent_cmd = f"kubectl exec -n trafficserver-test {pod_name} -- tail -200 /opt/ats/var/log/trafficserver/diags.log"
             recent_result = subprocess.run(recent_cmd, shell=True, capture_output=True, text=True)
-            pytest.fail(f"No warnings found in logs.  Recent logs:\n{recent_result.stdout[-500:]}")
+            pytest.fail(f"No warnings found in logs. Recent logs:\n{recent_result.stdout[-500:]}")
         
         print(f"Certificate warnings found:\n{log_result.stdout}")
         
