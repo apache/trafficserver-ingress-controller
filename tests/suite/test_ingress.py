@@ -1,5 +1,5 @@
 #  Licensed to the Apache Software Foundation (ASF) under one
-#  or more contributor license agreements.   See the NOTICE file
+#  or more contributor license agreements.  See the NOTICE file
 #  distributed with this work for additional information
 #  regarding copyright ownership.  The ASF licenses this file
 #  to you under the Apache License, Version 2.0 (the
@@ -35,7 +35,7 @@ def kubectl_delete(resource):
 def misc_command(command):
     rc = os.system(command)
     if rc != 0:
-        # os.system returns a shell-dependent code; keep it simple: 
+        # os.system returns a shell-dependent code; keep it simple:
         raise RuntimeError(f"Command failed (rc={rc}): {command}")
 def create_certs():
 
@@ -66,10 +66,10 @@ def create_certs():
     misc_command(
         'openssl req -new -key ../k8s/images/node-app-3/backend.key '
         '-out ../k8s/images/node-app-3/backend.csr '
-        '-subj "/C=US/ST=State/L=City/O=TestOrg/CN=test.example.com. backend. svc.cluster.local" '
+        '-subj "/C=US/ST=State/L=City/O=TestOrg/CN=test.example.com.backend.svc.cluster.local" '
     )
     misc_command(
-        'openssl x509 -req -in ../k8s/images/node-app-3/backend. csr -CA certs/rootCA.crt -CAkey certs/rootCA. key -CAcreateserial '
+        'openssl x509 -req -in ../k8s/images/node-app-3/backend.csr -CA certs/rootCA.crt -CAkey certs/rootCA.key -CAcreateserial '
         '-out ../k8s/images/node-app-3/backend.crt '
         '-days 365 -sha256 '
     )
@@ -91,7 +91,7 @@ def create_certs():
         subjectAltName = @alt_names
 
         [ alt_names ]
-        DNS.1 = test.edge. com
+        DNS.1 = test.edge.com
     """)
     with open("certs/server_ext.cnf", "w", encoding="utf-8") as f:
         f.write(server_ext)
@@ -147,7 +147,7 @@ def create_certs():
         subjectAltName = @alt_names
 
         [ alt_names ]
-        DNS.1 = test. example.com
+        DNS.1 = test.example.com
     """)
     with open("certs/server2_ext.cnf", "w", encoding="utf-8") as f:
         f.write(server2_ext)
@@ -163,11 +163,11 @@ def create_certs():
 
 def setup_module(module):
     create_certs()
-    misc_command('openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls. crt -subj "/CN=atssvc/O=atssvc"')
+    misc_command('openssl req -x509 -sha256 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=atssvc/O=atssvc"')
     kubectl_create('namespace trafficserver-test')
     kubectl_create('namespace backend')
     kubectl_create('secret tls app3-secret --key certs/server2.key --cert certs/server2.crt -n backend  --dry-run=client -o yaml | kubectl apply -f -') 
-    kubectl_create('secret tls tls-secret --key tls.key --cert tls. crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
+    kubectl_create('secret tls tls-secret --key tls.key --cert tls.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
     kubectl_create('secret tls server-secret --key certs/server.key --cert certs/server.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
     kubectl_create('secret tls ca-secret --key certs/rootCA.key --cert certs/rootCA.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
     kubectl_create('secret tls server2-secret --key certs/server2.key --cert certs/server2.crt -n trafficserver-test --dry-run=client -o yaml | kubectl apply -f -')
@@ -180,15 +180,15 @@ def setup_module(module):
 
     #Sni crd 
     kubectl_apply('../ats_sni/ats-snipolicy-role.yaml')
-    kubectl_apply('../ats_sni/ats-snipolicy-binding. yaml')
+    kubectl_apply('../ats_sni/ats-snipolicy-binding.yaml')
     kubectl_apply('../ats_sni/crd-atssnipolicy.yaml')
     #kubectl_apply('data/setup/ats_sni/atssnipolicy.yaml')
 
-    #Applying here as it takes some time for controller to get notification from kubernetes. 
+    #Applying here as it takes some time for controller to get notification from kubernetes.
     kubectl_apply('../ats_caching/ats-cachingpolicy-role.yaml')
     kubectl_apply('../ats_caching/ats-cachingpolicy-binding.yaml')
     kubectl_apply('../ats_caching/crd-atscachingpolicy.yaml')
-    kubectl_apply('../ats_caching/atscachingpolicy. yaml')
+    kubectl_apply('../ats_caching/atscachingpolicy.yaml')
     kubectl_apply('data/caching-app/')
 
     time.sleep(60)
@@ -201,10 +201,10 @@ def setup_module(module):
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3 -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')
 
     #    misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3')
-    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={. items[0].status.podIP}):8080/app1')
-#    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-3 -o jsonpath={.items[0].status.podIP}):8080/app2')
-    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc1 -n trafficserver-test-2 -o jsonpath={. spec.clusterIP}):8080/app1')
-#    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc2 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080/app2')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')
+#    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-3 -o jsonpath={.items[0].status.podIP}):8080/app1')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc1 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080/app1')
+#    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get service/appsvc2 -n trafficserver-test-2 -o jsonpath={.spec.clusterIP}):8080/app1')
 
 
 
@@ -217,8 +217,8 @@ def teardown_module(module):
     misc_command('rm -rf certs')
     misc_command('rm ../k8s/images/node-app-3/backend.csr')
     misc_command('rm ../k8s/images/node-app-3/backend.crt')
-    misc_command('rm ../k8s/images/node-app-3/backend. key')
-    misc_command('rm ../k8s/images/node-app-4/origin. crt')
+    misc_command('rm ../k8s/images/node-app-3/backend.key')
+    misc_command('rm ../k8s/images/node-app-4/origin.crt')
     misc_command('rm ../k8s/images/node-app-4/origin.key')
     
    
@@ -234,8 +234,8 @@ def get_expected_response_http2_disabled():
             <HR>
 
             <FONT FACE="Helvetica,Arial"><B>
-            Description: Your request on the specified host was not found. 
-            Check the location and try again. 
+            Description: Your request on the specified host was not found.
+            Check the location and try again.
             </B></FONT>
             <HR>
             </BODY>"""
@@ -243,7 +243,7 @@ def get_expected_response_http2_disabled():
     return ' '.join(resp.split())
 
 def get_expected_response_app1():
-    resp = """<! DOCTYPE html>
+    resp = """<!DOCTYPE html>
             <HTML>
 
             <HEAD>
@@ -305,7 +305,7 @@ class TestIngress:
         misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
-            f"Expected:  200 response code for test_basic_routing"
+            f"Expected: 200 response code for test_basic_routing"
         assert ' '.join(resp.text.split()) == get_expected_response_app1()
         
     def test_basic_routing_media_app1(self, minikubeip):
@@ -315,29 +315,29 @@ class TestIngress:
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
-        assert ' '.join(resp. text.split()) == get_expected_response_app1()
+        assert ' '.join(resp.text.split()) == get_expected_response_app1()
     
     def test_basic_routing_edge_app2(self, minikubeip):
         req_url = "http://" + minikubeip + ":30080/app2"
-        resp = requests.get(req_url, headers={"host":  "test.edge.com"})
+        resp = requests.get(req_url, headers={"host": "test.edge.com"})
         misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
-        assert ' '.join(resp. text.split()) == get_expected_response_app2()
+        assert ' '.join(resp.text.split()) == get_expected_response_app2()
     
     def test_basic_routing_media_app2(self, minikubeip):
         req_url = "http://" + minikubeip + ":30080/app2"
-        resp = requests.get(req_url, headers={"host":  "test.media.com"})
+        resp = requests.get(req_url, headers={"host": "test.media.com"})
         misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
-        assert resp. status_code == 200,\
+        assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
         assert ' '.join(resp.text.split()) == get_expected_response_app2()
     
     def test_basic_routing_edge_app2_https(self, minikubeip):
         req_url = "https://" + minikubeip + ":30443/app2"
-        resp = requests.get(req_url, headers={"host": "test. edge.com"}, verify=False)
+        resp = requests.get(req_url, headers={"host": "test.edge.com"}, verify=False)
         misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
@@ -347,14 +347,14 @@ class TestIngress:
     def test_cache_app1(self, minikubeip):
         command = f'curl -i -v -H "Host: test.media.com" http://{minikubeip}:30080/cache-test'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
-        response1 = response_1.stdout. strip()
+        response1 = response_1.stdout.strip()
         response1_list = response1.split('\n')
         for res in response1_list:
             if res.__contains__("Age"):
                 age1 = res
             if res.__contains__("Date"):
                 mod_time1 = res
-        time. sleep(5)
+        time.sleep(5)
         response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response2 = response_2.stdout.strip()
         response2_list = response2.split('\n')
@@ -368,7 +368,7 @@ class TestIngress:
     def test_cache_https_node_app3(self, minikubeip):
         command = f'curl -k -i -v --cacert certs/rootCA.crt --resolve test.example.com:30443:10.63.20.30 https://test.example.com:30443/node-app3'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
-        response1 = response_1.stdout. strip()
+        response1 = response_1.stdout.strip()
         response1_list = response1.split('\n')
         for res in response1_list:
             if res.__contains__("age"):
@@ -377,7 +377,7 @@ class TestIngress:
                 mod_time1 = res
         time.sleep(5)
         response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
-        response2 = response_2.stdout. strip()
+        response2 = response_2.stdout.strip()
         response2_list = response2.split('\n')
         for resp in response2_list:
             if resp.__contains__("age"):
@@ -395,14 +395,14 @@ class TestIngress:
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response1 = response_1.stdout.strip()
         response1_list = response1.split('\n')
-        for res in response1_list: 
+        for res in response1_list:
             if res.__contains__("Age"):
                 age1 = res
             if res.__contains__("Date"):
                 mod_time1 = res
         time.sleep(16)
         response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
-        response2 = response_2.stdout. strip()
+        response2 = response_2.stdout.strip()
         response2_list = response2.split('\n')
         for resp in response2_list:
             if resp.__contains__("Age"):
@@ -424,7 +424,7 @@ class TestIngress:
                 mod_time1 = res
         time.sleep(9)
         response_2 = subprocess.run(command, shell=True, capture_output=True, text=True)
-        response2 = response_2.stdout. strip()
+        response2 = response_2.stdout.strip()
         response2_list = response2.split('\n')
         for resp in response2_list:
             if resp.__contains__("Age"):
@@ -436,13 +436,13 @@ class TestIngress:
     
     def test_updating_ingress_media_app2(self, minikubeip):
         kubectl_apply('data/ats-ingress-update.yaml')
-        req_url = "http://" + minikubeip + ": 30080/app2"
+        req_url = "http://" + minikubeip + ":30080/app2"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
-        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid. log')
+        misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
             f"Expected: 200 response code for test_basic_routing"
-        assert ' '. join(resp.text.split()) == get_expected_response_app1_updated()
+        assert ' '.join(resp.text.split()) == get_expected_response_app1_updated()
     
     def test_deleting_ingress_media_app2(self, minikubeip):
         kubectl_apply('data/ats-ingress-delete.yaml')
@@ -451,27 +451,27 @@ class TestIngress:
         misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 404,\
-            f"Expected:  400 response code for test_basic_routing_deleted_ingress"
+            f"Expected: 400 response code for test_basic_routing_deleted_ingress"
 
     def test_add_ingress_media(self, minikubeip):
-        kubectl_apply('data/ats-ingress-add. yaml')
+        kubectl_apply('data/ats-ingress-add.yaml')
         req_url = "http://" + minikubeip + ":30080/test"
         resp = requests.get(req_url, headers={"host": "test.media.com"})
         misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 200,\
-            f"Expected:  200 response code for test_basic_routing"
+            f"Expected: 200 response code for test_basic_routing"
         assert ' '.join(resp.text.split()) == get_expected_response_app1()
 
     def test_snippet_edge_app2(self, minikubeip):
         kubectl_apply('data/ats-ingress-snippet.yaml')
         req_url = "http://" + minikubeip + ":30080/app2"
-        resp = requests.get(req_url, headers={"host":  "test.edge.com"},allow_redirects=False)
+        resp = requests.get(req_url, headers={"host": "test.edge.com"},allow_redirects=False)
         misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- cat /opt/ats/var/log/trafficserver/squid.log')
 
         assert resp.status_code == 301,\
-            f"Expected:  301 response code for test_snippet_edge_app2"
-        assert resp. headers['Location'] == 'https://test.edge.com/app2'
+            f"Expected: 301 response code for test_snippet_edge_app2"
+        assert resp.headers['Location'] == 'https://test.edge.com/app2'
     
     def test_https2_enabled(self, minikubeip):
         kubectl_apply('../ats_sni/http2/on.yaml')
@@ -508,21 +508,21 @@ class TestIngress:
         assert "HTTP/1.1 200 OK" in result.stderr or "HTTP/2 200" in result.stderr
 
     def test_verify_client_moderate_without_crt(self, minikubeip):
-        kubectl_apply('../ats_sni/verify-client/moderate. yaml')
+        kubectl_apply('../ats_sni/verify-client/moderate.yaml')
         time.sleep(7)
         cmd = f'curl -k --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-        assert result.returncode == 0, f"Curl failed:  {result.stderr}"
+        assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in result.stderr or "HTTP/2 200" in result.stderr
 
     def test_verify_client_moderate_with_crt(self, minikubeip):
-        kubectl_apply('../ats_sni/verify-client/moderate. yaml')
+        kubectl_apply('../ats_sni/verify-client/moderate.yaml')
         time.sleep(7)
         cmd = f'curl -k --cacert certs/rootCA.crt --cert certs/client1.crt --key certs/client1.key -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
-        assert "SSL connection using TLS" in result. stderr, "TLS handshake failed"
+        assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in result.stderr or "HTTP/2 200" in result.stderr
         
     def test_verify_client_strict_with_crt(self, minikubeip):
@@ -543,7 +543,7 @@ class TestIngress:
         assert result.returncode != 0, "Curl unexpectedly succeeded without client certificate"
         expected_error = "tlsv13 alert certificate required"
         assert expected_error in result.stderr, (
-        f"Expected TLS failure not found.  stderr:\n{result.stderr}"
+        f"Expected TLS failure not found. stderr:\n{result.stderr}"
         )
 
     def test_host_sni_none(self, minikubeip):
@@ -556,7 +556,7 @@ class TestIngress:
         assert "HTTP/1.1 200 OK" in result.stderr or "HTTP/2 200" in result.stderr
 
     def test_host_sni_match_enforced(self, minikubeip):
-        kubectl_apply('../ats_sni/host-sni-policy/enforced. yaml')
+        kubectl_apply('../ats_sni/host-sni-policy/enforced.yaml')
         time.sleep(7)
         cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -568,7 +568,7 @@ class TestIngress:
         time.sleep(7)
         cmd = (
             f'curl -k -v --cacert certs/rootCA.crt '
-            f'--resolve test. example.com:30443:{minikubeip} '
+            f'--resolve test.example.com:30443:{minikubeip} '
             f'https://test.example.com:30443/node-app3 '
             f'-H "Host: test.edge.com"'
         )
@@ -586,17 +586,17 @@ class TestIngress:
         )
         log_result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True)
         assert "SNI/hostname mismatch sni=test.example.com host=test.edge.com action=terminate" in log_result.stdout, (
-            f"Expected log entry not found.  Logs:\n{log_result.stdout}"
+            f"Expected log entry not found. Logs:\n{log_result.stdout}"
         )
 
     def test_host_sni_match_permissive(self, minikubeip):
         kubectl_apply('../ats_sni/host-sni-policy/permissive.yaml')
         time.sleep(7)
         cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
-        result = subprocess. run(cmd, shell=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
-        assert "HTTP/1.1 200 OK" in result. stderr or "HTTP/2 200" in result.stderr   
+        assert "HTTP/1.1 200 OK" in result.stderr or "HTTP/2 200" in result.stderr   
 
     def test_host_sni_mismatch_permissive(self, minikubeip):
         time.sleep(7)
@@ -604,7 +604,7 @@ class TestIngress:
             f'curl -k -v --cacert certs/rootCA.crt '
             f'--resolve test.example.com:30443:{minikubeip} '
             f'https://test.example.com:30443/node-app3 '
-            f'-H "Host: test.edge. com"'
+            f'-H "Host: test.edge.com"'
         )
         # Execute curl
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -615,10 +615,10 @@ class TestIngress:
         log_cmd = (
             "kubectl exec $(kubectl get pod -n trafficserver-test -o name | head -1) "
             "-n trafficserver-test -- "
-            "grep -i 'SNI/hostname mismatch sni=test.example. com host=test.edge.com action=continue' "
+            "grep -i 'SNI/hostname mismatch sni=test.example.com host=test.edge.com action=continue' "
             "/opt/ats/var/log/trafficserver/diags.log | sed 's/.*\\(SNI\\/hostname mismatch.*\\)/\\1/'"
         )
-        log_result = subprocess. run(log_cmd, shell=True, capture_output=True, text=True)
+        log_result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True)
         assert "SNI/hostname mismatch sni=test.example.com host=test.edge.com action=continue" in log_result.stdout, (
             f"Expected log entry not found. Logs:\n{log_result.stdout}"
         )
@@ -626,7 +626,7 @@ class TestIngress:
     # ==================== ENFORCED MODE ====================
 
     def test_verify_server_enforced_with_valid_cert(self, minikubeip):
-        """Test ENFORCED mode with valid certificate (backend. crt) - should succeed with 200 OK"""
+        """Test ENFORCED mode with valid certificate (backend.crt) - should succeed with 200 OK"""
         kubectl_apply('../ats_sni/verify-server-policy/enforced.yaml')
         time.sleep(7)
 
@@ -638,9 +638,9 @@ class TestIngress:
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in full_output, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in full_output or "HTTP/2 200" in full_output or "200 OK" in full_output, \
-            f"Expected 200 OK.  Got: {result.stdout[: 200]}"
+            f"Expected 200 OK. Got: {result.stdout[: 200]}"
 
-        print("ENFORCED mode with valid cert:  200 OK")
+        print("ENFORCED mode with valid cert: 200 OK")
 
     def test_verify_server_enforced_with_invalid_cert(self, minikubeip):
         """Test ENFORCED mode with invalid backend certificate (origin.crt) - should fail with 502"""
@@ -656,7 +656,7 @@ class TestIngress:
 
         # Check for 502 error
         has_502 = "HTTP/2 502" in full_output or "Could Not Connect" in full_output or "502 Bad Gateway" in full_output
-        assert has_502, f"Expected 502 error in ENFORCED mode with invalid cert. Got: {full_output[: 500]}"
+        assert has_502, f"Expected 502 error in ENFORCED mode with invalid cert. Got: {full_output[:500]}"
 
         print("Got 502 error, now checking logs for Action=Terminate...")
 
@@ -672,7 +672,7 @@ class TestIngress:
         log_cmd = f"kubectl exec -n trafficserver-test {pod_name} -- grep 'Action=Terminate' /opt/ats/var/log/trafficserver/diags.log | tail -5"
         log_result = subprocess.run(log_cmd, shell=True, capture_output=True, text=True)
 
-        if log_result.stdout: 
+        if log_result.stdout:
             print(f"Termination logs found:\n{log_result.stdout}")
             assert "Action=Terminate" in log_result.stdout, "Expected Action=Terminate"
 
@@ -691,7 +691,7 @@ class TestIngress:
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in full_output, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in full_output or "HTTP/2 200" in full_output or "200 OK" in full_output, \
-            f"Expected 200 OK. Got: {result. stdout[:200]}"
+            f"Expected 200 OK. Got: {result.stdout[:200]}"
         
         print("DISABLED mode with valid cert: 200 OK")
 
@@ -701,14 +701,14 @@ class TestIngress:
         time.sleep(7)
         
         cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
-        result = subprocess. run(cmd, shell=True, capture_output=True, text=True)
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
         
         # Should ALSO succeed with 200 OK (DISABLED = no verification, accepts any cert)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in full_output, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in full_output or "HTTP/2 200" in full_output or "200 OK" in full_output, \
-            f"Expected 200 OK. Got: {result. stdout[:200]}"
+            f"Expected 200 OK. Got: {result.stdout[:200]}"
         
         print("DISABLED mode with invalid cert: 200 OK (no verification performed)")
 
@@ -724,10 +724,10 @@ class TestIngress:
         full_output = result.stdout + result.stderr
         
         # Should succeed with 200 OK
-        assert result.returncode == 0, f"Curl failed:  {result.stderr}"
+        assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in full_output, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in full_output or "HTTP/2 200" in full_output or "200 OK" in full_output, \
-            f"Expected 200 OK.  Got: {result.stdout[:200]}"
+            f"Expected 200 OK. Got: {result.stdout[:200]}"
         
         print("PERMISSIVE mode with valid cert: 200 OK")
 
@@ -755,7 +755,7 @@ class TestIngress:
         # Get pod name
         get_pod_cmd = "kubectl get pods -n trafficserver-test -l app=trafficserver-test -o jsonpath='{.items[0].metadata.name}'"
         pod_result = subprocess.run(get_pod_cmd, shell=True, capture_output=True, text=True)
-        pod_name = pod_result.stdout. strip().replace("'", "")
+        pod_name = pod_result.stdout.strip().replace("'", "")
         
         assert pod_name, f"TrafficServer pod not found"
         
@@ -767,7 +767,7 @@ class TestIngress:
         if not log_result.stdout:
             recent_cmd = f"kubectl exec -n trafficserver-test {pod_name} -- tail -200 /opt/ats/var/log/trafficserver/diags.log"
             recent_result = subprocess.run(recent_cmd, shell=True, capture_output=True, text=True)
-            pytest.fail(f"No warnings found in logs.  Recent logs:\n{recent_result. stdout[-500:]}")
+            pytest.fail(f"No warnings found in logs.  Recent logs:\n{recent_result.stdout[-500:]}")
         
         print(f"Certificate warnings found:\n{log_result.stdout}")
         
