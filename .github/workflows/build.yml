@@ -30,8 +30,8 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@v2.13.0
         with:
-          minikube version: 'v1.36.0'
-          kubernetes version: 'v1.32.8'
+          minikube version: 'v1.37.0'
+          kubernetes version: 'v1.32.10'
           driver: 'docker'
           container runtime: 'docker'
           github token: ${{ secrets.GITHUB_TOKEN }}
@@ -58,6 +58,21 @@ jobs:
         run: |
           eval $(minikube -p minikube docker-env)
           docker build -t node-app-2 k8s/images/node-app-2/
+
+      - name: Build Caching App
+        run: |
+          eval $(minikube -p minikube docker-env)
+          docker build -t caching-app k8s/images/caching-app/
+
+      - name: Build App 3
+        run: |
+          eval $(minikube -p minikube docker-env)
+          docker build -t node-app-3 k8s/images/node-app-3/
+
+      - name: Build App 4
+        run: |
+          eval $(minikube -p minikube docker-env)
+          docker build -t node-app-4 k8s/images/node-app-4/
 
       - name: Install dependencies
         run: |

@@ -1,19 +1,25 @@
-apiVersion: k8s.trafficserver.apache.com/v1
+apiVersion: k8s.trafficserver.apache.com/v1alpha1
 kind: ATSCachingPolicy
 metadata:
   name: my-app-caching
-  namespace: trafficserver-test
+  namespace: cache-test-ns
 spec:
   rules:
-    - name: home-endpoint
-      primarySpecifier:
-        type: url_regex
-        pattern: ".*/app1"
-      action: cache
-      ttl: "12s"
     - name: static-assets
       primarySpecifier:
         type: url_regex
         pattern: "^/app2"
       action: cache
-      ttl: "20s"
+      ttl: "23s"
+    - name: cache-endpoint
+      primarySpecifier:
+        type: url_regex
+        pattern: ".*/cache-test"
+      action: cache
+      ttl: "12s"
+    - name: app3-endpoint
+      primarySpecifier:
+        type: url_regex
+        pattern: ".*/node-app3"
+      action: cache
+      ttl: "12s"

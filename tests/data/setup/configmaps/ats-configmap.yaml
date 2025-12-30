@@ -14,12 +14,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: trafficserver-test
-
----
 
 apiVersion: v1
 kind: ConfigMap
@@ -36,3 +30,8 @@ data:
   
   proxy.config.http.cache.http: "1"
   proxy.config.http.cache.required_headers: "0"
+  proxy.config.diags.debug.enabled: "1"
+
+  proxy.config.ssl.CA.cert.path: "/etc/ats/ssl/ca/"
+  proxy.config.ssl.CA.cert.filename: "tls.crt"
+
