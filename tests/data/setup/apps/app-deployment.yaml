@@ -45,8 +45,8 @@ spec:
     spec:
       containers:
       - name: app1
-        image: localhost:5000/node-appservice-1
-        imagePullPolicy: IfNotPresent
+        image: node-appservice-1:latest
+        imagePullPolicy: Never
         env:
         - name: AUTHOR
           value: app1
@@ -72,8 +72,8 @@ spec:
     spec:
       containers:
       - name: app2
-        image: localhost:5000/node-appservice-2
-        imagePullPolicy: IfNotPresent
+        image: node-appservice-2:latest
+        imagePullPolicy: Never
         env:
         - name: AUTHOR
           value: app2
@@ -100,8 +100,8 @@ spec:
     spec:
       containers:
       - name: app1
-        image: localhost:5000/node-appservice-1
-        imagePullPolicy: IfNotPresent
+        image: node-appservice-1:latest
+        imagePullPolicy: Never
         env:
         - name: AUTHOR
           value: app1
@@ -127,8 +127,8 @@ spec:
     spec:
       containers:
       - name: app2
-        image: localhost:5000/node-appservice-2
-        imagePullPolicy: IfNotPresent
+        image: node-appservice-2:latest
+        imagePullPolicy: Never
         env:
         - name: AUTHOR
           value: app2
