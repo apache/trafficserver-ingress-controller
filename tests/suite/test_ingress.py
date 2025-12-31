@@ -40,39 +40,39 @@ def misc_command(command):
 def create_certs():
 
     # Work dir
-    misc_command('mkdir -p certs')
+    #misc_command('mkdir -p certs')
 
     # Root CA
-    misc_command('openssl genrsa -out certs/rootCA.key 4096')
-    misc_command(
-        'openssl req -x509 -new -key certs/rootCA.key -sha256 -days 3650 '
-        '-out certs/rootCA.crt '
-        '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=TestRootCA" '
-        '-addext "basicConstraints=critical,CA:TRUE" '
-        '-addext "keyUsage=critical,keyCertSign,cRLSign" '
-        '-addext "subjectKeyIdentifier=hash"'
-    )
+    #misc_command('openssl genrsa -out certs/rootCA.key 4096')
+    #misc_command(
+     #   'openssl req -x509 -new -key certs/rootCA.key -sha256 -days 3650 '
+     #   '-out certs/rootCA.crt '
+     #   '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=TestRootCA" '
+     #   '-addext "basicConstraints=critical,CA:TRUE" '
+     #   '-addext "keyUsage=critical,keyCertSign,cRLSign" '
+     #   '-addext "subjectKeyIdentifier=hash"'
+    #)
 
     #Self-Signed certificate for node-app-4
-    misc_command('openssl genrsa -out ../k8s/images/node-app-4/origin.key 4096')
-    misc_command(
-        'openssl req -x509 -new -key ../k8s/images/node-app-4/origin.key -sha256 -days 3650 '
-        '-out ../k8s/images/node-app-4/origin.crt '
-        '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=test.example.com" '
-    )
+    #misc_command('openssl genrsa -out ../k8s/images/node-app-4/origin.key 4096')
+    #misc_command(
+     #   'openssl req -x509 -new -key ../k8s/images/node-app-4/origin.key -sha256 -days 3650 '
+     #   '-out ../k8s/images/node-app-4/origin.crt '
+     #   '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=test.example.com" '
+    #)
 
     # Backend CA
-    misc_command('openssl genrsa -out ../k8s/images/node-app-3/backend.key 2048')
-    misc_command(
-        'openssl req -new -key ../k8s/images/node-app-3/backend.key '
-        '-out ../k8s/images/node-app-3/backend.csr '
-        '-subj "/C=US/ST=State/L=City/O=TestOrg/CN=test.example.com.backend.svc.cluster.local" '
-    )
-    misc_command(
-        'openssl x509 -req -in ../k8s/images/node-app-3/backend.csr -CA certs/rootCA.crt -CAkey certs/rootCA.key -CAcreateserial '
-        '-out ../k8s/images/node-app-3/backend.crt '
-        '-days 365 -sha256 '
-    )
+    #misc_command('openssl genrsa -out ../k8s/images/node-app-3/backend.key 2048')
+    #misc_command(
+     #   'openssl req -new -key ../k8s/images/node-app-3/backend.key '
+     #   '-out ../k8s/images/node-app-3/backend.csr '
+     #   '-subj "/C=US/ST=State/L=City/O=TestOrg/CN=test.example.com.backend.svc.cluster.local" '
+    #)
+    #misc_command(
+     #   'openssl x509 -req -in ../k8s/images/node-app-3/backend.csr -CA certs/rootCA.crt -CAkey certs/rootCA.key -CAcreateserial '
+     #   '-out ../k8s/images/node-app-3/backend.crt '
+     #   '-days 365 -sha256 '
+    #)
 
     # Server key + CSR
     misc_command('openssl genrsa -out certs/server.key 2048')
@@ -197,8 +197,8 @@ def setup_module(module):
     misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2 -- ps auxxx')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2 -- curl -v localhost:8080/app1')
-    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2 -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')
-    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3 -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2 -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')    
+    misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3 -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')    
 
     #    misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-3 -o name | head -1) -n trafficserver-test-3')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')
@@ -366,7 +366,7 @@ class TestIngress:
         assert mod_time1 == mod_time2 and age1 != age2, "Expected Date provided by both responses to be same and the Age mentioned in second response to be more than 0"
 
     def test_cache_https_node_app3(self, minikubeip):
-        command = f'curl -k -i -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
+        command = f'curl -i -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response1 = response_1.stdout.strip()
         response1_list = response1.split('\n')
@@ -477,7 +477,7 @@ class TestIngress:
         kubectl_apply('../ats_sni/http2/on.yaml')
         time.sleep(10)  # wait for config changes propagate
     
-        cmd = f'curl -k --cacert certs/rootCA. crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl HTTPS/2 request failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -489,7 +489,7 @@ class TestIngress:
     def test_https2_disabled(self, minikubeip):
         kubectl_apply('../ats_sni/http2/off.yaml')
         time.sleep(5)
-        cmd = f'curl -k --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl HTTPS/2 request failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -501,7 +501,7 @@ class TestIngress:
     def test_verify_client_none(self, minikubeip):
         kubectl_apply('../ats_sni/verify-client/none.yaml')
         time.sleep(7)  
-        cmd = f'curl -k --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -510,7 +510,7 @@ class TestIngress:
     def test_verify_client_moderate_without_crt(self, minikubeip):
         kubectl_apply('../ats_sni/verify-client/moderate.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -519,7 +519,7 @@ class TestIngress:
     def test_verify_client_moderate_with_crt(self, minikubeip):
         kubectl_apply('../ats_sni/verify-client/moderate.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt --cert certs/client1.crt --key certs/client1.key -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt --cert certs/client1.crt --key certs/client1.key -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -528,7 +528,7 @@ class TestIngress:
     def test_verify_client_strict_with_crt(self, minikubeip):
         kubectl_apply('../ats_sni/verify-client/strict.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt --cert certs/client1.crt --key certs/client1.key -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt --cert certs/client1.crt --key certs/client1.key -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -538,7 +538,7 @@ class TestIngress:
         
         kubectl_apply('../ats_sni/verify-client/strict.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode != 0, "Curl unexpectedly succeeded without client certificate"
         expected_error = "tlsv13 alert certificate required"
@@ -549,7 +549,7 @@ class TestIngress:
     def test_host_sni_none(self, minikubeip):
         kubectl_apply('../ats_sni/host-sni-policy/disabled.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -558,7 +558,7 @@ class TestIngress:
     def test_host_sni_match_enforced(self, minikubeip):
         kubectl_apply('../ats_sni/host-sni-policy/enforced.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -567,7 +567,7 @@ class TestIngress:
     def test_host_sni_mismatch_enforced(self, minikubeip):
         time.sleep(7)
         cmd = (
-            f'curl -k -v --cacert certs/rootCA.crt '
+            f'curl -v --cacert certs/rootCA.crt '
             f'--resolve test.example.com:30443:{minikubeip} '
             f'https://test.example.com:30443/node-app3 '
             f'-H "Host: test.edge.com"'
@@ -592,7 +592,7 @@ class TestIngress:
     def test_host_sni_match_permissive(self, minikubeip):
         kubectl_apply('../ats_sni/host-sni-policy/permissive.yaml')
         time.sleep(7)
-        cmd = f'curl -k --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
+        cmd = f'curl --cacert certs/rootCA.crt  -v --resolve test.edge.com:30443:{minikubeip} https://test.edge.com:30443/app2'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in result.stderr, "TLS handshake failed"
@@ -601,7 +601,7 @@ class TestIngress:
     def test_host_sni_mismatch_permissive(self, minikubeip):
         time.sleep(7)
         cmd = (
-            f'curl -k -v --cacert certs/rootCA.crt '
+            f'curl -v --cacert certs/rootCA.crt '
             f'--resolve test.example.com:30443:{minikubeip} '
             f'https://test.example.com:30443/node-app3 '
             f'-H "Host: test.edge.com"'
@@ -630,7 +630,7 @@ class TestIngress:
         kubectl_apply('../ats_sni/verify-server-policy/enforced.yaml')
         time.sleep(7)
 
-        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
+        cmd = f'curl -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
 
@@ -647,7 +647,7 @@ class TestIngress:
         kubectl_apply('../ats_sni/verify-server-policy/enforced.yaml')
         time.sleep(7)
 
-        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
+        cmd = f'curl -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
 
@@ -683,7 +683,7 @@ class TestIngress:
         kubectl_apply('../ats_sni/verify-server-policy/disabled.yaml')
         time.sleep(7)
         
-        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
+        cmd = f'curl -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
         
@@ -700,7 +700,7 @@ class TestIngress:
         kubectl_apply('../ats_sni/verify-server-policy/disabled.yaml')
         time.sleep(7)
         
-        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
+        cmd = f'curl -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
         
@@ -719,7 +719,7 @@ class TestIngress:
         kubectl_apply('../ats_sni/verify-server-policy/permissive.yaml')
         time.sleep(7)
         
-        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
+        cmd = f'curl -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app3'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
         
@@ -738,9 +738,19 @@ class TestIngress:
         time.sleep(7)
         
         # Connect to Flask on 8449 with self-signed origin.crt
-        cmd = f'curl -k -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
+        cmd = f'curl -v --cacert certs/rootCA.crt --resolve test.example.com:30443:{minikubeip} https://test.example.com:30443/node-app4'
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
+        
+        misc_command('kubectl get pods -n backend')
+        misc_command('kubectl get pods -n trafficserver-test-2')
+        
+        misc_command('kubectl get all -A')
+
+        misc_command('kubectl describe pods -n backend')
+
+        misc_command('kubectl get pods -n backend -o name | xargs -n1 kubectl logs --prefix -n backend')
+        
         
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in full_output, "TLS handshake failed"

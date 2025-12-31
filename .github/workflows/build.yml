@@ -63,6 +63,23 @@ jobs:
         run: |
           eval $(minikube -p minikube docker-env)
           docker build -t caching-app k8s/images/caching-app/
+      
+      - name: Create CA to sign certificates
+        run: |
+          mkdir -p tests/certs
+          openssl genrsa -out tests/certs/rootCA.key 4096
+          openssl req -x509 -new -key tests/certs/rootCA.key -sha256 -days 1 -out tests/certs/rootCA.crt -subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=TestRootCA" -addext "basicConstraints=critical,CA:TRUE" -addext "keyUsage=critical,keyCertSign,cRLSign" -addext "subjectKeyIdentifier=hash"
+
+      - name: Create Certs for node-app-4
+        run: |
+          openssl genrsa -out k8s/images/node-app-4/origin.key 4096
+          openssl req -x509 -new -key k8s/images/node-app-4/origin.key -sha256 -days 1 -out k8s/images/node-app-4/origin.crt -subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=test.example.com"
+
+      - name: Create Certs for node-app-3
+        run: |
+          openssl genrsa -out k8s/images/node-app-3/backend.key 2048
+          openssl req -new -key k8s/images/node-app-3/backend.key -out k8s/images/node-app-3/backend.csr -subj "/C=US/ST=State/L=City/O=TestOrg/CN=test.example.com.backend.svc.cluster.local"
+          openssl x509 -req -in k8s/images/node-app-3/backend.csr -CA tests/certs/rootCA.crt -CAkey tests/certs/rootCA.key -CAcreateserial -out k8s/images/node-app-3/backend.crt -days 1 -sha256
 
       - name: Build App 3
         run: |

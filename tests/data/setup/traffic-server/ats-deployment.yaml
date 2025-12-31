@@ -35,7 +35,6 @@ spec:
     matchLabels:
       app: trafficserver-test
 
-  # DO NOT EXCEED ONE COPY
   replicas: 1
   # DO NOT EXCEED ONE COPY
   template:
@@ -47,13 +46,19 @@ spec:
       containers:
         - name: trafficserver-test
           image: ats-ingress:latest # Needs to be updated
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: "/etc/ats/ssl"
               name: ats-ssl
-              readOnly: true
+            - mountPath: "/etc/ats/ssl/ca"
+              name: ca-ssl
+            - mountPath: "/etc/ats/ssl/server"
+              name: server-ssl
+            - mountPath: "/etc/ats/ssl/server2"
+              name: server2-ssl
             - name: varlog
               mountPath: /opt/ats/var/log/trafficserver
-          imagePullPolicy: IfNotPresent
+     
           env:
             - name: POD_NAME
               valueFrom:
@@ -63,12 +68,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
-#            - name: INGRESS_CLASS
-#              value: "ats"
             - name: SNIPPET
               value: "1"
             - name: POD_TLS_PATH
-              value: "/etc/ats/ssl"
+              value: "/etc/ats/ssl:/etc/ats/ssl/server:/etc/ats/ssl/server2"
           ports:
           - containerPort: 8080
             name: http
@@ -83,16 +86,19 @@ spec:
             mountPath: "/var/log"
           - name: config-volume
             mountPath: "/fluentd/etc"
-#        - name: trafficserver-exporter
-#          image: ats-ingress-exporter:latest
-#          imagePullPolicy: IfNotPresent
-#          args: ["--endpoint=http://127.0.0.1:8080/_stats"]
-#          ports:
-#          - containerPort: 9122
       volumes:
         - name: ats-ssl
           secret:
             secretName: tls-secret
+        - name: server-ssl
+          secret:
+            secretName: server-secret
+        - name: server2-ssl
+          secret:
+            secretName: server2-secret
+        - name: ca-ssl
+          secret:
+            secretName: ca-secret
         - name: varlog
           emptyDir: {}
         - name: config-volume

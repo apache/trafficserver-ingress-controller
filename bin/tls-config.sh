@@ -19,22 +19,37 @@
 set +x
 
 if [ -z "${POD_TLS_PATH}" ]; then
-	echo "POD_TLS_PATH not defined"
-	exit 1
+    echo "POD_TLS_PATH not defined"
+    exit 1
 fi
 
-tlspath="$POD_TLS_PATH/"      
-tlskey="$POD_TLS_PATH/tls.key"
-tlscrt="$POD_TLS_PATH/tls.crt"
+
+# Clear existing file
+> /opt/ats/etc/trafficserver/ssl_multicert.config
+
+found_any=false
+
+IFS=':' read -r -a paths <<< "$POD_TLS_PATH"
+
+for tlspath in "${paths[@]}"; do      
+    tlskey="${tlspath}/tls.key"
+    tlscrt="${tlspath}/tls.crt"
         
-if [ ! -f "${tlscrt}" ]; then
-	echo "${tlscrt} not found"
-	exit 1
-fi
+    if [ ! -f "${tlscrt}" ]; then
+        echo "${tlscrt} not found"
+        exit 1
+    fi
 
-if [ ! -f "${tlskey}" ]; then
-	echo "${tlskey} not found"
-	exit 1
-fi
+    if [ ! -f "${tlskey}" ]; then
+        echo "${tlskey} not found"
+        exit 1
+    fi
 
-echo "dest_ip=* ssl_cert_name=${tlscrt} ssl_key_name=${tlskey}" > /opt/ats/etc/trafficserver/ssl_multicert.config
+    echo "dest_ip=* ssl_cert_name=${tlscrt} ssl_key_name=${tlskey}" >> /opt/ats/etc/trafficserver/ssl_multicert.config
+    found_any=true
+done
+
+if [ "$found_any" = false ]; then
+    echo "No valid TLS cert/key pairs found in $tlspath"
+    exit 1
+fi

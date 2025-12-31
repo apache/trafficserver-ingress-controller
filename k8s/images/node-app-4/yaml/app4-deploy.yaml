@@ -21,6 +21,7 @@ spec:
       containers:
         - name: node-app-4-container
           image: node-app-4:latest
+          imagePullPolicy: Never
           ports:
             - containerPort: 8443
               name: https

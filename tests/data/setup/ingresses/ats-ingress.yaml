@@ -27,6 +27,7 @@ metadata:
   name: app-ingress
   namespace: trafficserver-test-2
 spec:
+  ingressClassName: ats
   rules:
   - host: test.media.com
     http:
@@ -56,4 +57,10 @@ spec:
             name: appsvc1
             port:
               number: 8080
-          
+      - path: /app2
+        pathType: Exact
+        backend:
+          service:
+            name: appsvc2
+            port:
+              number: 8080
