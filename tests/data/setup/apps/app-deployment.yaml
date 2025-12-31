@@ -45,7 +45,7 @@ spec:
     spec:
       containers:
       - name: app1
-        image: node-appservice-1:latest
+        image: node-app-1:latest
         imagePullPolicy: Never
         env:
         - name: AUTHOR
@@ -72,7 +72,7 @@ spec:
     spec:
       containers:
       - name: app2
-        image: node-appservice-2:latest
+        image: node-app-2:latest
         imagePullPolicy: Never
         env:
         - name: AUTHOR
@@ -100,7 +100,7 @@ spec:
     spec:
       containers:
       - name: app1
-        image: node-appservice-1:latest
+        image: node-app-1:latest
         imagePullPolicy: Never
         env:
         - name: AUTHOR
@@ -127,7 +127,7 @@ spec:
     spec:
       containers:
       - name: app2
-        image: node-appservice-2:latest
+        image: node-app-2:latest
         imagePullPolicy: Never
         env:
         - name: AUTHOR
