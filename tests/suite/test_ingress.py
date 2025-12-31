@@ -746,6 +746,10 @@ class TestIngress:
         misc_command('kubectl get pods -n trafficserver-test-2')
         
         misc_command('kubectl get all -A')
+
+        misc_command('kubectl describe pods -n backend')
+
+        misc_command('kubectl get pods -n backend -o name | xargs -n1 kubectl logs --prefix -n backend')
         
         
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
