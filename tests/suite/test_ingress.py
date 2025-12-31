@@ -40,39 +40,39 @@ def misc_command(command):
 def create_certs():
 
     # Work dir
-    misc_command('mkdir -p certs')
+    #misc_command('mkdir -p certs')
 
     # Root CA
-    misc_command('openssl genrsa -out certs/rootCA.key 4096')
-    misc_command(
-        'openssl req -x509 -new -key certs/rootCA.key -sha256 -days 3650 '
-        '-out certs/rootCA.crt '
-        '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=TestRootCA" '
-        '-addext "basicConstraints=critical,CA:TRUE" '
-        '-addext "keyUsage=critical,keyCertSign,cRLSign" '
-        '-addext "subjectKeyIdentifier=hash"'
-    )
+    #misc_command('openssl genrsa -out certs/rootCA.key 4096')
+    #misc_command(
+     #   'openssl req -x509 -new -key certs/rootCA.key -sha256 -days 3650 '
+     #   '-out certs/rootCA.crt '
+     #   '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=TestRootCA" '
+     #   '-addext "basicConstraints=critical,CA:TRUE" '
+     #   '-addext "keyUsage=critical,keyCertSign,cRLSign" '
+     #   '-addext "subjectKeyIdentifier=hash"'
+    #)
 
     #Self-Signed certificate for node-app-4
-    misc_command('openssl genrsa -out ../k8s/images/node-app-4/origin.key 4096')
-    misc_command(
-        'openssl req -x509 -new -key ../k8s/images/node-app-4/origin.key -sha256 -days 3650 '
-        '-out ../k8s/images/node-app-4/origin.crt '
-        '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=test.example.com" '
-    )
+    #misc_command('openssl genrsa -out ../k8s/images/node-app-4/origin.key 4096')
+    #misc_command(
+     #   'openssl req -x509 -new -key ../k8s/images/node-app-4/origin.key -sha256 -days 3650 '
+     #   '-out ../k8s/images/node-app-4/origin.crt '
+     #   '-subj "/C=US/ST=State/L=City/O=MyOrg/OU=MyUnit/CN=test.example.com" '
+    #)
 
     # Backend CA
-    misc_command('openssl genrsa -out ../k8s/images/node-app-3/backend.key 2048')
-    misc_command(
-        'openssl req -new -key ../k8s/images/node-app-3/backend.key '
-        '-out ../k8s/images/node-app-3/backend.csr '
-        '-subj "/C=US/ST=State/L=City/O=TestOrg/CN=test.example.com.backend.svc.cluster.local" '
-    )
-    misc_command(
-        'openssl x509 -req -in ../k8s/images/node-app-3/backend.csr -CA certs/rootCA.crt -CAkey certs/rootCA.key -CAcreateserial '
-        '-out ../k8s/images/node-app-3/backend.crt '
-        '-days 365 -sha256 '
-    )
+    #misc_command('openssl genrsa -out ../k8s/images/node-app-3/backend.key 2048')
+    #misc_command(
+     #   'openssl req -new -key ../k8s/images/node-app-3/backend.key '
+     #   '-out ../k8s/images/node-app-3/backend.csr '
+     #   '-subj "/C=US/ST=State/L=City/O=TestOrg/CN=test.example.com.backend.svc.cluster.local" '
+    #)
+    #misc_command(
+     #   'openssl x509 -req -in ../k8s/images/node-app-3/backend.csr -CA certs/rootCA.crt -CAkey certs/rootCA.key -CAcreateserial '
+     #   '-out ../k8s/images/node-app-3/backend.crt '
+     #   '-days 365 -sha256 '
+    #)
 
     # Server key + CSR
     misc_command('openssl genrsa -out certs/server.key 2048')
