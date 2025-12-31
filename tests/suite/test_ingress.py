@@ -742,6 +742,16 @@ class TestIngress:
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
         full_output = result.stdout + result.stderr
         
+        misc_command('kubectl get pods -n backend')
+        misc_command('kubectl get pods -n trafficserver-test-2')
+        
+        misc_command('kubectl get all -A')
+
+        misc_command('kubectl describe pods -n backend')
+
+        misc_command('kubectl get pods -n backend -o name | xargs -n1 kubectl logs --prefix -n backend')
+        
+        
         assert result.returncode == 0, f"Curl failed: {result.stderr}"
         assert "SSL connection using TLS" in full_output, "TLS handshake failed"
         assert "HTTP/1.1 200 OK" in full_output or "HTTP/2 200" in full_output or "200 OK" in full_output, \

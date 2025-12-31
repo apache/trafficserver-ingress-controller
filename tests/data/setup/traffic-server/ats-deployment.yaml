@@ -58,7 +58,7 @@ spec:
               name: server2-ssl
             - name: varlog
               mountPath: /opt/ats/var/log/trafficserver
-          imagePullPolicy: Always
+     
           env:
             - name: POD_NAME
               valueFrom:
