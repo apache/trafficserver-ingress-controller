@@ -60,6 +60,7 @@ func (g *IgHandler) add(obj interface{}) {
 	// add the script before adding route
 	snippet, snippetErr := util.ExtractServerSnippet(ingressObj.GetAnnotations())
 	if snippetErr == nil {
+		log.Println("Snippet in the handlerIngress.go file: ", snippet)
 		g.Ep.RedisClient.DBOneSAdd(nameversion, snippet)
 	}
 
