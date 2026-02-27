@@ -33,8 +33,8 @@ Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-con
 - [Development](https://github.com/apache/trafficserver-ingress-controller/blob/master/docs/DEVELOPMENT.md)
 
 ## Dependencies
-- Alpine Linux 3.20.8
-- Apache Traffic Server 9.2.11
+- Alpine Linux 3.20.9
+- Apache Traffic Server 9.2.12
 - OpenResty LuaJIT2 v2.1_p20240815
 - Go (Version can be found in `GO_VERSION` file found at the base of this repository)
 - Other Packages
