@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+version: "2"
+
 # https://golangci-lint.run/usage/linters/
 linters:
   disable-all: true
@@ -31,8 +33,7 @@ run:
   timeout: 5m
   tests: false
 
-  output:
-    format: colored-line-number
-    print-issued-lines: true
-    print-linter-name: true
-
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
