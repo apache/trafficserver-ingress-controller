@@ -18,7 +18,7 @@ version: "2"
 
 # https://golangci-lint.run/usage/linters/
 linters:
-  disable-all: true
+  default: none
   enable:
     - errcheck
     - gosimple
@@ -34,6 +34,9 @@ run:
   tests: false
 
 output:
-  format: colored-line-number
-  print-issued-lines: true
-  print-linter-name: true
+  formats:
+    - path: stdout
+      format: colored-line-number
+  show:
+    issued-lines: true
+    linter-name: true
