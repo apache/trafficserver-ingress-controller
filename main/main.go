@@ -78,7 +78,7 @@ func main() {
 
 	// default namespace to "all"
 	if *namespaces != namespace.ALL {
-		namespaceList := strings.Split(strings.Replace(strings.ToLower(*namespaces), " ", "", -1), ",")
+		namespaceList := strings.Split(strings.ReplaceAll(strings.ToLower(*namespaces), " ", ""), ",")
 		for _, namespace := range namespaceList {
 			if namespace != "" {
 				namespaceMap[namespace] = true
@@ -89,7 +89,7 @@ func main() {
 	ignoreNamespaceMap = make(map[string]bool)
 
 	if *ignoreNamespaces != "" {
-		ignoreNamespaceList := strings.Split(strings.Replace(strings.ToLower(*ignoreNamespaces), " ", "", -1), ",")
+		ignoreNamespaceList := strings.Split(strings.ReplaceAll(strings.ToLower(*ignoreNamespaces), " ", ""), ",")
 		for _, namespace := range ignoreNamespaceList {
 			if namespace != "" {
 				ignoreNamespaceMap[namespace] = true
