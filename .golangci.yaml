@@ -35,8 +35,8 @@ run:
 
 output:
   formats:
-    - path: stdout
-      format: colored-line-number
+    colored-line-number:
+      path: stdout
   show:
     issued-lines: true
     linter-name: true
