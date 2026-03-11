@@ -50,7 +50,7 @@ func (w *Writer) SyncWriteJSONFile(obj interface{}) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close() // file is opened, must close
+	defer func() { _ = file.Close() }() // file is opened, must close
 
 	content, jsonErr := json.MarshalIndent(obj, "", "\t")
 	if jsonErr != nil {

@@ -45,11 +45,11 @@ const (
 func Init() (*Client, error) {
 	rClient, err := CreateRedisClient() // connecting to redis
 	if err != nil {
-		return nil, fmt.Errorf("Failed connecting to Redis: %s", err.Error())
+		return nil, fmt.Errorf("failed connecting to Redis: %s", err.Error())
 	}
 	err = rClient.Flush() // when the program starts, flush all stale memory
 	if err != nil {
-		return nil, fmt.Errorf("Failed to FlushAll: %s", err.Error())
+		return nil, fmt.Errorf("failed to FlushAll: %s", err.Error())
 	}
 	return rClient, nil
 }
@@ -189,8 +189,8 @@ func (c *Client) Flush() error {
 
 // Close tries to close the 2 clients
 func (c *Client) Close() {
-	c.DefaultDB.Close()
-	c.DBOne.Close()
+	_ = c.DefaultDB.Close()
+	_ = c.DBOne.Close()
 	// for garbage collector
 	c.DefaultDB = nil
 	c.DBOne = nil
@@ -198,7 +198,7 @@ func (c *Client) Close() {
 
 // Terminate tries to flush the entire redis and close clients
 func (c *Client) Terminate() {
-	c.Flush() // should go first
+	_ = c.Flush() // should go first
 	c.Close()
 }
 
