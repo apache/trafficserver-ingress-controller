@@ -78,7 +78,7 @@ func (h *AtsCacheHandler) Add(obj interface{}) {
 		log.Printf("Add: Failed to open cache.config: %v", err)
 		return
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	for _, line := range lines {
 		if _, err := f.WriteString(line + "\n"); err != nil {

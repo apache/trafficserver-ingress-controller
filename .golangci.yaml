@@ -14,12 +14,13 @@
 # limitations under the License.
 #
 
+version: "2"
+
 # https://golangci-lint.run/usage/linters/
 linters:
-  disable-all: true
+  default: none
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
@@ -31,8 +32,9 @@ run:
   timeout: 5m
   tests: false
 
-  output:
-    format: colored-line-number
-    print-issued-lines: true
-    print-linter-name: true
-
+output:
+  formats:
+    text:
+      path: stdout
+      print-issued-lines: true
+      print-linter-name: true
