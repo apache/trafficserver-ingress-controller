@@ -133,7 +133,7 @@ jobs:
         if: github.repository == 'apache/trafficserver-ingress-controller'
         uses: lhotari/sandboxed-trivy-action@555963036b2012b44c1071508a236e569db28ebb
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          scan-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           format: 'sarif'
           output: 'trivy-results.sarif'
 
