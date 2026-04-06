@@ -34,7 +34,7 @@ Card](https://goreportcard.com/badge/github.com/apache/trafficserver-ingress-con
 
 ## Dependencies
 - Alpine Linux 3.23.3
-- Apache Traffic Server 9.2.12
+- Apache Traffic Server 9.2.13
 - OpenResty LuaJIT2 v2.1_p20240815
 - Go (Version can be found in `GO_VERSION` file found at the base of this repository)
 - Other Packages
