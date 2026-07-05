@@ -104,7 +104,7 @@ jobs:
 
       - name: Log in to the Container registry
         if: github.repository == 'apache/trafficserver-ingress-controller'
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
