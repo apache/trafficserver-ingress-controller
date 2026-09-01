@@ -113,7 +113,7 @@ jobs:
       - name: Extract metadata (tags, labels) for Docker
         if: github.repository == 'apache/trafficserver-ingress-controller'
         id: meta
-        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -121,7 +121,7 @@ jobs:
 
       - name: Build and push Docker image
         if: github.repository == 'apache/trafficserver-ingress-controller'
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
         with:
           context: .
           push: true
@@ -131,7 +131,7 @@ jobs:
 
       - name: Run Trivy vulnerability scanner
         if: github.repository == 'apache/trafficserver-ingress-controller'
-        uses: lhotari/sandboxed-trivy-action@555963036b2012b44c1071508a236e569db28ebb
+        uses: lhotari/sandboxed-trivy-action@f01374b6cc3bf7264ab238293e94f6db7ada6dd0
         with:
           scan-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           format: 'sarif'
