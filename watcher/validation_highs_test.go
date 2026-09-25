@@ -22,14 +22,16 @@ limitations under the License.
 // so this file doubles as the before/after regression check.
 //
 // Covered here (miniredis + FakeATSManager, no cluster needed):
-//   f003 -> TestValidation_F003_*   (cross-tenant route injection on add)
-//   f004 -> TestValidation_F004_*   (silent route deletion/takeover on update)
-//   f002 -> TestValidation_F002_*   (unallowlisted ConfigMap key -> live ATS)
+//
+//	f003 -> TestValidation_F003_*   (cross-tenant route injection on add)
+//	f004 -> TestValidation_F004_*   (silent route deletion/takeover on update)
+//	f002 -> TestValidation_F002_*   (unallowlisted ConfigMap key -> live ATS)
 //
 // Out of scope for a Go unit test (validated statically / other harness):
-//   f001 (Lua loadstring sandbox)  -> needs a Lua/busted harness; none present.
-//   f008 (ClusterRole secrets grant) -> RBAC YAML; see the shell assertion in
-//        the validation report.
+//
+//	f001 (Lua loadstring sandbox)  -> needs a Lua/busted harness; none present.
+//	f008 (ClusterRole secrets grant) -> RBAC YAML; see the shell assertion in
+//	     the validation report.
 package watcher
 
 import (
