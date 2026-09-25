@@ -108,6 +108,107 @@ func TestUpdate_BasicConfigMap(t *testing.T) {
 
 }
 
+func TestAdd_DisallowedConfigMapKeysRejected(t *testing.T) {
+	cmHandler := createExampleCMHandler()
+	exampleConfigMap := createExampleConfigMap()
+
+	exampleConfigMap.Data = map[string]string{
+		"proxy.config.http.push_method_enabled":        "1",
+		"proxy.config.ssl.client.verify.server.policy": "DISABLED",
+		"proxy.config.ssl.keylog_file":                 "/tmp/keys.log",
+		"proxy.config.http.cache.required_headers":     "0",
+		"proxy.config.diags.debug.enabled":             "1",
+		"proxy.config.output.logfile.rolling_enabled":  "1",
+	}
+
+	cmHandler.Add(&exampleConfigMap)
+
+	disallowed := []string{
+		"proxy.config.http.push_method_enabled",
+		"proxy.config.ssl.client.verify.server.policy",
+		"proxy.config.ssl.keylog_file",
+		"proxy.config.http.cache.required_headers",
+		"proxy.config.diags.debug.enabled",
+	}
+
+	for _, key := range disallowed {
+		if val, err := cmHandler.Ep.ATSManager.ConfigGet(key); err == nil {
+			t.Errorf("disallowed key %s should not have been applied, but got value %s", key, val)
+		}
+	}
+
+	rEnabled, err := cmHandler.Ep.ATSManager.ConfigGet("proxy.config.output.logfile.rolling_enabled")
+
+	if err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(rEnabled, "1") {
+		t.Errorf("returned \n%s,  but expected \n%s", rEnabled, "1")
+	}
+}
+
+func TestAdd_OperatorExtendedAllowlist(t *testing.T) {
+	// The operator extends the allowlist through the pod spec; the shipped
+	// e2e fixture tests/data/setup/configmaps/ats-configmap.yaml relies on
+	// exactly this mechanism (see tests/data/setup/traffic-server/ats-deployment.yaml).
+	t.Setenv("CONFIGMAP_RECORD_ALLOWLIST", " proxy.config.diags.debug.enabled, proxy.config.http.cache.*,proxy.config.ssl.CA.cert.*, not.a.proxy.record ")
+
+	cmHandler := createExampleCMHandler()
+	exampleConfigMap := createExampleConfigMap()
+
+	exampleConfigMap.Data = map[string]string{
+		"proxy.config.diags.debug.enabled":             "1",
+		"proxy.config.http.cache.required_headers":     "0",
+		"proxy.config.ssl.CA.cert.filename":            "tls.crt",
+		"proxy.config.http.push_method_enabled":        "1",
+		"proxy.config.ssl.client.verify.server.policy": "DISABLED",
+		"not.a.proxy.record":                           "1",
+	}
+
+	cmHandler.Add(&exampleConfigMap)
+
+	allowed := map[string]string{
+		"proxy.config.diags.debug.enabled":         "1",
+		"proxy.config.http.cache.required_headers": "0",
+		"proxy.config.ssl.CA.cert.filename":        "tls.crt",
+	}
+
+	for key, expected := range allowed {
+		val, err := cmHandler.Ep.ATSManager.ConfigGet(key)
+		if err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(val, expected) {
+			t.Errorf("returned \n%s,  but expected \n%s", val, expected)
+		}
+	}
+
+	stillDisallowed := []string{
+		"proxy.config.http.push_method_enabled",
+		"proxy.config.ssl.client.verify.server.policy",
+		"not.a.proxy.record",
+	}
+
+	for _, key := range stillDisallowed {
+		if val, err := cmHandler.Ep.ATSManager.ConfigGet(key); err == nil {
+			t.Errorf("key %s outside the extended allowlist should not have been applied, but got value %s", key, val)
+		}
+	}
+}
+
+func TestAdd_ConfigMapValueWithWhitespaceRejected(t *testing.T) {
+	cmHandler := createExampleCMHandler()
+	exampleConfigMap := createExampleConfigMap()
+
+	exampleConfigMap.Data = map[string]string{
+		"proxy.config.restart.active_client_threshold": "0\nproxy.config.ssl.keylog_file /tmp/keys.log",
+	}
+
+	cmHandler.Add(&exampleConfigMap)
+
+	if val, err := cmHandler.Ep.ATSManager.ConfigGet("proxy.config.restart.active_client_threshold"); err == nil {
+		t.Errorf("value with control characters should not have been applied, but got %s", val)
+	}
+}
+
 func createExampleConfigMap() v1.ConfigMap {
 	exampleConfigMap := v1.ConfigMap{
 		ObjectMeta: meta_v1.ObjectMeta{
