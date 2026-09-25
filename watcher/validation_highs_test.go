@@ -127,7 +127,7 @@ func setContains(set []string, want string) bool {
 // --------------------------------------------------------------------------
 func TestValidation_F003_CrossTenantRouteInjection(t *testing.T) {
 	e := newTenantEndpoint(t)
-	ig := IgHandler{"ingresses", e}
+	ig := IgHandler{ResourceName: "ingresses", Ep: e}
 
 	const host = "shop.example.com"
 	const routeKey = "E+http://shop.example.com/"
@@ -163,7 +163,7 @@ func TestValidation_F003_CrossTenantRouteInjection(t *testing.T) {
 // --------------------------------------------------------------------------
 func TestValidation_F004_SilentRouteDeletionOnUpdate(t *testing.T) {
 	e := newTenantEndpoint(t)
-	ig := IgHandler{"ingresses", e}
+	ig := IgHandler{ResourceName: "ingresses", Ep: e}
 
 	const host = "shop.example.com"
 	const routeKey = "E+http://shop.example.com/"

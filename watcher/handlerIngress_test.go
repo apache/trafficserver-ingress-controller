@@ -210,6 +210,81 @@ func TestDelete(t *testing.T) {
 
 }
 
+func TestAdd_CrossNamespaceHostClaimRejected(t *testing.T) {
+	igHandler := createExampleIgHandler()
+	victimIngress := createExampleIngress()
+
+	igHandler.add(&victimIngress)
+
+	attackerIngress := createExampleIngress()
+	attackerIngress.ObjectMeta.Name = "attacker-ingress"
+	attackerIngress.ObjectMeta.Namespace = "attacker-namespace"
+	attackerIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Backend.Service.Name = "evilsvc"
+
+	igHandler.add(&attackerIngress)
+
+	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
+
+	// the attacker's backends must not appear under the victim's hostnames
+	expectedKeys := getExpectedKeysForAdd()
+
+	if !util.IsSameMap(returnedKeys, expectedKeys) {
+		t.Errorf("returned \n%v,  but expected \n%v", returnedKeys, expectedKeys)
+	}
+}
+
+func TestAdd_SameNamespaceHostSharingAllowed(t *testing.T) {
+	igHandler := createExampleIgHandler()
+	firstIngress := createExampleIngress()
+
+	igHandler.add(&firstIngress)
+
+	secondIngress := createExampleIngress()
+	secondIngress.ObjectMeta.Name = "second-ingress"
+	secondIngress.Spec.Rules = secondIngress.Spec.Rules[:1]
+	secondIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths = secondIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[:1]
+	secondIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Path = "/app3"
+	secondIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Backend.Service.Name = "appsvc3"
+
+	igHandler.add(&secondIngress)
+
+	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
+
+	expectedKeys := getExpectedKeysForAdd()
+	expectedKeys["E+http://test.media.com/app3"] = []string{"trafficserver-test:appsvc3:8080"}
+
+	if !util.IsSameMap(returnedKeys, expectedKeys) {
+		t.Errorf("returned \n%v,  but expected \n%v", returnedKeys, expectedKeys)
+	}
+}
+
+func TestDelete_ReleasesHostOwnership(t *testing.T) {
+	igHandler := createExampleIgHandler()
+	victimIngress := createExampleIngress()
+
+	igHandler.add(&victimIngress)
+	igHandler.delete(&victimIngress)
+
+	otherIngress := createExampleIngress()
+	otherIngress.ObjectMeta.Name = "other-ingress"
+	otherIngress.ObjectMeta.Namespace = "other-namespace"
+
+	igHandler.add(&otherIngress)
+
+	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
+
+	found := false
+	for _, member := range returnedKeys["E+http://test.media.com/app1"] {
+		if member == "other-namespace:appsvc1:8080" {
+			found = true
+		}
+	}
+
+	if !found {
+		t.Errorf("expected other-namespace:appsvc1:8080 to be routable after the previous owner was deleted, got \n%v", returnedKeys)
+	}
+}
+
 func createExampleIngressWithTLS() nv1.Ingress {
 	exampleIngress := createExampleIngress()
 
@@ -303,7 +378,7 @@ func createExampleIngress() nv1.Ingress {
 
 func createExampleIgHandler() IgHandler {
 	exampleEndpoint := createExampleEndpoint()
-	igHandler := IgHandler{"ingresses", &exampleEndpoint}
+	igHandler := IgHandler{ResourceName: "ingresses", Ep: &exampleEndpoint}
 
 	return igHandler
 }
