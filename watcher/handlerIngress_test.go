@@ -488,3 +488,40 @@ func getExampleSnippet() string {
 	-- ts.http.set_resp(301, 'Redirect')
 	ts.debug('Uncomment the above lines to redirect http request to https')`
 }
+
+func TestUpdate_PreservesOtherIngressRoutesOnSharedHostPath(t *testing.T) {
+	igHandler := createExampleIgHandler()
+
+	// the victim Ingress owns E+http://test.media.com/app1
+	victimIngress := createExampleIngress()
+	igHandler.add(&victimIngress)
+
+	// a second Ingress starts out on an unrelated host
+	otherIngress := createExampleIngress()
+	otherIngress.ObjectMeta.Name = "other-ingress"
+	otherIngress.Spec.Rules = otherIngress.Spec.Rules[:1]
+	otherIngress.Spec.Rules[0].Host = "other.host.com"
+	otherIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths = otherIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[:1]
+
+	// ... and is then updated to claim the victim's host/path
+	updatedOtherIngress := createExampleIngress()
+	updatedOtherIngress.ObjectMeta.Name = "other-ingress"
+	updatedOtherIngress.Spec.Rules = updatedOtherIngress.Spec.Rules[:1]
+	updatedOtherIngress.Spec.Rules[0].Host = "test.media.com"
+	updatedOtherIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths = updatedOtherIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[:1]
+	updatedOtherIngress.Spec.Rules[0].IngressRuleValue.HTTP.Paths[0].Backend.Service.Name = "othersvc"
+
+	igHandler.add(&otherIngress)
+	igHandler.update(&otherIngress, &updatedOtherIngress)
+
+	returnedKeys := igHandler.Ep.RedisClient.GetDBOneKeyValues()
+
+	// the update must not remove the victim's member from the shared key
+	expectedKeys := getExpectedKeysForAdd()
+	expectedKeys["E+http://other.host.com/app1"] = []string{}
+	expectedKeys["E+http://test.media.com/app1"] = append(expectedKeys["E+http://test.media.com/app1"], "trafficserver-test:othersvc:8080")
+
+	if !util.IsSameMap(returnedKeys, expectedKeys) {
+		t.Errorf("returned \n%v,  but expected \n%v", returnedKeys, expectedKeys)
+	}
+}

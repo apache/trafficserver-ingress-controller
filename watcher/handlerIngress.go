@@ -239,6 +239,19 @@ func (g *IgHandler) add(obj interface{}) {
 	}
 }
 
+// seedTempHostPath makes sure the temp key for hostPath starts from the
+// current live routing set before this Ingress's new members are added.
+// Without the seed, the final SUNIONSTORE back into hostPath would replace
+// the live set and silently drop entries contributed by other Ingresses
+// that share the same host/path.
+func (g *IgHandler) seedTempHostPath(m map[string]string, hostPath string) {
+	tempKey := "temp_" + hostPath
+	if _, ok := m[tempKey]; !ok {
+		g.Ep.RedisClient.DBOneSUnionStore(tempKey, hostPath)
+		m[tempKey] = hostPath
+	}
+}
+
 // Update for EventHandler
 func (g *IgHandler) Update(obj, newObj interface{}) {
 	log.Printf("In INGRESS_HANDLER UPDATE %#v \n", newObj)
@@ -387,8 +400,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			port := strconv.Itoa(int(newIngressObj.Spec.DefaultBackend.Service.Port.Number))
 			svcport := util.ConstructSvcPortString(newNamespace, service, port)
 
+			g.seedTempHostPath(m, hostPath)
 			g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
-			m["temp_"+hostPath] = hostPath
 
 			if newSnippetErr == nil {
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
@@ -398,8 +411,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			scheme = "https"
 			hostPath = util.ConstructHostPathString(scheme, host, path, pathType)
 
+			g.seedTempHostPath(m, hostPath)
 			g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
-			m["temp_"+hostPath] = hostPath
 
 			if newSnippetErr == nil {
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
@@ -437,8 +450,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 				port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 				svcport := util.ConstructSvcPortString(newNamespace, service, port)
 
+				g.seedTempHostPath(m, hostPath)
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
-				m["temp_"+hostPath] = hostPath
 
 				if newSnippetErr == nil {
 					g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
