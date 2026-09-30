@@ -18,6 +18,7 @@ package watcher
 import (
 	"log"
 	"strconv"
+	"sync"
 
 	"github.com/apache/trafficserver-ingress-controller/endpoint"
 	"github.com/apache/trafficserver-ingress-controller/util"
@@ -29,6 +30,108 @@ import (
 type IgHandler struct {
 	ResourceName string
 	Ep           *endpoint.Endpoint
+
+	// hostOwners maps a hostname to the namespace that first claimed it and
+	// a count of live Ingress claims from that namespace. A hostname's routes
+	// may only be written by Ingresses of the owning namespace; conflicting
+	// claims from other namespaces are rejected (first writer wins), so a
+	// tenant cannot attach its backend to another tenant's hostname.
+	// Held by pointer so copies of the handler share one registry and the
+	// struct stays safe to copy.
+	hostOwners *hostOwnerRegistry
+}
+
+type hostOwnerRegistry struct {
+	mu     sync.Mutex
+	owners map[string]*hostClaim
+}
+
+type hostClaim struct {
+	namespace string
+	refs      int
+}
+
+func (g *IgHandler) hostOwnerRegistryInit() *hostOwnerRegistry {
+	if g.hostOwners == nil {
+		g.hostOwners = &hostOwnerRegistry{owners: make(map[string]*hostClaim)}
+	}
+	return g.hostOwners
+}
+
+// claimHost records that an Ingress in namespace binds routes for host.
+// It returns false when the host is already owned by a different namespace.
+func (g *IgHandler) claimHost(host, namespace string) bool {
+	r := g.hostOwnerRegistryInit()
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	claim, ok := r.owners[host]
+	if !ok {
+		r.owners[host] = &hostClaim{namespace: namespace, refs: 1}
+		return true
+	}
+	if claim.namespace != namespace {
+		return false
+	}
+	claim.refs++
+	return true
+}
+
+// releaseHost drops one claim on host held by namespace. Releases by a
+// namespace that does not own the host are ignored, so a rejected claimant
+// cannot free another tenant's hostname by deleting its own Ingress.
+func (g *IgHandler) releaseHost(host, namespace string) {
+	r := g.hostOwnerRegistryInit()
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	claim, ok := r.owners[host]
+	if !ok || claim.namespace != namespace {
+		return
+	}
+	claim.refs--
+	if claim.refs <= 0 {
+		delete(r.owners, host)
+	}
+}
+
+// ingressHosts returns the unique set of hostnames an Ingress binds routes
+// for: "*" for the default backend and for rules with an empty host, plus
+// every rule host.
+func ingressHosts(ing *nv1.Ingress) []string {
+	seen := make(map[string]bool)
+	var hosts []string
+
+	appendHost := func(host string) {
+		if host == "" {
+			host = "*"
+		}
+		if !seen[host] {
+			seen[host] = true
+			hosts = append(hosts, host)
+		}
+	}
+
+	if ing.Spec.DefaultBackend != nil {
+		appendHost("*")
+	}
+	for _, rule := range ing.Spec.Rules {
+		appendHost(rule.Host)
+	}
+	return hosts
+}
+
+// claimIngressHosts claims every host the Ingress references and returns,
+// per host, whether the claim succeeded. Rejected claims are logged.
+func (g *IgHandler) claimIngressHosts(ing *nv1.Ingress, namespace, name string) map[string]bool {
+	claimed := make(map[string]bool)
+	for _, host := range ingressHosts(ing) {
+		claimed[host] = g.claimHost(host, namespace)
+		if !claimed[host] {
+			log.Printf("Host %q in Ingress %s/%s is already owned by another namespace; skipping its routes", host, namespace, name)
+		}
+	}
+	return claimed
 }
 
 func (g *IgHandler) Add(obj interface{}) {
@@ -64,8 +167,12 @@ func (g *IgHandler) add(obj interface{}) {
 		g.Ep.RedisClient.DBOneSAdd(nameversion, snippet)
 	}
 
+	// claim host ownership before writing any routes; hosts owned by a
+	// different namespace are skipped
+	claimed := g.claimIngressHosts(ingressObj, namespace, name)
+
 	// add default backend rules
-	if ingressObj.Spec.DefaultBackend != nil {
+	if ingressObj.Spec.DefaultBackend != nil && claimed["*"] {
 		host := "*"
 		scheme := "http"
 		path := "/"
@@ -105,6 +212,9 @@ func (g *IgHandler) add(obj interface{}) {
 		if host == "" {
 			host = "*"
 		}
+		if !claimed[host] {
+			continue
+		}
 		scheme := "http"
 		if _, ok := tlsHosts[host]; ok {
 			scheme = "https"
@@ -126,6 +236,19 @@ func (g *IgHandler) add(obj interface{}) {
 			}
 		}
 
+	}
+}
+
+// seedTempHostPath makes sure the temp key for hostPath starts from the
+// current live routing set before this Ingress's new members are added.
+// Without the seed, the final SUNIONSTORE back into hostPath would replace
+// the live set and silently drop entries contributed by other Ingresses
+// that share the same host/path.
+func (g *IgHandler) seedTempHostPath(m map[string]string, hostPath string) {
+	tempKey := "temp_" + hostPath
+	if _, ok := m[tempKey]; !ok {
+		g.Ep.RedisClient.DBOneSUnionStore(tempKey, hostPath)
+		m[tempKey] = hostPath
 	}
 }
 
@@ -238,6 +361,11 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			}
 
 		}
+
+		// release the old spec's host claims; the new spec re-claims below
+		for _, host := range ingressHosts(ingressObj) {
+			g.releaseHost(host, namespace)
+		}
 	}
 
 	newNamespace := newIngressObj.GetNamespace()
@@ -256,8 +384,12 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			g.Ep.RedisClient.DBOneSAdd(nameversion, newSnippet)
 		}
 
+		// claim host ownership before writing any routes; hosts owned by a
+		// different namespace are skipped
+		claimed := g.claimIngressHosts(newIngressObj, newNamespace, name)
+
 		// handle default backend rule
-		if newIngressObj.Spec.DefaultBackend != nil {
+		if newIngressObj.Spec.DefaultBackend != nil && claimed["*"] {
 			host := "*"
 			scheme := "http"
 			path := "/"
@@ -268,8 +400,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			port := strconv.Itoa(int(newIngressObj.Spec.DefaultBackend.Service.Port.Number))
 			svcport := util.ConstructSvcPortString(newNamespace, service, port)
 
+			g.seedTempHostPath(m, hostPath)
 			g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
-			m["temp_"+hostPath] = hostPath
 
 			if newSnippetErr == nil {
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
@@ -279,8 +411,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			scheme = "https"
 			hostPath = util.ConstructHostPathString(scheme, host, path, pathType)
 
+			g.seedTempHostPath(m, hostPath)
 			g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
-			m["temp_"+hostPath] = hostPath
 
 			if newSnippetErr == nil {
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
@@ -300,6 +432,9 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 			if host == "" {
 				host = "*"
 			}
+			if !claimed[host] {
+				continue
+			}
 			scheme := "http"
 			if _, ok := newTlsHosts[host]; ok {
 				scheme = "https"
@@ -315,8 +450,8 @@ func (g *IgHandler) update(obj, newObj interface{}) {
 				port := strconv.Itoa(int(httpPath.Backend.Service.Port.Number))
 				svcport := util.ConstructSvcPortString(newNamespace, service, port)
 
+				g.seedTempHostPath(m, hostPath)
 				g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, svcport)
-				m["temp_"+hostPath] = hostPath
 
 				if newSnippetErr == nil {
 					g.Ep.RedisClient.DBOneSAdd("temp_"+hostPath, nameversion)
@@ -422,6 +557,11 @@ func (g *IgHandler) delete(obj interface{}) {
 			}
 		}
 
+	}
+
+	// release this Ingress's host claims (no-op for hosts owned elsewhere)
+	for _, host := range ingressHosts(ingressObj) {
+		g.releaseHost(host, namespace)
 	}
 }
 
