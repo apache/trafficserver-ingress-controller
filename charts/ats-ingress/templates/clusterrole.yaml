@@ -28,15 +28,31 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion }}
 rules:
+# The controller only watches Endpoints cluster-wide (watcher/watcher.go).
+# ConfigMaps are watched in the release namespace only and are granted by a
+# namespaced Role (role.yaml); secrets, services, namespaces and events are
+# never read by the controller, so they are not granted here. TLS material
+# reaches the pod via a Secret volume mount, which needs no RBAC.
 - apiGroups:
   - ""
   resources:
-  - configmaps
   - endpoints
-  - services
-  - namespaces
-  - events
-  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "k8s.trafficserver.apache.com"
+  resources:
+  - atscachingpolicies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - "trafficserver.apache.org"
+  resources:
+  - atssnipolicies
   verbs:
   - get
   - list

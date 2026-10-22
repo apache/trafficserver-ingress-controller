@@ -65,7 +65,7 @@ type EventHandler interface {
 // Watch creates necessary threads to watch over resources
 func (w *Watcher) Watch() error {
 	//================= Watch for Ingress ==================
-	igHandler := IgHandler{"ingresses", w.Ep}
+	igHandler := IgHandler{ResourceName: "ingresses", Ep: w.Ep}
 	igListWatch := cache.NewListWatchFromClient(w.Cs.NetworkingV1().RESTClient(), igHandler.GetResourceName(), v1.NamespaceAll, fields.Everything())
 	err := w.allNamespacesWatchFor(&igHandler, w.Cs.NetworkingV1().RESTClient(),
 		fields.Everything(), &nv1.Ingress{}, w.ResyncPeriod, igListWatch)

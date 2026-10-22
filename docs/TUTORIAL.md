@@ -38,6 +38,15 @@ Check out the project's github action "Build and Integrate". It has an example o
 
 The above also shows example of configuring Apache Traffic Server [_reloadable_ configurations](https://docs.trafficserver.apache.org/en/9.2.x/admin-guide/files/records.config.en.html#reloadable) using [kubernetes configmap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/) resource.
 
+Because the `ats-configmap: "true"` annotation can be set by anyone with permission to write ConfigMaps in a watched namespace, the controller only applies keys from a fail-closed allowlist of operationally safe tuning records (log rolling, restart thresholds, keep-alive/transaction/connect timeouts, connection throttle, RAM-cache size). Any other key is rejected and logged. To permit additional records, set the environment variable `CONFIGMAP_RECORD_ALLOWLIST` in the ATS deployment to a comma-separated list of entries — an entry ending in `*` matches keys by prefix, any other entry must match a key exactly, and every entry must start with `proxy.config.`. For example:
+
+```yaml
+- name: CONFIGMAP_RECORD_ALLOWLIST
+  value: "proxy.config.http.cache.http,proxy.config.diags.debug.enabled,proxy.config.ssl.CA.cert.*"
+```
+
+Putting the extension in the pod spec keeps the decision with the cluster operator: extending the allowlist requires write access to the Deployment, a higher privilege than the ConfigMap write access the allowlist defends against. Records like `proxy.config.ssl.keylog_file`, `proxy.config.http.push_method_enabled`, or `proxy.config.ssl.client.verify.server.policy` should never be added.
+
 #### Namespaces for Ingresses
 
 You can specifiy the list of namespaces to look for ingress object by providing an environment variable called `INGRESS_NS`. The default is `all`, which tells the controller to look for ingress objects in all namespaces. Alternatively you can provide a comma-separated list of namespaces for the controller to look for ingresses. Similarly you can specifiy a comma-separated list of namespaces to ignore while the controller is looking for ingresses by providing `INGRESS_IGNORE_NS`.

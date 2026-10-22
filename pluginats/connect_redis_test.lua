@@ -197,6 +197,84 @@ describe("Unit tests - Lua", function()
       assert.stub(ts.http.set_resp).was.called_with(301,"Redirect")
     end)
 
+    it("Test - Snippet runs in restricted sandbox", function()
+      client:select(1)
+      client:sadd("E+http://test.edge.com/app1","$attacker-ns/evil-ingress/1")
+      local evil_snippet = "ts.debug('sandbox_os:' .. tostring(os))\n" ..
+        "ts.debug('sandbox_io:' .. tostring(io))\n" ..
+        "ts.debug('sandbox_require:' .. tostring(require))\n" ..
+        "ts.debug('sandbox_loadstring:' .. tostring(loadstring))\n" ..
+        "snippet_leak_probe = 42\n"
+      client:sadd("$attacker-ns/evil-ingress/1", evil_snippet)
+
+      package.loaded["connect_redis"] = nil
+      require "connect_redis"
+      local input_args = {"snippet"}
+      __init__(input_args)
+      do_global_read_request()
+
+      -- process-level primitives are not reachable from snippets
+      assert.stub(ts.debug).was.called_with("sandbox_os:nil")
+      assert.stub(ts.debug).was.called_with("sandbox_io:nil")
+      assert.stub(ts.debug).was.called_with("sandbox_require:nil")
+      assert.stub(ts.debug).was.called_with("sandbox_loadstring:nil")
+
+      -- snippet globals stay in the sandbox, not in the plugin state
+      assert.is_nil(_G.snippet_leak_probe)
+    end)
+
+    it("Test - Snippet cannot reach metatable, environment or loader escapes", function()
+      -- Locks in the sandbox's escape-surface claims: every primitive that
+      -- could be used to break out of the restricted environment (metatable
+      -- manipulation, the real global table, environment introspection,
+      -- alternate code loaders, the debug library) must resolve to nil.
+      client:select(1)
+      client:sadd("E+http://test.edge.com/app1","$attacker-ns/escape-ingress/3")
+      local escape_snippet =
+        "ts.debug('esc_getmetatable:' .. tostring(getmetatable))\n" ..
+        "ts.debug('esc_setmetatable:' .. tostring(setmetatable))\n" ..
+        "ts.debug('esc_rawset:' .. tostring(rawset))\n" ..
+        "ts.debug('esc_rawget:' .. tostring(rawget))\n" ..
+        "ts.debug('esc_G:' .. tostring(_G))\n" ..
+        "ts.debug('esc_getfenv:' .. tostring(getfenv))\n" ..
+        "ts.debug('esc_setfenv:' .. tostring(setfenv))\n" ..
+        "ts.debug('esc_load:' .. tostring(load))\n" ..
+        "ts.debug('esc_loadfile:' .. tostring(loadfile))\n" ..
+        "ts.debug('esc_dofile:' .. tostring(dofile))\n" ..
+        "ts.debug('esc_coroutine:' .. tostring(coroutine))\n" ..
+        "ts.debug('esc_debug:' .. tostring(debug))\n" ..
+        "ts.debug('esc_package:' .. tostring(package))\n"
+      client:sadd("$attacker-ns/escape-ingress/3", escape_snippet)
+
+      package.loaded["connect_redis"] = nil
+      require "connect_redis"
+      local input_args = {"snippet"}
+      __init__(input_args)
+      do_global_read_request()
+
+      for _, name in ipairs({"getmetatable","setmetatable","rawset","rawget","G",
+                             "getfenv","setfenv","load","loadfile","dofile",
+                             "coroutine","debug","package"}) do
+        assert.stub(ts.debug).was.called_with("esc_" .. name .. ":nil")
+      end
+    end)
+
+    it("Test - Failing snippet is contained", function()
+      client:select(1)
+      client:sadd("E+http://test.edge.com/app1","$attacker-ns/broken-ingress/2")
+      client:sadd("$attacker-ns/broken-ingress/2", "os.execute('id')")
+
+      package.loaded["connect_redis"] = nil
+      require "connect_redis"
+      local input_args = {"snippet"}
+      __init__(input_args)
+
+      -- os is nil inside the sandbox; the runtime error must be caught
+      -- instead of propagating out of the plugin
+      assert.has_no.errors(function() do_global_read_request() end)
+      assert.stub(ts.error).was.called()
+    end)
+
 
   end)
 end)

@@ -31,6 +31,37 @@ function __init__(argtb)
   end
 end
 
+-- Globals a server snippet is allowed to reach. Snippets come from the
+-- ats.ingress.kubernetes.io/server-snippet annotation of tenant Ingress
+-- objects, so they must never reach process-level primitives such as
+-- os, io, require, package, loadstring, dofile or the real global table.
+local SNIPPET_ALLOWED_GLOBALS = {
+  ts = true, string = true, table = true, math = true,
+  tostring = true, tonumber = true, pairs = true, ipairs = true,
+  next = true, select = true, type = true, unpack = true,
+  pcall = true, xpcall = true, error = true, assert = true,
+}
+
+-- Build a fresh, restricted environment for one snippet execution.
+-- Reads of allowed names (plus the TS_LUA_* hook constants) are proxied
+-- to the plugin globals; everything else resolves to nil. Writes land in
+-- the throwaway table, so snippets cannot mutate plugin globals.
+local function new_snippet_env()
+  local env = {}
+  setmetatable(env, {
+    __index = function(_, key)
+      if SNIPPET_ALLOWED_GLOBALS[key] then
+        return _G[key]
+      end
+      if type(key) == 'string' and string.sub(key, 1, 7) == 'TS_LUA_' then
+        return _G[key]
+      end
+      return nil
+    end,
+  })
+  return env
+end
+
 -- helper function to split a string
 function ipport_split(s, delimiter)
   result = {}
@@ -244,8 +275,16 @@ function do_global_read_request()
           return 0
         end
       ts.debug("Snippet in the Connect Redis lua file " .. snippet)
-        local f = loadstring(snippet)
-        f()
+        local f, compile_err = loadstring(snippet)
+        if f == nil then
+          ts.error("Snippet failed to compile: " .. tostring(compile_err))
+        else
+          setfenv(f, new_snippet_env())
+          local ok, run_err = pcall(f)
+          if not ok then
+            ts.error("Snippet execution failed: " .. tostring(run_err))
+          end
+        end
       end
     end
   end

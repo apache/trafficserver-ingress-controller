@@ -72,6 +72,11 @@ spec:
               value: "1"
             - name: POD_TLS_PATH
               value: "/etc/ats/ssl:/etc/ats/ssl/server:/etc/ats/ssl/server2"
+            # Extra records.config keys (beyond the controller's built-in
+            # safe-tuning allowlist) that the annotated ConfigMap
+            # tests/data/setup/configmaps/ats-configmap.yaml is allowed to set.
+            - name: CONFIGMAP_RECORD_ALLOWLIST
+              value: "proxy.config.http.cache.http,proxy.config.http.cache.required_headers,proxy.config.diags.debug.enabled,proxy.config.ssl.CA.cert.path,proxy.config.ssl.CA.cert.filename"
           ports:
           - containerPort: 8080
             name: http
