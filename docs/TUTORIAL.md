@@ -21,6 +21,7 @@
 - [Usage](#usage)
   - [ConfigMap](#configmap)
   - [Namespaces for Ingresses](#namespaces-for-ingresses)
+  - [Hostname Ownership](#hostname-ownership)
   - [Snippet](#snippet)
   - [Ingress Class](#ingress-class)
   - [Customizing Logging and TLS](#customizing-logging-and-tls)
@@ -50,6 +51,12 @@ Putting the extension in the pod spec keeps the decision with the cluster operat
 #### Namespaces for Ingresses
 
 You can specifiy the list of namespaces to look for ingress object by providing an environment variable called `INGRESS_NS`. The default is `all`, which tells the controller to look for ingress objects in all namespaces. Alternatively you can provide a comma-separated list of namespaces for the controller to look for ingresses. Similarly you can specifiy a comma-separated list of namespaces to ignore while the controller is looking for ingresses by providing `INGRESS_IGNORE_NS`.
+
+#### Hostname Ownership
+
+Every hostname in an ingress rule (and `*` for rules without a host or for a default backend) is owned by a single namespace. The first ingress object the controller sees for a hostname claims it for its namespace; ingress objects in other namespaces that reference the same hostname have the routes for that hostname skipped, and the controller logs a message such as `Host "example.com" in Ingress other-ns/my-ingress is already owned by another namespace; skipping its routes`. Routes for hostnames that are not in conflict are still applied. A hostname is released once every ingress object in the owning namespace that references it has been deleted.
+
+This prevents a tenant from attaching its own backend to a path under another tenant's hostname. It also means that the paths of one hostname cannot be split across ingress objects in different namespaces; if several teams need to route the same hostname, put their ingress objects in the same namespace, or give each namespace its own hostname. Ingress objects in the same namespace can share a hostname freely. There is no setting that allows a hostname to be shared across namespaces.
 
 #### Snippet
 

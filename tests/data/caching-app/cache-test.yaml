@@ -57,7 +57,7 @@ metadata:
 spec:
   #ingressClassName: ats
   rules:
-  - host: test.media.com
+  - host: test.cache.com
     http:
       paths:
       - path: /cache-test

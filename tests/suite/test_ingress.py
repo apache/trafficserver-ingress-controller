@@ -195,6 +195,8 @@ def setup_module(module):
     misc_command('kubectl get all -A')
     misc_command('kubectl get pod -A -o wide')
     misc_command('kubectl logs $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2')
+    # controller logs: shows e.g. host claims rejected by tenant isolation
+    misc_command('kubectl logs $(kubectl get pod -n trafficserver-test -o name) -n trafficserver-test -c trafficserver-test')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2 -- ps auxxx')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2 -- curl -v localhost:8080/app1')
     misc_command('kubectl exec $(kubectl get pod -n trafficserver-test-2 -o name | head -1) -n trafficserver-test-2 -- curl -v $(kubectl get pod -n trafficserver-test-2 -o jsonpath={.items[0].status.podIP}):8080/app1')    
@@ -345,7 +347,7 @@ class TestIngress:
         assert ' '.join(resp.text.split()) == get_expected_response_app2()
 
     def test_cache_app1(self, minikubeip):
-        command = f'curl -i -v -H "Host: test.media.com" http://{minikubeip}:30080/cache-test'
+        command = f'curl -i -v -H "Host: test.cache.com" http://{minikubeip}:30080/cache-test'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response1 = response_1.stdout.strip()
         response1_list = response1.split('\n')
@@ -391,7 +393,7 @@ class TestIngress:
         # waiting for cache from previous test case to expire
         time.sleep(20)
 
-        command = f'curl -i -v -H "Host: test.media.com" http://{minikubeip}:30080/cache-test'
+        command = f'curl -i -v -H "Host: test.cache.com" http://{minikubeip}:30080/cache-test'
         response_1 = subprocess.run(command, shell=True, capture_output=True, text=True)
         response1 = response_1.stdout.strip()
         response1_list = response1.split('\n')

@@ -37,15 +37,3 @@ spec:
             name: appsvc1
             port:
               number: 8080
-                    
-  - host: test.edge.com
-    http:
-      paths:
-      - path: /app1
-        pathType: Exact
-        backend:
-          service:
-            name: appsvc1
-            port:
-              number: 8080
-          
