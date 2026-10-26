@@ -30,6 +30,13 @@ spec:
   - host: test.edge.com
     http:
       paths:
+      - path: /app1
+        pathType: Exact
+        backend:
+          service:
+            name: appsvc1
+            port:
+              number: 8080
       - path: /app2
         pathType: Exact
         backend:
